@@ -2,9 +2,23 @@ frappe.pages['dak_day_planner'].on_page_load = function (wrapper) {
     var page = frappe.ui.make_app_page({
         parent: wrapper,
         title: '',
-        single_column: true
+        single_column: false
     });
 
+    // 1. Render Navigation Immediately
+    frappe.pages['dak_day_planner'].render_nav_bar(wrapper);
+
+    // 2. Check dependencies for the rest of the content
+    if (!frappe.provide('dakbabu.components') || !dakbabu.components.get_reminder_card) {
+        frappe.require('/assets/dakbabu/js/dak_components.js', () => {
+            frappe.pages['dak_day_planner'].render_page_content_only(wrapper);
+        });
+    } else {
+        frappe.pages['dak_day_planner'].render_page_content_only(wrapper);
+    }
+}
+
+frappe.pages['dak_day_planner'].render_nav_bar = function (wrapper) {
     $(wrapper).find('.layout-main').html(`
         <!-- Navigation Bar Card -->
         <div style="
@@ -83,13 +97,226 @@ frappe.pages['dak_day_planner'].on_page_load = function (wrapper) {
                 </button>
             </div>
         </div>
+        <div id="planner-body" style="width: 100%; box-sizing: border-box;">
 
-
-
-        <div style="padding: 40px; text-align: center; color: #6b7280;">
-            <i class="fa fa-calendar" style="font-size: 4rem; opacity: 0.2; margin-bottom: 20px;"></i>
-            <h3>Day Planner</h3>
-            <p>Your daily schedule will appear here.</p>
+            </div>
+            <!-- Removed Second Skeleton Card for new layout -->
         </div>
     `);
+}
+
+frappe.pages['dak_day_planner'].render_page_content_only = function (wrapper) {
+    if (!dakbabu.components || !dakbabu.components.get_reminder_card) {
+        console.error("Failed to load Dak Components");
+        frappe.msgprint("Failed to load Planner Components. Please reload dependencies.");
+        return;
+    }
+
+    $(wrapper).find('#planner-body').html(`
+        <!-- Hello Container (Now Parent) -->
+        <div style="background: #f3f4f6; padding: 20px; margin-bottom: 5px; border-radius: 12px 12px 0 0; box-shadow: 0 5px 15px rgba(0,0,0,0.03); color: #1f2937; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: flex-start;">
+            
+            <!-- Backlog Container (Nested, 40%) -->
+            <div class="backlog-container" style="width: 40%; flex: 0 0 40%; margin-top: 0;">
+                <div class="backlog-header">
+                        <h3><i class="fa fa-list"></i> Backlog (5)</h3>
+                        <span class="header-action">Drag here to unschedule</span>
+                </div>
+                <div id="backlog-task-list" class="backlog-list">
+                    <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.7);">
+                        <i class="fa fa-spinner fa-spin"></i> Loading Backlog...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Container (Nested, 55%) -->
+            <div class="schedule-container" style="width: 55%; flex: 0 0 55%; margin-top: 0;">
+                <div class="schedule-header">
+                        <h3><i class="fa fa-calendar-o"></i> Schedule</h3>
+                        <button id="btn-schedule-time" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: #fff; border: none;">
+                            <i class="fa fa-clock-o"></i> Set Time
+                        </button>
+                </div>
+                <div class="schedule-grid">
+                        <!-- 9 AM -->
+                        <div class="time-slot">
+                        <div class="time-label">09:00 AM</div>
+                        <div class="slot-content">
+                            <!-- Event Card -->
+                            <div class="event-card" style="top: 5px; height: 90px; background: #6366f1;">
+                                <div class="event-title">Team Standup</div>
+                                <div class="event-subtitle">General</div>
+                                <div class="event-meta">
+                                    <span class="event-tag">15m</span>
+                                    <span class="event-tag">NORMAL</span>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        <!-- 10 AM -->
+                        <div class="time-slot">
+                        <div class="time-label">10:00 AM</div>
+                        <div class="slot-content"></div>
+                        </div>
+                        <!-- 11 AM -->
+                        <div class="time-slot">
+                        <div class="time-label">11:00 AM</div>
+                        <div class="slot-content"></div>
+                        </div>
+                        <!-- 12 PM -->
+                        <div class="time-slot">
+                        <div class="time-label">12:00 PM</div>
+                        <div class="slot-content"></div>
+                        </div>
+                        <!-- 01 PM -->
+                        <div class="time-slot">
+                        <div class="time-label">01:00 PM</div>
+                        <div class="slot-content"></div>
+                        </div>
+                        <!-- 02 PM -->
+                        <div class="time-slot">
+                        <div class="time-label">02:00 PM</div>
+                        <div class="slot-content"></div>
+                        </div>
+                        <!-- 03 PM -->
+                        <div class="time-slot">
+                        <div class="time-label">03:00 PM</div>
+                        <div class="slot-content"></div>
+                        </div>
+                        <!-- 04 PM -->
+                        <div class="time-slot">
+                        <div class="time-label">04:00 PM</div>
+                        <div class="slot-content" style="border-bottom: none;"></div>
+                        </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        
+
+
+
+    `);
+
+    // Fetch Data for Card 1 (Reminder Card)
+
+    frappe.pages['dak_day_planner'].render_backlog_tasks();
+    frappe.pages['dak_day_planner'].setup_schedule_time_picker(wrapper);
+}
+
+frappe.pages['dak_day_planner'].setup_schedule_time_picker = function (wrapper) {
+    $(wrapper).find('#btn-schedule-time').on('click', function () {
+        let d = new frappe.ui.Dialog({
+            title: 'Set Schedule Time',
+            fields: [
+                {
+                    label: 'Start Time',
+                    fieldname: 'start_time',
+                    fieldtype: 'Time',
+                    reqd: 1,
+                    default: '09:00:00'
+                },
+                {
+                    label: 'End Time',
+                    fieldname: 'end_time',
+                    fieldtype: 'Time',
+                    reqd: 1,
+                    default: '17:00:00'
+                }
+            ],
+            primary_action_label: 'Update',
+            primary_action: (values) => {
+                let start = values.start_time.substring(0, 5);
+                let end = values.end_time.substring(0, 5);
+                $(wrapper).find('#btn-schedule-time').html(`<i class="fa fa-clock-o"></i> ${start} - ${end}`);
+                frappe.show_alert({ message: `Schedule updated: ${start} - ${end}`, indicator: 'green' });
+                d.hide();
+            }
+        });
+        d.$wrapper.addClass('planner-dialog');
+        d.show();
+    });
+}
+
+frappe.pages['dak_day_planner'].render_backlog_tasks = function () {
+    frappe.call({
+        method: "dakbabu.dakbabu.page.dak_dashboard.dak_dashboard.get_backlog_tasks",
+        callback: function (r) {
+            if (r.message && r.message.length > 0) {
+                let html = '';
+                r.message.forEach(task => {
+                    let priorityClass = 'priority-normal';
+                    if (task.priority === 'High') priorityClass = 'priority-high';
+                    if (task.priority === 'Low') priorityClass = 'priority-low';
+                    if (task.priority === 'Urgent' || task.priority === 'Critical') priorityClass = 'priority-critical';
+
+                    // Theme Logic
+                    let cardThemeClass = 'card-theme-blue'; // Default
+                    if (task.exp_end_date) {
+                        let today = frappe.datetime.get_today();
+                        if (task.exp_end_date < today) {
+                            cardThemeClass = 'card-theme-orange'; // Overdue
+                        } else if (task.exp_end_date === today) {
+                            cardThemeClass = 'card-theme-orange'; // Due Today
+                        } else {
+                            cardThemeClass = 'card-theme-green'; // Future
+                        }
+                    }
+
+                    let assigneeHtml = '';
+                    // Attempt to parse _assign if it exists and is a string
+                    // Note: In some Frappe versions _assign is a JSON string of a list of emails ["santosh@example.com"]
+                    if (task._assign) {
+                        try {
+                            let assignees = JSON.parse(task._assign);
+                            if (assignees && assignees.length > 0) {
+                                // Just show the first one
+                                let initial = assignees[0].substring(0, 2).toUpperCase();
+                                assigneeHtml = `<div class="assignee-avatar" title="${assignees[0]}">${initial}</div>`;
+                            }
+                        } catch (e) {
+                            // Ignore parse error
+                        }
+                    }
+
+                    // Format Date
+                    let dateDisplay = 'No Date';
+                    if (task.exp_end_date) {
+                        dateDisplay = frappe.datetime.str_to_user(task.exp_end_date);
+                    }
+
+                    html += `
+                        <div class="backlog-card ${cardThemeClass}" data-name="${task.name}" onclick="frappe.set_route('Form', 'Task', '${task.name}')">
+                            <div class="card-header-row">
+                                <div class="card-tags-left">
+                                    <span class="id-tag">${task.name}</span>
+                                    <span class="priority-tag ${priorityClass}">${task.priority || 'NORMAL'}</span>
+                                </div>
+                                <i class="fa fa-ellipsis-v card-menu-icon"></i>
+                            </div>
+                            <div class="card-title">${task.subject}</div>
+                            <div class="card-desc">${task.description || 'No description provided.'}</div>
+                            
+                            <div class="card-footer-block">
+                                <div class="footer-item">
+                                    <span class="status-dot ${task.status === 'Open' ? 'status-open' : 'status-other'}"></span>
+                                    ${task.status}
+                                </div>
+                                <div class="footer-item">
+                                    <i class="fa fa-calendar-o"></i> ${dateDisplay}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                $('#backlog-task-list').html(html);
+                $('.backlog-header h3').html(`<i class="fa fa-list"></i> Backlog (${r.message.length})`);
+            } else {
+                $('#backlog-task-list').html('<div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.7);">No tasks in backlog!</div>');
+                $('.backlog-header h3').html(`<i class="fa fa-list"></i> Backlog (0)`);
+            }
+        }
+    });
 }

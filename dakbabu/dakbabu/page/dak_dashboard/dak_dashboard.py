@@ -40,3 +40,22 @@ def get_recent_tasks():
 		limit=3
 	)
 	return tasks
+
+@frappe.whitelist()
+def get_backlog_tasks():
+	tasks = frappe.get_all("Task",
+		filters={"status": "Open"},
+		fields=["name", "subject", "status", "description", "priority", "exp_end_date", "_assign"],
+		order_by="creation desc",
+		limit=20
+	)
+	return tasks
+
+@frappe.whitelist()
+def get_all_tasks_list():
+	tasks = frappe.get_all("Task",
+		fields=["name", "subject", "status", "description", "priority", "exp_end_date", "_assign", "project", "creation", "modified"],
+		order_by="creation desc",
+		limit=100
+	)
+	return tasks

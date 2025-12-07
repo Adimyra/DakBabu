@@ -1,9 +1,27 @@
 frappe.pages['dak_dashboard'].on_page_load = function (wrapper) {
     var page = frappe.ui.make_app_page({
         parent: wrapper,
-        title: '',
+        title: 'Dak Dashboard',
         single_column: true
     });
+
+    // Check dependencies
+    if (!frappe.provide('dakbabu.components') || !dakbabu.components.get_reminder_card || !dakbabu.components.get_performance_card) {
+        frappe.require('/assets/dakbabu/js/dak_components.js', () => {
+            frappe.pages['dak_dashboard'].render_page_content(wrapper);
+        });
+    } else {
+        frappe.pages['dak_dashboard'].render_page_content(wrapper);
+    }
+}
+
+frappe.pages['dak_dashboard'].render_page_content = function (wrapper) {
+    if (!dakbabu.components || !dakbabu.components.get_reminder_card || !dakbabu.components.get_performance_card) {
+        console.error("Failed to load Dak Components");
+        frappe.msgprint("Failed to load Dashboard Components. Please reload dependencies.");
+        return;
+    }
+
 
     // Add content to the page
     $(wrapper).find('.layout-main').html(`
@@ -127,79 +145,13 @@ frappe.pages['dak_dashboard'].on_page_load = function (wrapper) {
 
 
 
-		<!-- Reminder Section(Full Width) -->
-		<div class="reminder-section" style="
-			width: 100%;
-			margin-bottom: 30px;
-			background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-			padding: 40px 40px;
-			box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
-			color: #ffffff;
-			display: flex;
-			flex-wrap: wrap;
-			gap: 20px;
-			justify-content: space-between;
-			align-items: center;
-			position: relative;
-			overflow: hidden;
-            border-radius: 0 0 16px 16px;
-		">
-			<!-- Decorative BG -->
-			<div style="position: absolute; top: -50px; left: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
-			<div style="position: absolute; bottom: -50px; right: 20%; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+		${dakbabu.components.get_reminder_card('dashboard')}
 
-			<div style="position: relative; z-index: 1; flex: 1 1 400px;">
-				<div style="display: flex; align-items: center; margin-bottom: 10px; opacity: 0.9;">
-					<span style="font-size: 1.1rem; margin-right: 8px;">🔔</span>
-					<span id="latest-task-status" style="font-weight: 500; font-size: 0.95rem; letter-spacing: 0.02em;">Loading reminder...</span>
-				</div>
-				
-				<h2 id="latest-task-subject" style="font-size: 2rem; font-weight: 700; margin-bottom: 15px; color: #fff;">
-                    <div class="skeleton" style="width: 60%; height: 32px; border-radius: 8px;"></div>
-                </h2>
-				
-				<div style="display: flex; align-items: center; gap: 20px; font-size: 0.95rem;">
-					<span style="
-						background: rgba(255,255,255,0.2); 
-						padding: 5px 12px; 
-						border-radius: 6px; 
-						backdrop-filter: blur(5px);
-						display: flex; align-items: center;
-					">
-						<i class="fa fa-clock-o" style="margin-right: 6px;"></i> 11:00
-					</span>
-					<span style="display: flex; align-items: center; opacity: 0.9;">
-						<i class="fa fa-building-o" style="margin-right: 6px;"></i> Headquarters
-					</span>
-					<span style="display: flex; align-items: center; opacity: 0.9;">
-						<i class="fa fa-hourglass-half" style="margin-right: 6px;"></i> Est: 120m
-					</span>
-				</div>
-			</div>
-
-			<div style="position: relative; z-index: 1; flex: 0 0 auto;">
-				<button class="btn" style="
-					background: #ffffff; 
-					color: #7c3aed; 
-					padding: 10px 24px; 
-					border-radius: 8px; 
-					font-weight: 600; 
-					border: none;
-					box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-					transition: all 0.2s;
-					font-size: 0.95rem;
-				" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-					View Task
-				</button>
-			</div>
-		</div>
-
-		<div class="dashboard-content" style="padding: 0;">
-			<!-- Stats Row -->
-			<div class="row" style="margin: 0; width: 100%;">
+        <!-- Stats Row -->
+        <div class="row" style="margin: 0; width: 100%; margin-top: 0px;">
 				<!-- Total Tasks: Blue/Cyan -->
 				<div class="col-md-3 col-sm-6 mb-4" style="padding: 0 10px;">
-					<div class="frappe-card" onclick="frappe.set_route('List', 'Task')" style="
+					<div class="frappe-card" onclick="frappe.set_route('dak_task_list')" style="
 						padding: 20px; 
 						border-radius: 12px; 
 						background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
@@ -228,7 +180,7 @@ frappe.pages['dak_dashboard'].on_page_load = function (wrapper) {
 
 				<!-- Due Period: Orange/Red -->
 				<div class="col-md-3 col-sm-6 mb-4" style="padding: 0 10px;">
-					<div class="frappe-card" onclick="frappe.set_route('List', 'Task', {status: 'Overdue'})" style="
+					<div class="frappe-card" onclick="frappe.set_route('dak_task_list')" style="
 						padding: 20px; 
 						border-radius: 12px; 
 						background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
@@ -255,7 +207,7 @@ frappe.pages['dak_dashboard'].on_page_load = function (wrapper) {
 
 				<!-- High Priority: Pink/Rose -->
 				<div class="col-md-3 col-sm-6 mb-4" style="padding: 0 10px;">
-					<div class="frappe-card" onclick="frappe.set_route('List', 'Task', {priority: 'High'})" style="
+					<div class="frappe-card" onclick="frappe.set_route('dak_task_list')" style="
 						padding: 20px; 
 						border-radius: 12px; 
 						background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
@@ -284,7 +236,7 @@ frappe.pages['dak_dashboard'].on_page_load = function (wrapper) {
 
 				<!-- Active Now: Emerald/Green -->
 				<div class="col-md-3 col-sm-6 mb-4" style="padding: 0 10px;">
-					<div class="frappe-card" onclick="frappe.set_route('List', 'Task', {status: 'Open'})" style="
+					<div class="frappe-card" onclick="frappe.set_route('dak_task_list')" style="
 						padding: 20px; 
 						border-radius: 12px; 
 						background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -310,8 +262,39 @@ frappe.pages['dak_dashboard'].on_page_load = function (wrapper) {
 				</div>
 			</div>
 
+		<div class="dashboard-content" style="padding: 0;">
+
+			<!-- Stats Row Moved Up -->
+
 			<div class="flex-grid-container" style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;">
 				
+                <!-- Standard Frappe Style Card -->
+                <div class="flex-card-item" style="flex: 1 1 300px; max-width: 400px;">
+                    <div class="frappe-card" style="
+                        height: 100%;
+                        padding: 20px;
+                        border-radius: 8px;
+                        background: #ffffff;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                        border: 1px solid #ebEEF0;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: flex-start;
+                    ">
+                        <h6 style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: #8d99a6; margin-bottom: 10px; letter-spacing: 0.5px;">Total Tasks</h6>
+                        <div style="display: flex; align-items: baseline;">
+                            <h3 id="total-tasks-frappe-card" style="font-size: 28px; font-weight: 700; color: #36414c; margin: 0;">-</h3>
+                            <span class="ml-2" style="font-size: 13px; color: #00B368; margin-left: 8px; background: #E8FDF5; padding: 2px 6px; border-radius: 4px;">
+                                <i class="fa fa-arrow-up"></i> Live
+                            </span>
+                        </div>
+                        <div style="width: 100%; height: 4px; background: #F4F5F7; border-radius: 2px; margin-top: 15px; overflow: hidden;">
+                            <div style="width: 70%; height: 100%; background: #06b6d4; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+
 				<div class="flex-card-item" style="flex: 1 1 500px; max-width: 900px;">
 					<div class="frappe-card" style="
 						height: 100%;
@@ -432,93 +415,7 @@ frappe.pages['dak_dashboard'].on_page_load = function (wrapper) {
             </div>
         </div>
 
-            <!-- Performance Matrix Card (Now 25% Width) -->
-            <div class="reminder-section" style="
-                flex: 1;
-                background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
-                padding: 25px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border-radius: 16px;
-            position: relative;
-            overflow: hidden;
-            border: none;
-            color: #ffffff;
-        ">
-            <!-- Decorative Circles (Adjusted) -->
-            <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
-            <div style="position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-
-            <div style="position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
-                <div style="display: flex; align-items: center; margin-bottom: 20px;">
-                    <span style="font-size: 1.1rem; margin-right: 10px; background: rgba(255,255,255,0.2); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; backdrop-filter: blur(5px);">
-                        <i class="fa fa-line-chart"></i>
-                    </span>
-                    <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #ffffff;">Performance</h3>
-                </div>
-
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                    <!-- Circular Progress (Smaller) -->
-                    <div id="perf-circle" style="
-                        width: 100px; 
-                        height: 100px; 
-                        border-radius: 50%; 
-                        background: conic-gradient(rgba(255,255,255,0.9) 0% 0%, rgba(255,255,255,0.2) 0% 100%); 
-                        display: flex; 
-                        align-items: center; 
-                        justify-content: center;
-                        position: relative;
-                        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                    ">
-                        <div style="
-                            width: 82px; 
-                            height: 82px; 
-                            background: rgba(255,255,255,0.1); 
-                            border-radius: 50%; 
-                            display: flex; 
-                            align-items: center; 
-                            justify-content: center;
-                            backdrop-filter: blur(5px);
-                        ">
-                            <span id="perf-percent" style="font-size: 1.4rem; font-weight: 800; color: #ffffff;">0%</span>
-                        </div>
-                    </div>
-
-                    <!-- Stats (Stacked) -->
-                    <div style="width: 100%; display: flex; justify-content: space-around;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.8); letter-spacing: 0.05em; margin-bottom: 3px;">AVG. TIME</div>
-                            <div style="font-size: 1.25rem; font-weight: 700; color: #ffffff;">0h 0m</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.8); letter-spacing: 0.05em; margin-bottom: 3px;">COMPLETED</div>
-                            <div id="perf-completed" style="font-size: 1.25rem; font-weight: 700; color: #ffffff;">0 <span style="font-size: 0.9rem; font-weight: 400; opacity: 0.7;">/ 2</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer / Badge -->
-                <div style="
-                    background: rgba(255,255,255,0.1); 
-                    padding: 10px 15px; 
-                    border-radius: 10px; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: space-between;
-                    backdrop-filter: blur(5px);
-                    border: 1px solid rgba(255,255,255,0.1);
-                    margin-top: 20px;
-                ">
-                    <span style="font-size: 0.85rem; color: #ffffff;">Efficiency</span>
-                    <span style="
-                        background: rgba(255,255,255,0.9); 
-                        color: #d946ef; 
-                        padding: 4px 10px; 
-                        border-radius: 12px; 
-                        font-size: 0.75rem; 
-                        font-weight: 700;
-                    ">Needs Imp.</span>
-                </div>
-            </div>
+            ${dakbabu.components.get_performance_card()}
         </div>
         </div>
 
@@ -631,6 +528,7 @@ frappe.pages['dak_dashboard'].refresh_stats = function (timespan) {
         callback: function (r) {
             if (r.message) {
                 $('#total-tasks-count').text(r.message.total_tasks);
+                $('#total-tasks-frappe-card').text(r.message.total_tasks); // Update standard card
                 $('#high-priority-count').text(r.message.high_priority);
 
                 // Update Performance Matrix
@@ -653,11 +551,11 @@ frappe.pages['dak_dashboard'].refresh_stats = function (timespan) {
         method: "dakbabu.dakbabu.page.dak_dashboard.dak_dashboard.get_latest_task",
         callback: function (r) {
             if (r.message) {
-                $('#latest-task-subject').text(r.message.subject);
-                $('#latest-task-status').text('Reminder: ' + r.message.status);
+                $('#latest-task-subject-dashboard').text(r.message.subject);
+                $('#latest-task-status-dashboard').text('Reminder: ' + r.message.status);
             } else {
-                $('#latest-task-subject').text("No Upcoming Tasks");
-                $('#latest-task-status').text("You're all caught up!");
+                $('#latest-task-subject-dashboard').text("No Upcoming Tasks");
+                $('#latest-task-status-dashboard').text("You're all caught up!");
             }
         }
     });
