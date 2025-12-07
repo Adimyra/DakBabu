@@ -1,0 +1,192 @@
+/* Vibrant Test Page Styles */
+
+/* Dialog Styling */
+.modal-content {
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: none;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 20px 24px;
+}
+
+.modal-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.modal-body {
+    padding: 30px;
+    background-color: #f8f9fc;
+}
+
+.modal-footer {
+    background-color: #f8f9fc;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-top: 1px solid #e3e6f0;
+    padding: 16px 24px;
+}
+
+/* Form Controls */
+.form-group label {
+    font-weight: 600;
+    color: #4e73df;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #d1d3e2;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(to right, #667eea, #764ba2);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+    background: linear-gradient(to right, #5a6fd1, #6b4391);
+}
+
+/* Page List Groups */
+.list-group-item {
+    border: none;
+    margin-bottom: 8px;
+    border-radius: 8px !important;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.list-group-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    background-color: white;
+}
+
+.list-group-item-action:active {
+    background-color: #f8f9fc;
+}
+
+/* Column Headers */
+h4 {
+    color: #5a5c69;
+    font-weight: 700;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+/* Specific Colors for lists */
+.col-md-3:nth-child(1) .list-group-item {
+    border-left-color: #4e73df;
+}
+
+/* Customers - Blue */
+.col-md-3:nth-child(1) h4 {
+    border-bottom-color: #4e73df;
+    color: #4e73df;
+}
+
+.col-md-3:nth-child(2) .list-group-item {
+    border-left-color: #1cc88a;
+}
+
+/* Projects - Green */
+.col-md-3:nth-child(2) h4 {
+    border-bottom-color: #1cc88a;
+    color: #1cc88a;
+}
+
+.col-md-3:nth-child(3) .list-group-item {
+    border-left-color: #f6c23e;
+}
+
+/* Addresses - Yellow */
+.col-md-3:nth-child(3) h4 {
+    border-bottom-color: #f6c23e;
+    color: #f6c23e;
+}
+
+.col-md-3:nth-child(4) .list-group-item {
+    border-left-color: #e74a3b;
+}
+
+/* Tasks - Red */
+.col-md-3:nth-child(4) h4 {
+    border-bottom-color: #e74a3b;
+    color: #e74a3b;
+}
+
+/* Kanban Sorting */
+.sortable-placeholder {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    height: 100px;
+    margin-bottom: 10px;
+    background: #e9ecef;
+}
+
+/* Force White Text on Cards with Gradients */
+.kanban-card,
+.kanban-card a,
+.kanban-card h6,
+.kanban-card small,
+.kanban-card i,
+.kanban-card span {
+    color: white !important;
+}
+
+.kanban-card a:hover {
+    text-decoration: underline;
+}
+
+#view-card .card,
+#view-card .card a,
+#view-card .card h5,
+#view-card .card small,
+#view-card .card i {
+    color: white !important;
+}
+
+/* Native DnD Styles */
+.kanban-column {
+    transition: background 0.2s, border 0.2s;
+    border: 2px solid transparent;
+}
+
+.kanban-column.drag-over {
+    background-color: #e2e6ea !important;
+    border: 2px dashed #667eea;
+}
+
+.kanban-card.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+}

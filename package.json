@@ -1,0 +1,17 @@
+{
+  "name": "dakbabu",
+  "version": "1.0.0",
+  "description": "DakBabu",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jquery": "^3.5.33",
+    "@types/sortablejs": "^1.15.9",
+    "typescript": "^5.9.3"
+  }
+}
