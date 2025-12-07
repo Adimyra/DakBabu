@@ -1,0 +1,115 @@
+.layout-main-section {
+    max-width: 100% !important;
+    padding: 0 !important;
+}
+.page-container {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+.page-head {
+    display: none !important;
+}
+.layout-main {
+    padding: 0 !important;
+}
+.page-content {
+    padding: 0 !important;
+}
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Drawer Styles */
+.task-drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1040;
+    display: none;
+    backdrop-filter: blur(2px);
+}
+.task-drawer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 500px;
+    max-width: 90%;
+    height: auto;
+    max-height: 85vh;
+    background: #fff;
+    z-index: 1041;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    opacity: 0;
+    pointer-events: none;
+}
+.task-drawer.open {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+.drawer-header {
+    padding: 30px;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    color: white;
+}
+.drawer-body {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background: #f9fafb;
+}
+.drawer-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+}
+.vibrant-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    transition: all 0.2s;
+    background: #fff;
+    color: #1f2937;
+}
+.vibrant-input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    outline: none;
+}
+.vibrant-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+/* Skeleton Loading */
+.skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 6px;
+}
+.skeleton-dark {
+     background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.filter-item:hover {
+    background-color: #f3f4f6;
+}

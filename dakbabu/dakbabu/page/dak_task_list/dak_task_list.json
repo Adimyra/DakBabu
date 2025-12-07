@@ -1,0 +1,19 @@
+{
+    "content": null,
+    "creation": "2025-12-07 04:26:06.610576",
+    "docstatus": 0,
+    "doctype": "Page",
+    "idx": 0,
+    "modified": "2025-12-07 04:26:06.610576",
+    "modified_by": "Administrator",
+    "module": "DakBabu",
+    "name": "dak_task_list",
+    "owner": "Administrator",
+    "page_name": "dak_task_list",
+    "roles": [],
+    "script": null,
+    "standard": "Yes",
+    "style": null,
+    "system_page": 0,
+    "title": "Task list"
+}
