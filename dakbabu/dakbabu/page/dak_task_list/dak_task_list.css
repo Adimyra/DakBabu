@@ -26,88 +26,6 @@
     margin-right: 0 !important;
 }
 
-/* Drawer Styles */
-.task-drawer-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1040;
-    display: none;
-    backdrop-filter: blur(2px);
-}
-
-.task-drawer {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.9);
-    width: 500px;
-    max-width: 90%;
-    height: auto;
-    max-height: 85vh;
-    background: #fff;
-    z-index: 1041;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    border-radius: 16px;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.task-drawer.open {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.drawer-header {
-    padding: 30px;
-    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
-    color: white;
-}
-
-.drawer-body {
-    flex: 1;
-    padding: 30px;
-    overflow-y: auto;
-    background: #f9fafb;
-}
-
-.drawer-footer {
-    padding: 20px 30px;
-    border-top: 1px solid #e5e7eb;
-    background: #fff;
-}
-
-.vibrant-input {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    transition: all 0.2s;
-    background: #fff;
-    color: #1f2937;
-}
-
-.vibrant-input:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-    outline: none;
-}
-
-.vibrant-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.9rem;
-}
 
 /* Custom Table Styles for Dak List */
 #standard-task-table-body tr:nth-child(even) {
@@ -217,4 +135,660 @@
     100% {
         background-position: 200% 0;
     }
+}
+
+/* Lucid UI Theme for Task Drawer */
+
+:root {
+    --lucid-bg: #ffffff;
+    --lucid-fg: #0f172a;
+    /* Slate 900 */
+    --lucid-muted: #64748b;
+    /* Slate 500 */
+    --lucid-border: #e2e8f0;
+    /* Slate 200 */
+    --lucid-input-bg: #ffffff;
+    --lucid-primary: #0f172a;
+    /* Slate 900 */
+    --lucid-primary-fg: #ffffff;
+    --lucid-radius: 0.5rem;
+    --lucid-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.lucid-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    /* Centered */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.lucid-modal-overlay.open {
+    display: flex;
+    opacity: 1;
+}
+
+.lucid-drawer {
+    width: 650px;
+    max-width: 90vw;
+    height: auto;
+    max-height: 90vh;
+    background: var(--lucid-bg);
+    border-radius: 16px;
+    /* Rounded corners for modal */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.95);
+    transition: transform 0.2s ease-out;
+    overflow: hidden;
+    /* integrated header/footer */
+}
+
+.lucid-modal-overlay.open .lucid-drawer {
+    transform: scale(1);
+    transform: translateX(0);
+    /* Reset from drawer slide */
+}
+
+.lucid-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 100%);
+    /* Vibrant Gradient */
+    color: white;
+}
+
+.lucid-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: -0.025em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.lucid-subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0.25rem 0 0 0;
+}
+
+.lucid-close-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.lucid-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    transform: rotate(90deg);
+}
+
+.lucid-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.lucid-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.lucid-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--lucid-fg);
+    margin-bottom: 0.5rem;
+}
+
+.lucid-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    border: 1px solid var(--lucid-border);
+    border-radius: var(--lucid-radius);
+    background: var(--lucid-input-bg);
+    color: var(--lucid-fg);
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.lucid-input::placeholder {
+    color: #94a3b8;
+}
+
+.lucid-input:focus {
+    outline: none;
+    border-color: #0f172a;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.1);
+}
+
+.lucid-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.lucid-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--lucid-border);
+    background: #f8fafc;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+}
+
+.lucid-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--lucid-radius);
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.lucid-btn-ghost {
+    background: white;
+    color: var(--lucid-fg);
+    border: 1px solid var(--lucid-border);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.lucid-btn-ghost:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.lucid-btn-primary {
+    background: var(--lucid-primary);
+    color: var(--lucid-primary-fg);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.lucid-btn-primary:hover {
+    background: #334155;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+.lucid-btn-primary:active {
+    transform: translateY(0);
+}
+
+select.lucid-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Latest Task Card Styles */
+.latest-task-card {
+    width: 100%;
+    background: #f3f4f6;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    padding: 25px 30px;
+    color: #1f2937;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+[data-theme="dark"] .latest-task-card {
+    background: #1f2937;
+    /* Dark Grey Bg */
+    border-color: #374151;
+    color: #f3f4f6;
+    /* Light Text */
+}
+
+/* Decorative Circles */
+.ltc-circle {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.ltc-circle-1 {
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+}
+
+.ltc-circle-2 {
+    bottom: -20px;
+    right: 80px;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.05) 100%);
+}
+
+.ltc-circle-3 {
+    top: 40%;
+    left: -30px;
+    width: 80px;
+    height: 80px;
+    background: rgba(16, 185, 129, 0.05);
+}
+
+[data-theme="dark"] .ltc-circle-1 {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+}
+
+[data-theme="dark"] .ltc-circle-2 {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.1) 100%);
+}
+
+[data-theme="dark"] .ltc-circle-3 {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+/* Content Elements */
+.ltc-content {
+    position: relative;
+    z-index: 1;
+    flex: 4;
+    padding-right: 20px;
+}
+
+.ltc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.ltc-badge {
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+[data-theme="dark"] .ltc-badge {
+    background: #3730a3;
+    color: #c7d2fe;
+}
+
+.ltc-status {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+}
+
+[data-theme="dark"] .ltc-status {
+    background: #374151;
+    color: #e5e7eb;
+    border-color: #4b5563;
+}
+
+.ltc-date {
+    font-size: 0.85rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+}
+
+[data-theme="dark"] .ltc-date {
+    color: #9ca3af;
+}
+
+.ltc-title {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.025em;
+}
+
+[data-theme="dark"] .ltc-title {
+    color: #f9fafb;
+}
+
+.ltc-desc {
+    margin: 0;
+    font-size: 1rem;
+    color: #6b7280;
+    max-width: 800px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+    line-height: 1.5;
+}
+
+[data-theme="dark"] .ltc-desc {
+    color: #9ca3af;
+}
+
+/* Timer Display */
+.ltc-timer {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.ltc-timer-box {
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #dc2626;
+    background: #fee2e2;
+    padding: 5px 15px;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+[data-theme="dark"] .ltc-timer-box {
+    background: #450a0a;
+    color: #f87171;
+    border-color: #7f1d1d;
+}
+
+/* Actions */
+.ltc-actions {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Buttons */
+.ltc-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.ltc-btn-start {
+    background: #4f46e5;
+    border: 1px solid #4338ca;
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+}
+
+.ltc-btn-start:hover {
+    background: #4338ca;
+}
+
+[data-theme="dark"] .ltc-btn-start {
+    background: #6366f1;
+    border-color: #4f46e5;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .ltc-btn-start:hover {
+    background: #4f46e5;
+}
+
+
+.ltc-btn-stop {
+    background: #fff;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    animation: pulse 2s infinite;
+}
+
+.ltc-btn-stop:hover {
+    background: #fef2f2;
+}
+
+[data-theme="dark"] .ltc-btn-stop {
+    background: #1f2937;
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+[data-theme="dark"] .ltc-btn-stop:hover {
+    background: #374151;
+}
+
+.ltc-btn-view {
+    background: #f9fafb;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.ltc-btn-view:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+[data-theme="dark"] .ltc-btn-view {
+    background: #374151;
+    color: #d1d5db;
+    border-color: #4b5563;
+}
+
+[data-theme="dark"] .ltc-btn-view:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+}
+
+
+/* --- Full Page Dark Mode Support --- */
+
+/* Global Page Background */
+[data-theme="dark"] .layout-main-section,
+[data-theme="dark"] .page-container,
+[data-theme="dark"] .page-content,
+[data-theme="dark"] .layout-main {
+    background-color: #121212 !important;
+    color: #E0E0E0;
+}
+
+/* 1. List View (Table) */
+[data-theme="dark"] #standard-task-table-body tr:nth-child(even) {
+    background-color: #1E1E1E !important;
+    /* Deep Charcoal for even rows */
+}
+
+[data-theme="dark"] #standard-task-table-body tr:nth-child(odd) {
+    background-color: #121212 !important;
+    /* Darker for odd rows */
+}
+
+[data-theme="dark"] #standard-task-table-body tr:hover {
+    background-color: #2C2C2C !important;
+}
+
+[data-theme="dark"] #standard-task-table-body td {
+    border-top: 1px solid #374151;
+    border-bottom: 1px solid #374151;
+    color: #E0E0E0;
+}
+
+[data-theme="dark"] .list-row-head {
+    background-color: #1E1E1E !important;
+    color: #BBBBBB !important;
+    border-bottom: 1px solid #374151;
+}
+
+/* 2. Kanban View */
+[data-theme="dark"] #kanban-task-list {
+    /* bg handled by global */
+}
+
+[data-theme="dark"] .kanban-column {
+    background: #1E1E1E;
+}
+
+[data-theme="dark"] .kanban-column-header {
+    color: #BBBBBB;
+}
+
+[data-theme="dark"] .kanban-card {
+    background: #2C2C2C;
+    color: #E0E0E0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .kanban-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background: #383838;
+}
+
+/* 3. Task Drawer (Lucid Theme) Overrides */
+[data-theme="dark"] .lucid-drawer {
+    background: #1E1E1E;
+    color: #E0E0E0;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .lucid-header {
+    border-bottom: 1px solid #374151;
+    /* Keep the gradient */
+}
+
+[data-theme="dark"] .lucid-title {
+    color: #E0E0E0;
+}
+
+[data-theme="dark"] .lucid-subtitle {
+    color: #BBBBBB;
+}
+
+[data-theme="dark"] .lucid-label {
+    color: #E0E0E0;
+}
+
+[data-theme="dark"] .lucid-input {
+    background: #2C2C2C;
+    border-color: #4b5563;
+    /* Subtle Blue/Grey Border */
+    color: #E0E0E0;
+}
+
+[data-theme="dark"] .lucid-input:focus {
+    border-color: #6366f1;
+    /* Indigo */
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+[data-theme="dark"] .lucid-footer {
+    background: #1E1E1E;
+    border-top: 1px solid #374151;
+}
+
+[data-theme="dark"] .lucid-btn-ghost {
+    background: transparent;
+    color: #E0E0E0;
+    border-color: #4b5563;
+}
+
+[data-theme="dark"] .lucid-btn-ghost:hover {
+    background: #374151;
+    border-color: #9ca3af;
+}
+
+/* 4. Badges / Indicators */
+[data-theme="dark"] .indicator,
+[data-theme="dark"] .badge,
+[data-theme="dark"] .status-badge {
+    color: #FFFFFF !important;
+    /* Force white text */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    border: none;
+}
+
+/* Specific Badge Adjustments */
+[data-theme="dark"] .indicator.blue,
+[data-theme="dark"] .badge-primary {
+    background-color: #2563eb;
+    color: white !important;
+}
+
+/* Completed -> Teal/Blue? User said Teal. Custom override maybe needed in JS or here if class known */
+[data-theme="dark"] .indicator.green,
+[data-theme="dark"] .badge-success {
+    background-color: #16a34a;
+    color: white !important;
+}
+
+[data-theme="dark"] .indicator.orange,
+[data-theme="dark"] .badge-warning {
+    background-color: #d97706;
+    color: white !important;
+}
+
+/* Overdue -> Muted Gold */
+[data-theme="dark"] .indicator.red,
+[data-theme="dark"] .badge-danger {
+    background-color: #dc2626;
+    color: white !important;
+}
+
+[data-theme="dark"] .indicator.purple {
+    background-color: #9333ea;
+    color: white !important;
+}
+
+/* Filter/Input Fields (Global) */
+[data-theme="dark"] input.form-control,
+[data-theme="dark"] select.form-control {
+    background-color: #2C2C2C;
+    border: 1px solid #4b5563;
+    color: #E0E0E0;
 }

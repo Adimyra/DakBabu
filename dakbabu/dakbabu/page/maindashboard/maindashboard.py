@@ -7,9 +7,9 @@ def get_latest_task():
     Returns a dict with title, description, priority, and status.
     """
     try:
-        frappe.log_error("Test Page: Fetching Latest Task", "Debug")
+        frappe.log_error("Main Dashboard: Fetching Latest Task", "Debug")
         tasks = frappe.get_all('Task', 
-            fields=['subject', 'priority', 'status', 'exp_end_date'],
+            fields=['name', 'subject', 'priority', 'status', 'exp_end_date', 'description', 'project'],
             order_by='creation desc',
             limit_page_length=1
         )
@@ -20,16 +20,19 @@ def get_latest_task():
         task = tasks[0]
         
         # Format due date if exists
-        description = "Latest Task"
+        due_date = ""
         if task.exp_end_date:
-            description = f"Due: {frappe.format_date(task.exp_end_date)}"
+            due_date = frappe.format_date(task.exp_end_date)
 
         return {
+            'name': task.name,
             'title': task.subject,
-            'description': description,
+            'description': task.description, # Real description
+            'due_date': due_date,
             'priority': task.priority,
-            'status': task.status
+            'status': task.status,
+            'project': task.project
         }
     except Exception as e:
-        frappe.log_error(f"Error in Test Page Fetch: {str(e)}")
+        frappe.log_error(f"Error in Main Dashboard Fetch: {str(e)}")
         return None

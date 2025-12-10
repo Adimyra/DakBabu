@@ -54,7 +54,7 @@ dakbabu.components.get_reminder_card = function (id_suffix = "") {
 			</div>
 
 			<div style="position: relative; z-index: 1; flex: 0 0 auto;">
-				<button class="btn" style="
+				<button class="btn" onclick="window.toggle_reminder_drawer(true)" style="
 					background: #ffffff; 
 					color: #7c3aed; 
 					padding: 10px 24px; 
@@ -74,8 +74,8 @@ dakbabu.components.get_reminder_card = function (id_suffix = "") {
 
 dakbabu.components.get_performance_card = function () {
     return `
-            <!-- Performance Matrix Card (Now 25% Width) -->
-            <div class="reminder-section" style="
+
+        <div class="reminder-section" style="
                 flex: 1;
                 background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
                 padding: 25px;
@@ -161,5 +161,5 @@ dakbabu.components.get_performance_card = function () {
                     ">Needs Imp.</span>
                 </div>
             </div>
-    `;
+            `;
 };

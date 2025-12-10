@@ -25,12 +25,54 @@ def get_task_counts(timespan="All Time"):
 
 @frappe.whitelist()
 def get_latest_task():
-	tasks = frappe.get_all("Task", 
-		fields=["subject", "status", "description", "priority", "exp_end_date"], 
-		order_by="creation desc", 
-		limit=1
-	)
-	return tasks[0] if tasks else None
+	try:
+		# 0. Look for "Working Now" Task (Absolute Highest Priority)
+		working_task = frappe.get_list("Task",
+			filters={"is_working_now": 1},
+			fields=["name", "subject", "status", "description", "priority", "exp_end_date", "is_working_now"],
+			limit=1
+		)
+		if working_task:
+			return working_task
+
+		# 1. Look for Overdue Tasks (Highest Priority) - Fetch ALL
+		overdue_tasks = frappe.get_list("Task", 
+			filters={"status": "Overdue"},
+			fields=["name", "subject", "status", "description", "priority", "exp_end_date"], 
+			order_by="exp_end_date asc, priority desc",
+			limit=3
+		)
+		if overdue_tasks:
+			return overdue_tasks
+
+		# 2. Fallback: Look for Active Tasks (Top 3)
+		active_tasks = frappe.get_list("Task", 
+			filters={"status": ["in", ["Open", "Working", "Pending Review"]]},
+			fields=["name", "subject", "status", "description", "priority", "exp_end_date"], 
+			order_by="priority desc, modified desc", 
+			limit=3
+		)
+		if active_tasks:
+			return active_tasks
+
+		return []
+	except Exception as e:
+		frappe.log_error(f"Error in get_latest_task: {str(e)}")
+		return []
+
+@frappe.whitelist()
+def set_working_task(task_name):
+	try:
+		# 1. Reset all other tasks
+		frappe.db.sql("UPDATE `tabTask` SET is_working_now = 0 WHERE is_working_now = 1")
+		
+		# 2. Set new task as working
+		frappe.db.set_value("Task", task_name, "is_working_now", 1)
+		frappe.db.commit()
+		return True
+	except Exception as e:
+		frappe.log_error(f"Error setting working task: {str(e)}")
+		return False
 
 @frappe.whitelist()
 def get_recent_tasks():
@@ -54,8 +96,8 @@ def get_backlog_tasks():
 @frappe.whitelist()
 def get_all_tasks_list():
 	tasks = frappe.get_all("Task",
-		fields=["name", "subject", "status", "description", "priority", "exp_end_date", "_assign", "project", "creation", "modified"],
+		fields=["name", "subject", "status", "description", "priority", "exp_end_date", "_assign", "project", "creation", "modified", "is_working_now"],
 		order_by="creation desc",
-		limit=100
+		limit=None
 	)
 	return tasks

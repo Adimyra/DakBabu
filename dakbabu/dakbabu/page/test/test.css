@@ -1,192 +1,570 @@
-/* Vibrant Test Page Styles */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-/* Dialog Styling */
-.modal-content {
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    border: none;
+/* Palette 
+    #031716 (Black Green)
+    #032F30 (Dark Teal)
+    #0A7075 (Teal)
+    #0C969C (Bright Teal)
+    #6BA3BE (Muted Blue)
+    #274D60 (Slate Teal)
+*/
+
+    /* Page Background */
+.page-container {
+    background-color: #f4f8f9 !important; /* Very light teal tint */
+    transition: background-color 0.3s ease;
+}
+.page-container.dark-theme-active {
+    background-color: #010d0c !important; /* Deep Dark Background */
 }
 
-.modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    padding: 20px 24px;
-}
-
-.modal-title {
-    font-weight: 700;
-    font-size: 1.25rem;
-}
-
-.modal-body {
+/* Container */
+.modern-task-container {
+    font-family: 'Roboto', sans-serif;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(3, 23, 22, 0.08);
     padding: 30px;
-    background-color: #f8f9fc;
-}
-
-.modal-footer {
-    background-color: #f8f9fc;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-    border-top: 1px solid #e3e6f0;
-    padding: 16px 24px;
-}
-
-/* Form Controls */
-.form-group label {
-    font-weight: 600;
-    color: #4e73df;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-}
-
-.form-control {
-    border-radius: 8px;
-    border: 1px solid #d1d3e2;
-    padding: 12px 16px;
+    margin: 20px 0;
+    min-height: 600px;
+    color: #031716;
     transition: all 0.3s ease;
-    background-color: white;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
-.form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+/* --- DARK THEME OVERRIDES --- */
+.modern-task-container.dark-theme {
+    background: #021a19; 
+    color: #e0f2f1; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid #0a3d3d;
 }
 
-/* Buttons */
-.btn-primary {
-    background: linear-gradient(to right, #667eea, #764ba2);
-    border: none;
-    border-radius: 8px;
-    padding: 10px 24px;
-    font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* Header */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
 }
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
-    background: linear-gradient(to right, #5a6fd1, #6b4391);
-}
-
-/* Page List Groups */
-.list-group-item {
-    border: none;
-    margin-bottom: 8px;
-    border-radius: 8px !important;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    transition: all 0.2s ease;
-    border-left: 4px solid transparent;
-}
-
-.list-group-item:hover {
-    transform: translateX(5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    background-color: white;
-}
-
-.list-group-item-action:active {
-    background-color: #f8f9fc;
-}
-
-/* Column Headers */
-h4 {
-    color: #5a5c69;
+.page-title {
+    font-size: 28px;
     font-weight: 700;
-    border-bottom: 2px solid #667eea;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-    display: inline-block;
+    color: #032F30; /* Dark Teal */
+    margin: 0;
+    transition: color 0.3s;
+}
+.dark-theme .page-title { color: #80cbc4; } 
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
-/* Specific Colors for lists */
-.col-md-3:nth-child(1) .list-group-item {
-    border-left-color: #4e73df;
-}
-
-/* Customers - Blue */
-.col-md-3:nth-child(1) h4 {
-    border-bottom-color: #4e73df;
-    color: #4e73df;
-}
-
-.col-md-3:nth-child(2) .list-group-item {
-    border-left-color: #1cc88a;
-}
-
-/* Projects - Green */
-.col-md-3:nth-child(2) h4 {
-    border-bottom-color: #1cc88a;
-    color: #1cc88a;
-}
-
-.col-md-3:nth-child(3) .list-group-item {
-    border-left-color: #f6c23e;
-}
-
-/* Addresses - Yellow */
-.col-md-3:nth-child(3) h4 {
-    border-bottom-color: #f6c23e;
-    color: #f6c23e;
-}
-
-.col-md-3:nth-child(4) .list-group-item {
-    border-left-color: #e74a3b;
-}
-
-/* Tasks - Red */
-.col-md-3:nth-child(4) h4 {
-    border-bottom-color: #e74a3b;
-    color: #e74a3b;
-}
-
-/* Kanban Sorting */
-.sortable-placeholder {
-    border: 2px dashed #ccc;
+.btn-action {
+    background: transparent;
+    border: 1px solid #6BA3BE;
+    color: #274D60;
+    padding: 9px 12px;
     border-radius: 8px;
-    height: 100px;
-    margin-bottom: 10px;
-    background: #e9ecef;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+.btn-action:hover { background: #e0f2f1; }
+.btn-action.active {
+    background: #0A7075;
+    color: #fff;
+    border-color: #0A7075;
 }
 
-/* Force White Text on Cards with Gradients */
-.kanban-card,
-.kanban-card a,
-.kanban-card h6,
-.kanban-card small,
-.kanban-card i,
-.kanban-card span {
-    color: white !important;
+.btn-play-text { 
+    background: #4caf50 !important; /* Solid Green */
+    border-color: #4caf50 !important;
+    box-shadow: 0 4px 6px rgba(76, 175, 80, 0.4);
+}
+.btn-play-text:hover { 
+    background: #43a047 !important; 
+    box-shadow: 0 6px 8px rgba(76, 175, 80, 0.6);
 }
 
-.kanban-card a:hover {
-    text-decoration: underline;
+.btn-stop-text { 
+    background: #f44336 !important; /* Solid Red */
+    border-color: #f44336 !important;
+    box-shadow: 0 4px 6px rgba(244, 67, 54, 0.4);
+}
+.btn-stop-text:hover { 
+    background: #e53935 !important; 
+    box-shadow: 0 6px 8px rgba(244, 67, 54, 0.6);
+}
+.dark-theme .btn-action {
+    border-color: #4db6ac;
+    color: #80cbc4;
+}
+.dark-theme .btn-action:hover { background: #032F30; }
+.dark-theme .btn-action.active {
+    background: #004d40;
+    color: #fff;
+    border-color: #004d40;
 }
 
-#view-card .card,
-#view-card .card a,
-#view-card .card h5,
-#view-card .card small,
-#view-card .card i {
-    color: white !important;
+.btn-new-task {
+    background: #0A7075; /* Teal Primary */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(10, 112, 117, 0.3);
+}
+.btn-new-task:hover { background: #0C969C; }
+
+
+/* Toolbar */
+.task-toolbar {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.search-wrapper { position: relative; width: 300px; }
+.modern-search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #6BA3BE;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #031716;
+    background: #ffffff;
+    transition: all 0.3s;
+}
+.modern-search-input:focus {
+    outline: none;
+    border-color: #0A7075;
+    box-shadow: 0 0 0 2px rgba(10, 112, 117, 0.1);
+}
+.dark-theme .modern-search-input {
+    background: #032F30;
+    border-color: #274D60;
+    color: #e0f2f1;
+}
+.dark-theme .modern-search-input::placeholder { color: #80cbc4; opacity: 0.5; }
+
+/* --- Decorative Sphere Card --- */
+.decorative-sphere-card {
+    margin: 20px 0;
+    padding: 40px 60px;
+    border-radius: 24px;
+    background: linear-gradient(45deg, #2F4F4F 0%, #7DAFC2 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 10px 30px rgba(47, 79, 79, 0.3);
+    min-height: 250px; /* Increased height for buttons */
+}
+.sphere-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    z-index: 2;
+}
+.sphere-3d {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #7DAFC2 0%, #3e6b72 50%, #2F4F4F 100%);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.small-circle-badge {
+    position: absolute;
+    bottom: -20px; /* Swapped to Bottom Center */
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 36px;
+    height: 36px;
+    padding: 0 6px;
+    border-radius: 18px;
+    border: 2px solid #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(2px);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 10;
+    white-space: nowrap;
+}
+.sphere-inner-col {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center;
+    gap: 12px;
+    z-index: 5;
+}
+.sphere-clock {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 20px; 
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    letter-spacing: 1px;
+    line-height: 1;
+    z-index: 5;
+}
+.sphere-internal-controls {
+    position: absolute;
+    bottom: 10px; 
+    right: 0px; /* Moved right 20px */
+    left: auto;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 6;
+}
+.sphere-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+.sphere-icon-btn:hover { transform: scale(1.1); box-shadow: 0 6px 10px rgba(0,0,0,0.4); }
+.sphere-icon-btn:active { transform: scale(0.95); }
+
+.sphere-icon-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+.btn-play-icon { 
+    background: #4caf50 !important; /* Solid Green */
+}
+.btn-play-icon:hover { background: #43a047 !important; }
+
+.btn-stop-icon { 
+    background: #f44336 !important; /* Solid Red */
+}
+.btn-stop-icon:hover { background: #e53935 !important; }
+.btn-sphere {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.btn-sphere:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.btn-start { background: #4caf50; color: white; }
+.btn-end { background: #f44336; color: white; }
+
+.card-content {
+    margin-left: 0;
+    text-align: left;
+    flex: 1;
+    color: #ffffff;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.card-content h3 { font-size: 24px; font-weight: 700; margin: 0 0 5px 0; color: #fff; }
+.card-content p { font-size: 14px; opacity: 0.9; margin: 0; }
+
+/* --- VIEWS --- */
+.view-container { flex: 1; overflow-y: auto; overflow-x: hidden; }
+
+/* --- FRA-PPE (Standard) LIST VIEW MIMIC --- */
+.frappe-list-table {
+    width: 100%;
+    border-collapse: separate; 
+    border-spacing: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.frappe-list-table thead th {
+    background-color: #f7fafc;
+    color: #8d99a6;
+    font-size: 11px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px 15px;
+    border-bottom: 1px solid #d1d8dd;
+    text-align: left;
+}
+.dark-theme .frappe-list-table thead th {
+    background-color: #0e1e25;
+    color: #5c6975;
+    border-bottom-color: #23313a;
 }
 
-/* Native DnD Styles */
+.frappe-list-row {
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+.frappe-list-row:hover td {
+    background-color: #f7fafc;
+}
+.dark-theme .frappe-list-row:hover td {
+    background-color: #1a272e;
+}
+
+.frappe-list-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #d1d8dd;
+    vertical-align: top;
+    background-color: #ffffff;
+    color: #000;
+    font-size: 13px;
+}
+.dark-theme .frappe-list-table td {
+    border-bottom-color: #23313a;
+    background-color: #131b20;
+    color: #d1d8dd;
+}
+
+/* Frappe Columns */
+.subject-main {
+    font-weight: 600;
+    color: #1f272e;
+    font-size: 14px;
+    margin-bottom: 4px;
+    display: block;
+    text-decoration: none;
+}
+.subject-meta {
+    color: #8d99a6;
+    font-size: 11px;
+}
+.dark-theme .subject-main { color: #d1d8dd; }
+.dark-theme .subject-meta { color: #5c6975; }
+
+/* Status Indicator (Dot) */
+.indicator {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    color: #1f272e;
+}
+.indicator::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+.dark-theme .indicator { color: #d1d8dd; }
+
+/* Status Colors */
+.indicator.green::before { background: #28a745; }
+.indicator.red::before { background: #ff5858; } 
+.indicator.orange::before { background: #ffa00a; }
+.indicator.blue::before { background: #5e64ff; }
+.indicator.gray::before { background: #8d99a6; }
+
+/* Card View */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.task-card {
+    /* Multi-layer Background: Noise -> Main Circles -> Shadow Circles -> Base Gradient */
+    background-color: #ffffff;
+    background-image: 
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"),
+        
+        /* Circle 1 & Shadow */
+        radial-gradient(circle at 90% 10%, rgba(14, 51, 42, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 92% 12%, rgba(0,0,0,0.1) 0%, transparent 45%), /* Shadow 1 */
+
+        /* Circle 2 & Shadow */
+        radial-gradient(circle at 10% 90%, rgba(10, 112, 117, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 12% 92%, rgba(0,0,0,0.1) 0%, transparent 45%), /* Shadow 2 */
+
+        linear-gradient(145deg, #f0f4f4 0%, #ffffff 100%);
+    
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(14, 51, 42, 0.1);
+}
+.dark-theme .task-card {
+    background-color: #021a19;
+    background-image: 
+            url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"),
+        radial-gradient(circle at 90% 10%, rgba(128, 203, 196, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 10% 90%, rgba(10, 112, 117, 0.1) 0%, transparent 40%),
+        linear-gradient(145deg, #021a19 0%, #032F30 100%);
+    border: 1px solid #0a3d3d;
+}
+/* Remove old pseudo-element since we use background-image now */
+.task-card::before { display: none; }
+.task-card-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.task-card-title { font-weight: 600; font-size: 15px; margin-bottom: 8px; color: #031716; }
+.dark-theme .task-card-title { color: #e0f2f1; }
+.task-card-date { font-size: 12px; color: #6BA3BE; }
+
+/* Kanban View */
+.kanban-board {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    height: 100%;
+}
 .kanban-column {
-    transition: background 0.2s, border 0.2s;
-    border: 2px solid transparent;
+    min-width: 280px;
+    width: 320px;
+    background: #f4f8f9;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
 }
+.dark-theme .kanban-column { background: #010d0c; border: 1px solid #0a3d3d;}
+.kanban-header {
+    font-weight: 700;
+    color: #274D60;
+    margin-bottom: 15px;
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
+}
+.dark-theme .kanban-header { color: #80cbc4; }
+.kanban-tasks { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.kanban-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    cursor: pointer;
+}
+.dark-theme .kanban-card { background: #021a19; color: #e0f2f1; border: 1px solid #0a3d3d;}
 
-.kanban-column.drag-over {
-    background-color: #e2e6ea !important;
-    border: 2px dashed #667eea;
-}
 
-.kanban-card.dragging {
-    opacity: 0.5;
-    transform: scale(0.98);
+/* Column Picker Popover */
+.col-picker-popover {
+    position: absolute;
+    top: 130px;
+    left: 170px;
+    background: #fff;
+    border: 1px solid #f0f7fa;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 15px;
+    z-index: 100;
+    display: none;
+    width: 200px;
 }
+.dark-theme .col-picker-popover { background: #021a19; border-color: #0a3d3d; }
+.col-option { display: block; margin-bottom: 8px; cursor: pointer; color: #031716; }
+.dark-theme .col-option { color: #e0f2f1; }
+
+
+/* Footer / Pagination */
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    margin-top: auto;
+    border-top: 1px solid #d1d8dd; /* Frappe Style */
+    font-size: 13px;
+    color: #274D60;
+}
+.dark-theme .table-footer { border-top-color: #23313a; color: #80cbc4; }
+.footer-actions { display: flex; align-items: center; gap: 20px; }
+.rows-per-page-select {
+    padding: 5px 10px;
+    border: 1px solid #d1d8dd;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+    cursor: pointer;
+}
+.dark-theme .rows-per-page-select option { background: #021a19; }
+.pagination-controls { display: flex; gap: 10px; align-items: center; }
+.btn-page {
+    background: transparent;
+    border: 1px solid #d1d8dd;
+    border-radius: 4px;
+    padding: 5px 10px;
+    color: inherit;
+    cursor: pointer;
+}
+.btn-page:disabled { opacity: 0.5; cursor: not-allowed; border-color: #ccc; }
+.btn-page:not(:disabled):hover { background: #f7fafc; color: #032F30; }
+
+/* Components */
+.subject-cell { display: flex; align-items: flex-start; gap: 12px; }
+.user-avatar-circle {
+    width: 32px; height: 32px;
+    background: #032F30; /* Dark Teal */
+    color: #ffffff;
+    font-weight: 600; font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 5px; /* Frappe is usually squircle or circle, let's go soft square */
+}
+.dark-theme .user-avatar-circle { background: #80cbc4; color: #004d40; }
+
+/* Re-defining Status Pill only for cards/kanban, List uses Indicators */
+.status-pill { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
+/* Adapted Status Colors */
+.status-working { background: #e0f2f1; color: #0A7075; } 
+.status-open { background: #f4f8f9; color: #274D60; } 
+.status-overdue { background: #fef2f2; color: #ef4444; }
+.status-completed { background: #ecfdf5; color: #10b981; } 
+.status-pending { background: #f1f5f9; color: #6BA3BE; } 
+
+/* Dark Mode Status Overrides */
+.dark-theme .status-working { background: #004d40; color: #80cbc4; }
+.dark-theme .status-open { background: #032F30; color: #b2dfdb; }
+.dark-theme .status-overdue { background: #371c1c; color: #ef9a9a; }
+.dark-theme .status-completed { background: #1b5e20; color: #a5d6a7; }
+.dark-theme .status-pending { background: #263238; color: #b0bec5; }
+
+.priority-text { font-weight: 500; font-size: 12px; }
+.priority-high { color: #d32f2f; }
+.priority-medium { color: #f57c00; }
+.priority-low { color: #6BA3BE; }
+.dark-theme .priority-high { color: #ef9a9a; }
+.dark-theme .priority-medium { color: #ffcc80; }
+.dark-theme .priority-low { color: #90a4ae; }
+
+.due-date { font-size: 12px; color: #8d99a6; }
+.due-date.overdue { color: #d32f2f; font-weight: 500; }
+.dark-theme .due-date { color: #80cbc4; }
+.dark-theme .due-date.overdue { color: #ef9a9a; }

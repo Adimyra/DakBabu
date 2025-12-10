@@ -103,49 +103,23 @@ frappe.pages['dak_dashboard'].render_page_content = function (wrapper) {
                     <i class="fa fa-plus" style="margin-right: 8px;"></i> Add Task
                 </button>
 
-                <!-- Right Filter -->
-                <div style="position: relative;">
-                    <div id="filter-btn" onclick="frappe.pages['dak_dashboard'].toggle_filter_dropdown()" style="
-                        background: rgba(255,255,255,0.1);
-                        padding: 8px 16px;
-                        border-radius: 8px;
-                        color: #ffffff;
-                        font-weight: 500;
-                        font-size: 0.9rem;
-                        cursor: pointer;
-                        display: flex;
-                        align-items: center;
-                        transition: background 0.2s;
-                        backdrop-filter: blur(5px);
-                    " onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-                        <i class="fa fa-filter" style="margin-right: 8px; color: rgba(255,255,255,0.8);"></i> <span id="current-filter-label">All Time</span> <i class="fa fa-chevron-down" style="margin-left: 8px; font-size: 0.8rem; color: rgba(255,255,255,0.8);"></i>
-                    </div>
-                    <!-- Filter Dropdown -->
-                    <div id="filter-dropdown" style="
-                        position: absolute;
-                        top: 110%;
-                        right: 0;
-                        background: #ffffff;
-                        border-radius: 8px;
-                        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-                        width: 150px;
-                        display: none;
-                        flex-direction: column;
-                        z-index: 1000;
-                        overflow: hidden;
-                    ">
-                        <div class="filter-item" onclick="frappe.pages['dak_dashboard'].set_dashboard_filter('All Time')" style="padding: 10px 15px; cursor: pointer; color: #333; font-size: 0.9rem; transition: bg 0.2s;">All Time</div>
-                        <div class="filter-item" onclick="frappe.pages['dak_dashboard'].set_dashboard_filter('Today')" style="padding: 10px 15px; cursor: pointer; color: #333; font-size: 0.9rem; transition: bg 0.2s;">Today</div>
-                        <div class="filter-item" onclick="frappe.pages['dak_dashboard'].set_dashboard_filter('This Week')" style="padding: 10px 15px; cursor: pointer; color: #333; font-size: 0.9rem; transition: bg 0.2s;">This Week</div>
-                        <div class="filter-item" onclick="frappe.pages['dak_dashboard'].set_dashboard_filter('This Month')" style="padding: 10px 15px; cursor: pointer; color: #333; font-size: 0.9rem; transition: bg 0.2s;">This Month</div>
-                    </div>
-                </div>
+
             </div>
         </div>
 
 
 
-		${dakbabu.components.get_reminder_card('dashboard')}
+
+
+            <!-- Dynamic Task Cards Container (Active Task) -->
+            <div id="task-cards-container" style="width: 100%; margin-bottom: 20px; padding: 0 10px;">
+                <!-- Cards will be injected here via JS -->
+                 <div class="text-center p-5" style="color: rgba(0,0,0,0.5);">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
 
         <!-- Stats Row -->
         <div class="row" style="margin: 0; width: 100%; margin-top: 0px;">
@@ -262,162 +236,31 @@ frappe.pages['dak_dashboard'].render_page_content = function (wrapper) {
 				</div>
 			</div>
 
+            <!-- Renamed Clean Task Card Section (Moved here) -->
+            <!-- Dynamic Task Cards Container -->
+ 
+
 		<div class="dashboard-content" style="padding: 0;">
 
 			<!-- Stats Row Moved Up -->
 
 			<div class="flex-grid-container" style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;">
 				
-                <!-- Standard Frappe Style Card -->
-                <div class="flex-card-item" style="flex: 1 1 300px; max-width: 400px;">
-                    <div class="frappe-card" style="
-                        height: 100%;
-                        padding: 20px;
-                        border-radius: 8px;
-                        background: #ffffff;
-                        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                        border: 1px solid #ebEEF0;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-start;
-                    ">
-                        <h6 style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: #8d99a6; margin-bottom: 10px; letter-spacing: 0.5px;">Total Tasks</h6>
-                        <div style="display: flex; align-items: baseline;">
-                            <h3 id="total-tasks-frappe-card" style="font-size: 28px; font-weight: 700; color: #36414c; margin: 0;">-</h3>
-                            <span class="ml-2" style="font-size: 13px; color: #00B368; margin-left: 8px; background: #E8FDF5; padding: 2px 6px; border-radius: 4px;">
-                                <i class="fa fa-arrow-up"></i> Live
-                            </span>
-                        </div>
-                        <div style="width: 100%; height: 4px; background: #F4F5F7; border-radius: 2px; margin-top: 15px; overflow: hidden;">
-                            <div style="width: 70%; height: 100%; background: #06b6d4; border-radius: 2px;"></div>
-                        </div>
-                    </div>
-                </div>
 
-				<div class="flex-card-item" style="flex: 1 1 500px; max-width: 900px;">
-					<div class="frappe-card" style="
-						height: 100%;
-						padding: 30px; 
-						border-radius: 12px; 
-						background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
-						box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
-                        color: #ffffff;
-                        border: none;
-                        position: relative;
-                        overflow: hidden;
-					">
-                        <!-- Card Decorative BG -->
-                        <div style="position: absolute; top: -20%; right: -10%; width: 300px; height: 300px; background: rgba(255,255,255,0.1); border-radius: 50%; z-index: 0;"></div>
 
-						<h4 style="font-weight: 600; margin-bottom: 20px; color: #fff; position: relative; z-index: 1;">System Users</h4>
-						
-                        <div class="user-list-container" style="position: relative; z-index: 1;">
-                             <!-- Skeleton User Items -->
-                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                <div class="skeleton" style="width: 45px; height: 45px; border-radius: 50%; margin-right: 15px;"></div>
-                                <div style="flex: 1;">
-                                    <div class="skeleton" style="width: 60%; height: 14px; margin-bottom: 5px;"></div>
-                                    <div class="skeleton" style="width: 40%; height: 12px;"></div>
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                <div class="skeleton" style="width: 45px; height: 45px; border-radius: 50%; margin-right: 15px;"></div>
-                                <div style="flex: 1;">
-                                    <div class="skeleton" style="width: 60%; height: 14px; margin-bottom: 5px;"></div>
-                                    <div class="skeleton" style="width: 40%; height: 12px;"></div>
-                                </div>
-                            </div>
-                        </div>
-					</div>
-				</div>
 			</div>
 		</div>
 
-        <!-- Bottom Cards Wrapper: Side by Side -->
-        <div style="display: flex; gap: 30px; margin-top: 30px; margin-bottom: 50px;">
-            <!-- Clean Task Card Section (Now 75% Width) -->
-            <div class="reminder-section" style="
-                flex: 3;
-                background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
-                padding: 0;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border-radius: 16px;
-            display: flex;
-            flex-wrap: wrap;
-            position: relative;
-            overflow: hidden;
-            border: none;
-            color: #ffffff;
-        ">
-            <!-- Decorative Circles -->
-            <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
-            <div style="position: absolute; bottom: -50px; right: 20%; width: 250px; height: 250px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
 
-            <div style="flex: 1; padding: 30px; min-width: 300px; position: relative; z-index: 1;">
-                <!-- Badges Row -->
-                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-                    <span style="background: #e0f2fe; color: #0369a1; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">In Progress</span>
-                    <span style="background: #fee2e2; color: #b91c1c; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">High</span>
-                    <span style="background: #ffedd5; color: #c2410c; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;"><i class="fa fa-calendar-o" style="margin-right: 5px;"></i> Due Today</span>
-                    <span style="background: #f3e8ff; color: #7e22ce; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;"><i class="fa fa-clock-o" style="margin-right: 5px;"></i> 11:00</span>
-                </div>
 
-                <!-- Title -->
-                <h3 style="font-size: 1.75rem; font-weight: 700; color: #ffffff; margin-bottom: 15px;">Reply to Ministry Audit</h3>
 
-                <!-- Meta Row -->
-                <div style="display: flex; align-items: center; gap: 20px; color: rgba(255,255,255,0.8); margin-bottom: 15px; font-size: 0.95rem;">
-                    <span style="display: flex; align-items: center;"><i class="fa fa-file-text-o" style="margin-right: 6px;"></i> Do Letter</span>
-                    <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; color: #ffffff;">#DO/2023/889</span>
-                    <span><i class="fa fa-paperclip"></i></span>
-                    <span><i class="fa fa-comment-o" style="margin-right: 4px;"></i> 1</span>
-                    <span><i class="fa fa-check-square-o" style="margin-right: 4px;"></i> 1/2</span>
-                </div>
 
-                <!-- Description -->
-                <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; margin: 0; line-height: 1.5;">Draft reply regarding the Q3 audit observations.</p>
-            </div>
 
-            <!-- Right Section (Timer) -->
-            <div style="
-                padding: 30px; 
-                min-width: 250px; 
-                display: flex; 
-                flex-direction: column; 
-                align-items: center; 
-                justify-content: center; 
-                border-left: 1px solid rgba(255,255,255,0.2);
-                background: rgba(0,0,0,0.05);
-                position: relative;
-                z-index: 1;
-            ">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.8); letter-spacing: 0.05em; margin-bottom: 5px;">TIME LOGGED</div>
-                    <div style="font-size: 2rem; font-weight: 700; color: #ffffff; font-variant-numeric: tabular-nums;">01:00:00</div>
-                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">Est: 120m</div>
-                </div>
 
-                <button class="btn btn-primary" style="
-                    background: #2563eb; 
-                    border: none; 
-                    padding: 10px 40px; 
-                    border-radius: 8px; 
-                    font-weight: 600; 
-                    font-size: 1rem;
-                    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4);
-                    transition: all 0.2s;
-                    display: flex;
-                    align-items: center;
-                " onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-                    <i class="fa fa-play" style="margin-right: 8px; font-size: 0.9rem;"></i> Start
-                </button>
-            </div>
+        <div style="margin-top: 15px;">
+             ${dakbabu.components.get_performance_card()}
         </div>
 
-            ${dakbabu.components.get_performance_card()}
-        </div>
-        </div>
 
         <!-- Drawer Markup -->
         <div class="task-drawer-overlay" onclick="frappe.pages['dak_dashboard'].toggle_task_drawer(false)"></div>
@@ -480,44 +323,24 @@ frappe.pages['dak_dashboard'].render_page_content = function (wrapper) {
                 </div>
             </div>
         </div>
+        </div>
+        
+        </div>
 	`);
 
-    // Fetch and display users
-    frappe.call({
-        method: "dakbabu.dakbabu.page.dak_dashboard.dak_dashboard.get_users",
-        callback: function (r) {
-            if (r.message) {
-                let users_html = '<ul class="list-group list-group-flush" style="margin-top: 10px; background: transparent;">';
-                r.message.forEach(user => {
-                    users_html += `
-                        <li class="list-group-item d-flex align-items-center" style="
-                            background: rgba(255, 255, 255, 0.15);
-                            border: 1px solid rgba(255, 255, 255, 0.1);
-                            padding: 12px 20px;
-                            border-radius: 12px;
-                            margin-bottom: 12px;
-                            backdrop-filter: blur(10px);
-                            transition: all 0.2s ease;
-                        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                            <div class="avatar avatar-md mr-3" style="margin-right: 15px;">
-                                <img class="avatar-frame" src="${user.user_image || '/assets/frappe/images/default-avatar.png'}" alt="${user.full_name}" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8);">
-                            </div>
-                            <div>
-                                <h6 class="mb-0" style="font-weight: 600; font-size: 1rem; color: #fff;">${user.full_name}</h6>
-                                <p class="mb-0" style="font-size: 0.85rem; color: rgba(255,255,255,0.85);">${user.email}</p>
-                            </div>
-                        </li>
-					`;
-                });
-                users_html += '</ul>';
 
-                $(wrapper).find('.user-list-container').html(users_html);
-            }
-        }
-    });
 
     // Fetch Stats on Load
     frappe.pages['dak_dashboard'].refresh_stats();
+
+    // Event Listeners
+    $(wrapper).on('click', '.view-task-btn', function () {
+        frappe.pages['dak_dashboard'].toggle_reminder_drawer(true);
+    });
+
+    $(wrapper).on('click', '.close-reminder-drawer', function () {
+        frappe.pages['dak_dashboard'].toggle_reminder_drawer(false);
+    });
 }
 
 frappe.pages['dak_dashboard'].refresh_stats = function (timespan) {
@@ -546,16 +369,96 @@ frappe.pages['dak_dashboard'].refresh_stats = function (timespan) {
         }
     });
 
-    // Fetch Latest Task for Reminder Card (Updates Subject/Status only, keeps dummy Meta data)
+    // Fetch Latest Tasks for Task Cards Container
     frappe.call({
         method: "dakbabu.dakbabu.page.dak_dashboard.dak_dashboard.get_latest_task",
         callback: function (r) {
-            if (r.message) {
-                $('#latest-task-subject-dashboard').text(r.message.subject);
-                $('#latest-task-status-dashboard').text('Reminder: ' + r.message.status);
+            let container = $('#task-cards-container');
+            container.empty();
+
+            if (r.message && r.message.length > 0) {
+                let tasks = r.message;
+                if (!Array.isArray(tasks)) tasks = [tasks];
+
+                // Find Active Task (Working Now) or default to first
+                let activeTask = tasks.find(t => t.is_working_now == 1);
+                if (!activeTask) activeTask = tasks[0];
+
+                let task = activeTask;
+
+                // Check Timer State
+                let is_running = frappe.pages['dak_dashboard'].timer.running && frappe.pages['dak_dashboard'].timer.task_name === task.name;
+
+                // Resume interval if running
+                if (is_running && !frappe.pages['dak_dashboard'].timer.interval) {
+                    frappe.pages['dak_dashboard'].start_clock_interval();
+                }
+
+                let action_btn_html = '';
+                if (is_running) {
+                    // STOP BUTTON
+                    action_btn_html = `
+                    <button onclick="frappe.pages['dak_dashboard'].stop_timer_action('${task.name}')" class="ltc-btn ltc-btn-stop" title="Stop Timer">
+                        <i class="fa fa-stop" style="font-size: 1.1em;"></i>
+                    </button>
+                    `;
+                } else {
+                    // START BUTTON
+                    action_btn_html = `
+                    <button onclick="frappe.pages['dak_dashboard'].start_timer_action('${task.name}')" class="ltc-btn ltc-btn-start" title="Start Timer">
+                        <i class="fa fa-play" style="font-size: 1.1em; margin-left: 2px;"></i>
+                    </button>
+                    `;
+                }
+
+                // Render Active/Latest Task Card (Same Design as Task List)
+                let cardHtml = `
+                    <div class="latest-task-card">
+                        <!-- 3 Decorative Circles -->
+                        <div class="ltc-circle ltc-circle-1"></div>
+                        <div class="ltc-circle ltc-circle-2"></div>
+                        <div class="ltc-circle ltc-circle-3"></div>
+                        
+                        <div class="ltc-content">
+                            <div class="ltc-header">
+                                <span class="ltc-badge">Active Task</span>
+                                <span class="ltc-status">${task.status}</span>
+                                <span class="ltc-date"><i class="fa fa-calendar" style="margin-right: 5px;"></i> ${task.exp_end_date ? frappe.datetime.str_to_user(task.exp_end_date) : "No Date"}</span>
+                            </div>
+                            <h2 class="ltc-title" onclick="frappe.set_route('Form', 'Task', '${task.name}')" style="cursor: pointer;">${task.subject}</h2>
+                            <p class="ltc-desc">
+                                ${task.description || 'No detailed description available for this task.'}
+                            </p>
+                        </div>
+
+                        <div class="ltc-actions" style="flex-direction: column; align-items: flex-end; gap: 10px;">
+                             <div style="display: flex; gap: 15px;">
+                                 ${action_btn_html}
+
+                                 <!-- Edit Button -->
+                                 <button onclick="frappe.set_route('Form', 'Task', '${task.name}')" class="ltc-btn ltc-btn-view" title="Edit Task">
+                                    <i class="fa fa-pencil" style="font-size: 1.1em;"></i>
+                                 </button>
+                             </div>
+                             
+                             ${is_running ? `
+                             <!-- Timer Display -->
+                             <div class="ltc-timer">
+                                <div class="ltc-timer-box" style="padding: 2px 10px; font-size: 1.2rem;">
+                                     <span id="dashboard-digital-timer">00:00:00</span>
+                                </div>
+                             </div>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.html(cardHtml);
             } else {
-                $('#latest-task-subject-dashboard').text("No Upcoming Tasks");
-                $('#latest-task-status-dashboard').text("You're all caught up!");
+                container.html(`
+                    <div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.5); background: rgba(0,0,0,0.02); border-radius: 16px;">
+                        <h4>No Active Tasks</h4>
+                        <p>You are all caught up!</p>
+                    </div>
+                 `);
             }
         }
     });
@@ -639,17 +542,155 @@ frappe.pages['dak_dashboard'].create_task_from_drawer = function () {
     });
 };
 
-frappe.pages['dak_dashboard'].toggle_filter_dropdown = function () {
-    let dropdown = $('#filter-dropdown');
-    if (dropdown.css('display') === 'none') {
-        dropdown.css('display', 'flex');
-    } else {
-        dropdown.hide();
-    }
+
+
+
+// --- Timer State ---
+frappe.pages['dak_dashboard'].timer = {
+    running: false,
+    task_name: null,
+    start_time: null,
+    timesheet: null,
+    activity: null,
+    interval: null
 };
 
-frappe.pages['dak_dashboard'].set_dashboard_filter = function (filter) {
-    $('#current-filter-label').text(filter);
-    $('#filter-dropdown').hide();
-    frappe.pages['dak_dashboard'].refresh_stats(filter);
+// --- Timer Helper Functions ---
+
+frappe.pages['dak_dashboard'].start_clock_interval = function () {
+    if (frappe.pages['dak_dashboard'].timer.interval) clearInterval(frappe.pages['dak_dashboard'].timer.interval);
+
+    frappe.pages['dak_dashboard'].timer.interval = setInterval(function () {
+        let timer = frappe.pages['dak_dashboard'].timer;
+        if (!timer.running || !timer.start_time) return;
+
+        let now = moment();
+        let start = moment(timer.start_time);
+        let duration = moment.duration(now.diff(start));
+
+        let hours = Math.floor(duration.asHours());
+        let mins = duration.minutes();
+        let secs = duration.seconds();
+
+        let formatted =
+            (hours < 10 ? "0" + hours : hours) + ":" +
+            (mins < 10 ? "0" + mins : mins) + ":" +
+            (secs < 10 ? "0" + secs : secs);
+
+        $('#dashboard-digital-timer').text(formatted);
+    }, 1000);
 };
+
+frappe.pages['dak_dashboard'].start_timer_action = function (task_name) {
+    // Prompt for Activity Type
+    frappe.prompt([
+        {
+            label: 'Activity Type',
+            fieldname: 'activity_type',
+            fieldtype: 'Link',
+            options: 'Activity Type',
+            reqd: 1
+        }
+    ], (values) => {
+        let activity = values.activity_type;
+        let start_time = frappe.datetime.now_datetime();
+
+        // Create Timesheet (Draft)
+        frappe.call({
+            method: 'frappe.client.insert',
+            args: {
+                doc: {
+                    doctype: 'Timesheet',
+                    note: 'Timer started from Dashboard',
+                    time_logs: [
+                        {
+                            from_time: start_time,
+                            activity_type: activity,
+                            task: task_name
+                            // hours is 0 initially, will be updated on stop
+                        }
+                    ]
+                }
+            },
+            callback: function (r) {
+                if (!r.exc && r.message) {
+                    // Update State
+                    frappe.pages['dak_dashboard'].timer = {
+                        running: true,
+                        task_name: task_name,
+                        start_time: start_time,
+                        timesheet: r.message.name,
+                        activity: activity,
+                        interval: null
+                    };
+
+                    frappe.show_alert({ message: `Timer Started for ${activity}`, indicator: 'green' });
+                    frappe.pages['dak_dashboard'].start_clock_interval();
+
+                    // Re-render to show Stop button
+                    frappe.pages['dak_dashboard'].refresh_stats();
+                }
+            }
+        });
+
+    }, 'Start Timer', 'Start');
+};
+
+frappe.pages['dak_dashboard'].stop_timer_action = function (task_name) {
+    let timer = frappe.pages['dak_dashboard'].timer;
+    if (!timer.running || timer.task_name !== task_name) return;
+
+    let end_time = frappe.datetime.now_datetime();
+    let start_moment = moment(timer.start_time);
+    let end_moment = moment(end_time);
+    let duration_hours = moment.duration(end_moment.diff(start_moment)).asHours();
+
+    // Clear Interval
+    if (timer.interval) {
+        clearInterval(timer.interval);
+        timer.interval = null;
+    }
+
+    // Ensure at least some time is logged (e.g. 0.01)
+    if (duration_hours < 0.01) duration_hours = 0.01;
+
+    frappe.call({
+        method: 'frappe.client.get',
+        args: { doctype: 'Timesheet', name: timer.timesheet },
+        callback: function (r) {
+            if (r.message) {
+                let ts = r.message;
+                if (ts.time_logs && ts.time_logs.length > 0) {
+                    // Update the first log (since we created it fresh)
+                    ts.time_logs[0].hours = duration_hours;
+                    ts.time_logs[0].to_time = end_time;
+
+                    // Save
+                    frappe.call({
+                        method: 'frappe.client.save',
+                        args: { doc: ts },
+                        callback: function (save_r) {
+                            if (!save_r.exc) {
+                                frappe.show_alert({ message: `Timer Stopped. Logged ${duration_hours.toFixed(2)} hrs.`, indicator: 'blue' });
+
+                                // Reset State
+                                frappe.pages['dak_dashboard'].timer = {
+                                    running: false,
+                                    task_name: null,
+                                    start_time: null,
+                                    timesheet: null,
+                                    activity: null,
+                                    interval: null
+                                };
+
+                                // Re-render
+                                frappe.pages['dak_dashboard'].refresh_stats();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    });
+};
+
