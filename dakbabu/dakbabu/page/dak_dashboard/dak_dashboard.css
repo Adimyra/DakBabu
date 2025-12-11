@@ -67,7 +67,7 @@
 
 .drawer-header {
     padding: 30px;
-    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, #2e605c 0%, #468e88 100%);
     color: white;
 }
 
@@ -151,7 +151,9 @@
 .task-drawer.side-drawer.open {
     transform: translateX(0);
     opacity: 1;
-}/* Active Task Card Styles (Ported from Task List) */
+}
+
+/* Active Task Card Styles (Ported from Task List) */
 .latest-task-card {
     width: 100%;
     background: #f3f4f6;
@@ -422,4 +424,267 @@
 [data-theme="dark"] .ltc-btn-view:hover {
     background: #4b5563;
     border-color: #6b7280;
+}
+
+/* --- Decorative Sphere Card (Imported from test.css) --- */
+.decorative-sphere-card {
+    margin: 0 0 20px 0;
+    padding: 30px 40px;
+    border-radius: 0;
+    background: linear-gradient(135deg, #2e605c 0%, #468e88 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 10px 30px rgba(47, 79, 79, 0.3);
+    min-height: 220px;
+    color: #fff;
+}
+
+.sphere-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    z-index: 2;
+    position: relative;
+}
+
+.sphere-3d {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #7DAFC2 0%, #3e6b72 50%, #2F4F4F 100%);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.small-circle-badge {
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 36px;
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 15px;
+    border: 2px solid #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(2px);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.sphere-inner-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 5;
+    width: 100%;
+}
+
+.sphere-clock {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 1px;
+    line-height: 1;
+    z-index: 5;
+    margin-top: 45px;
+    /* Adjust visual centering */
+}
+
+.sphere-internal-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    margin-left: 110px;
+}
+
+.sphere-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.sphere-icon-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+}
+
+.sphere-icon-btn:active {
+    transform: scale(0.95);
+}
+
+.sphere-icon-btn i {
+    font-size: 14px;
+}
+
+.btn-play-icon {
+    background: #3e6b72 !important;
+    /* Matches Sphere Mid-tone */
+    border: 2px solid #ffffff !important;
+}
+
+.btn-play-icon:hover {
+    background: #2F4F4F !important;
+}
+
+.btn-stop-icon {
+    background: #3e6b72 !important;
+    /* Matches Sphere Mid-tone */
+    border: 2px solid #ffffff !important;
+}
+
+.btn-stop-icon:hover {
+    background: #2F4F4F !important;
+}
+
+.card-content {
+    margin-left: 0;
+    text-align: left;
+    flex: 1;
+    color: #ffffff;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding-right: 30px;
+}
+
+.card-content h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    color: #fff;
+    cursor: pointer;
+}
+
+.card-content p {
+    font-size: 13px;
+    opacity: 0.9;
+    margin: 0;
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+.sphere-meta {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+
+.sphere-badge-pill {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+/* Responsive Matrix Cards */
+.dashboard-matrix-row {
+    flex-wrap: wrap;
+}
+
+/* Media Query for Tablets and Smaller (MD and below) */
+@media (max-width: 991px) {
+    .dashboard-matrix-row {
+        gap: 5px;
+        /* Reduce gap */
+    }
+
+    .dashboard-matrix-card {
+        padding: 10px !important;
+    }
+
+    .dmc-title {
+        font-size: 0.9rem !important;
+    }
+
+    .dmc-circle {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    .dmc-inner-circle {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    /* Target inner span percentage text */
+    .dmc-inner-circle span {
+        font-size: 0.9rem !important;
+    }
+
+    .dmc-label {
+        font-size: 0.5rem !important;
+    }
+
+    .dmc-value {
+        font-size: 0.8rem !important;
+    }
+}
+
+/* Phones (SM and XS) */
+@media (max-width: 767px) {
+
+    /* Sphere Card responsive */
+    .decorative-sphere-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px !important;
+        text-align: center;
+    }
+
+    .card-content {
+        width: 100%;
+        padding-right: 0 !important;
+        margin-bottom: 20px;
+        text-align: center;
+        /* Center text on mobile */
+    }
+
+    .sphere-wrapper {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .sphere-internal-controls {
+        margin-left: 0 !important;
+        /* Reset margin on mobile */
+        justify-content: center;
+    }
+
+    .ltc-btn {
+        width: 36px;
+        height: 36px;
+    }
 }

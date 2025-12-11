@@ -1,1 +1,222 @@
-/* Day Planner CSS Cleared */
+/* Global Layout Override */
+.layout-main-section,
+.page-container,
+.page-content,
+.layout-main {
+    max-width: 100% !important;
+    padding: 0 !important;
+}
+
+.page-head {
+    display: none !important;
+}
+
+/* Planner Container */
+.planner-wrapper {
+    height: calc(100vh - 70px);
+    display: flex;
+    background: #f3f4f6;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .planner-wrapper {
+    background: #121212;
+}
+
+/* Left Column: Task Pool */
+.task-pool-col {
+    width: 350px;
+    min-width: 350px;
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    z-index: 10;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .task-pool-col {
+    background: #1E1E1E;
+    border-color: #374151;
+}
+
+.pool-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+[data-theme="dark"] .pool-header {
+    border-color: #374151;
+}
+
+.pool-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Right Column: Time Grid */
+.planner-grid-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #f9fafb;
+}
+
+[data-theme="dark"] .planner-grid-col {
+    background: #121212;
+}
+
+.planner-controls {
+    padding: 15px 30px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    z-index: 5;
+}
+
+[data-theme="dark"] .planner-controls {
+    background: #1E1E1E;
+    border-color: #374151;
+}
+
+.planner-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 30px;
+    position: relative;
+}
+
+/* Task Card (Draggable) */
+.planner-task-card {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    cursor: grab;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+[data-theme="dark"] .planner-task-card {
+    background: #2C2C2C;
+    border-color: #4b5563;
+    color: #e5e7eb;
+}
+
+.planner-task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-color: #d1d5db;
+}
+
+.planner-task-card:active {
+    cursor: grabbing;
+}
+
+.planner-task-card.is-dragging {
+    opacity: 0.5;
+    border: 2px dashed #468e88;
+    /* Teal */
+}
+
+/* Time Slot */
+.time-slot-row {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    min-height: 80px;
+    transition: background 0.1s;
+}
+
+[data-theme="dark"] .time-slot-row {
+    border-color: #374151;
+}
+
+.time-slot-label {
+    width: 80px;
+    min-width: 80px;
+    text-align: right;
+    padding: 10px 15px 0 0;
+    color: #6b7280;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-right: 1px solid #efefef;
+    position: relative;
+}
+
+[data-theme="dark"] .time-slot-label {
+    color: #9ca3af;
+    border-right-color: #374151;
+}
+
+/* Half-hour marker line */
+.time-slot-label::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    width: 5px;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.time-slot-dropzone {
+    flex: 1;
+    padding: 5px;
+    position: relative;
+}
+
+.time-slot-dropzone.drag-over {
+    background: rgba(70, 142, 136, 0.05);
+    /* Teal tint */
+    box-shadow: inset 0 0 0 2px #468e88;
+}
+
+[data-theme="dark"] .time-slot-dropzone.drag-over {
+    background: rgba(70, 142, 136, 0.2);
+}
+
+/* Assigned Task in Slot */
+.slot-task {
+    background: #e0f2f1;
+    /* Teal 50 */
+    border-left: 4px solid #468e88;
+    /* Teal */
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #004d40;
+    /* Teal 900 */
+    margin-bottom: 5px;
+    cursor: grab;
+}
+
+[data-theme="dark"] .slot-task {
+    background: #2e605c;
+    /* Dark Teal */
+    color: #e0f2f1;
+    /* Light Teal */
+    border-left-color: #4db6ac;
+    /* Accented Teal */
+}
+
+.slot-task h5 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.slot-task p {
+    margin: 2px 0 0;
+    font-size: 0.75rem;
+    opacity: 0.8;
+}

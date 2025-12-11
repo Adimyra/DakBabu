@@ -132,12 +132,12 @@ frappe.pages['dak_task_list'].on_page_load = function (wrapper) {
         </div>
 
         <!-- Latest Task Featured Card -->
-        <div id="latest-task-container" style="width: 100%; margin-bottom: 20px; display: none;">
+        <div id="latest-task-container" style="width: 100%; margin-bottom: 5px; display: none;">
             <!-- Content rendered via JS -->
         </div>
 
         <!-- Bottom Cards Wrapper: Task List Container -->
-        <div style="width: 100%; margin-bottom: 50px; display: flex; flex-wrap: wrap; row-gap: 15px; column-gap: 30px; margin-top: 15px;" id="task-list-container">
+        <div style="width: 100%; margin-bottom: 50px; display: flex; flex-wrap: wrap; row-gap: 15px; column-gap: 30px; margin-top: 5px;" id="task-list-container">
             <div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.5); width: 100%;">
                 <i class="fa fa-spinner fa-spin" style="font-size: 2rem;"></i><br>Loading Tasks...
             </div>
@@ -163,13 +163,13 @@ frappe.pages['dak_task_list'].on_page_load = function (wrapper) {
             padding: 20px;
             display: none; /* Hidden by default until loaded */
         ">
-            <h4 style="margin-bottom: 20px; font-weight: 700; color: #1f2937;">Task List</h4>
+
             
             <!-- Filters -->
             <!-- Filters & Grouping -->
             <div class="row" style="margin-bottom: 20px;">
-                <div class="col-md-3">
-                     <!-- Group By Dropdown (Moved here) -->
+                <div class="col-md-2">
+                     <!-- Group By Dropdown -->
                     <div class="dropdown" style="width: 100%;">
                         <button class="btn btn-default btn-sm dropdown-toggle form-control" type="button" data-toggle="dropdown" style="text-align: left; display: flex; justify-content: space-between; align-items: center;">
                             <span><i class="fa fa-list-ul"></i> Group: <span id="group-by-label">None</span></span> <span class="caret"></span>
@@ -181,10 +181,10 @@ frappe.pages['dak_task_list'].on_page_load = function (wrapper) {
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <input type="text" id="filter-subject" class="form-control" placeholder="Filter by Subject..." onkeyup="frappe.pages['dak_task_list'].apply_task_filters()">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select id="filter-status" class="form-control" onchange="frappe.pages['dak_task_list'].apply_task_filters()">
                         <option value="">All Statuses</option>
                         <option value="Open">Open</option>
@@ -194,7 +194,7 @@ frappe.pages['dak_task_list'].on_page_load = function (wrapper) {
                         <option value="Completed">Completed</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select id="filter-priority" class="form-control" onchange="frappe.pages['dak_task_list'].apply_task_filters()">
                         <option value="">All Priorities</option>
                         <option value="Low">Low</option>
@@ -203,14 +203,27 @@ frappe.pages['dak_task_list'].on_page_load = function (wrapper) {
                         <option value="Urgent">Urgent</option>
                     </select>
                 </div>
+                <div class="col-md-2">
+                    <select id="filter-date" class="form-control" onchange="frappe.pages['dak_task_list'].apply_task_filters()">
+                        <option value="">All Dates</option>
+                        <option value="Today">Today</option>
+                        <option value="Tomorrow">Tomorrow</option>
+                        <option value="This Week">This Week</option>
+                        <option value="Next Week">Next Week</option>
+                        <option value="This Month">This Month</option>
+                        <option value="Next Month">Next Month</option>
+                        <option value="Overdue">Overdue</option>
+                    </select>
+                </div>
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover table-striped" style="margin-bottom: 0;">
-                        <!-- Dynamic Header -->
+                <table class="frappe-list-table" id="standard-task-table">
+                    <thead>
                         <tr id="task-table-header">
                              <!-- Will be populated by JS -->
                         </tr>
+                    </thead>
                     <tbody id="standard-task-table-body">
                         <!-- Rows rendered here -->
                     </tbody>
@@ -327,6 +340,53 @@ frappe.pages['dak_task_list'].on_page_load = function (wrapper) {
             </div>
         </div>
 
+        <!-- Task Details Drawer -->
+        <div class="lucid-modal-overlay" id="list-details-overlay" onclick="frappe.pages['dak_task_list'].toggle_details_drawer(false)">
+            <div class="lucid-drawer task-details-drawer" id="list-task-details-drawer" onclick="event.stopPropagation()">
+                <div class="lucid-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; width: 100%;">
+                        <div style="padding-right: 20px;">
+                            <span id="list-detail-project" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; color: rgba(255,255,255,0.8); display: block; margin-bottom: 5px;">Project Name</span>
+                            <h4 id="list-detail-subject" style="color: white; margin: 0; font-weight: 700; font-size: 1.3rem; line-height: 1.4;">Task Subject</h4>
+                        </div>
+                        <span onclick="frappe.pages['dak_task_list'].toggle_details_drawer(false)" style="cursor: pointer; opacity: 0.8; font-size: 1.5rem; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); border-radius: 50%; has-tooltip: 0; color: white;">&times;</span>
+                    </div>
+                </div>
+                
+                <div class="lucid-body" style="padding: 25px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap;">
+                        <span id="list-detail-status" class="sphere-badge-pill" style="background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; padding: 4px 12px; border-radius: 20px;">Status</span>
+                        <span id="list-detail-priority" class="sphere-badge-pill" style="background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; padding: 4px 12px; border-radius: 20px;">Priority</span>
+                        <span id="list-detail-date" class="sphere-badge-pill" style="background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; padding: 4px 12px; border-radius: 20px;"><i class="fa fa-calendar"></i> Date</span>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label class="lucid-label" style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Estimated Time</label>
+                        <div style="font-size: 1.1rem; font-weight: 500; color: #111827;">
+                            <span id="list-detail-exp-time">0</span> Hrs
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label class="lucid-label" style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Description</label>
+                        <div id="list-detail-description" style="font-size: 1rem; line-height: 1.6; color: #374151; white-space: pre-wrap;">No description provided.</div>
+                    </div>
+
+                     <div style="margin-bottom: 25px;">
+                        <label class="lucid-label" style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Assigned To</label>
+                        <div id="list-detail-assigned" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+                    </div>
+                </div>
+
+                <div class="lucid-footer" style="padding: 20px 25px; border-top: 1px solid #e5e7eb;">
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <button class="lucid-btn lucid-btn-ghost" id="btn-edit-task-details" style="flex: 1;"><i class="fa fa-pencil"></i> Edit</button>
+                        <button class="lucid-btn lucid-btn-primary" id="btn-view-full-task-list" style="flex: 1; background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);">View Full Form</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Timesheet Entry Modal -->
         <div class="lucid-modal-overlay" id="timesheet-modal-overlay" onclick="frappe.pages['dak_task_list'].toggle_timesheet_modal(false)">
             <div class="lucid-drawer" id="timesheet-modal" onclick="event.stopPropagation()" style="height: auto; max-height: 80vh; width: 500px;">
@@ -382,8 +442,13 @@ frappe.pages['dak_task_list'].on_page_load = function (wrapper) {
         </div>
     `);
 
-    // Fetch and render tasks
+    // Fetch and render tasks initial
     frappe.pages['dak_task_list'].render_task_list(wrapper);
+
+    // Bind refresh event for re-entry
+    $(wrapper).on('show', function () {
+        frappe.pages['dak_task_list'].render_task_list(wrapper);
+    });
 }
 
 frappe.pages['dak_task_list'].render_task_list = function (wrapper) {
@@ -421,8 +486,27 @@ frappe.pages['dak_task_list'].render_task_list = function (wrapper) {
 
                 frappe.pages['dak_task_list'].toggle_view(frappe.pages['dak_task_list'].current_view);
 
-                // Initial Render
-                frappe.pages['dak_task_list'].render_tasks_visuals(wrapper, r.message);
+                // Handle Route Options (Filters from Dashboard)
+                // If route_options is present (even empty object), it implies a fresh navigation intent
+                if (frappe.route_options) {
+                    // Reset both filters first
+                    $('#filter-status').val('');
+                    $('#filter-priority').val('');
+
+                    // Apply specific filters if present
+                    if (frappe.route_options.status) {
+                        $('#filter-status').val(frappe.route_options.status);
+                    }
+                    if (frappe.route_options.priority) {
+                        $('#filter-priority').val(frappe.route_options.priority);
+                    }
+
+                    // Consume options
+                    frappe.route_options = null;
+                }
+
+                // Initial Render (Filtered)
+                frappe.pages['dak_task_list'].apply_task_filters();
 
                 // Render Active Task Card
                 if (r.message && r.message.length > 0) {
@@ -571,12 +655,40 @@ frappe.pages['dak_task_list'].apply_task_filters = function () {
     let subject = $('#filter-subject').val().toLowerCase();
     let status = $('#filter-status').val();
     let priority = $('#filter-priority').val();
+    let date_filter = $('#filter-date').val();
 
     let filtered_tasks = frappe.pages['dak_task_list'].all_tasks.filter(task => {
         let matchSubject = !subject || task.subject.toLowerCase().includes(subject);
         let matchStatus = !status || task.status === status;
         let matchPriority = !priority || task.priority === priority;
-        return matchSubject && matchStatus && matchPriority;
+
+        let matchDate = true;
+        if (date_filter) {
+            if (!task.exp_end_date) {
+                matchDate = false;
+            } else {
+                let d = moment(task.exp_end_date);
+                let now = moment();
+
+                if (date_filter === 'Today') {
+                    matchDate = d.isSame(now, 'day');
+                } else if (date_filter === 'Tomorrow') {
+                    matchDate = d.isSame(now.clone().add(1, 'days'), 'day');
+                } else if (date_filter === 'This Week') {
+                    matchDate = d.isSame(now, 'week');
+                } else if (date_filter === 'Next Week') {
+                    matchDate = d.isSame(now.clone().add(1, 'weeks'), 'week');
+                } else if (date_filter === 'This Month') {
+                    matchDate = d.isSame(now, 'month');
+                } else if (date_filter === 'Next Month') {
+                    matchDate = d.isSame(now.clone().add(1, 'months'), 'month');
+                } else if (date_filter === 'Overdue') {
+                    matchDate = d.isBefore(now, 'day') && task.status !== 'Completed';
+                }
+            }
+        }
+
+        return matchSubject && matchStatus && matchPriority && matchDate;
     });
 
     frappe.pages['dak_task_list'].render_tasks_visuals(wrapper, filtered_tasks);
@@ -604,6 +716,16 @@ frappe.pages['dak_task_list'].render_tasks_visuals = function (wrapper, tasks) {
 
     // Add function to set working task
     frappe.pages['dak_task_list'].set_working_task = function (task_name) {
+        let task = frappe.pages['dak_task_list'].all_tasks.find(t => t.name === task_name);
+        if (task && task.status === 'Completed') {
+            frappe.msgprint({
+                title: __('Cannot Activate Task'),
+                message: __('This task is already <b>Completed</b>. Please re-open it before setting it as active.'),
+                indicator: 'red'
+            });
+            return;
+        }
+
         frappe.call({
             method: "dakbabu.dakbabu.page.dak_dashboard.dak_dashboard.set_working_task",
             args: { task_name: task_name },
@@ -627,24 +749,30 @@ frappe.pages['dak_task_list'].render_tasks_visuals = function (wrapper, tasks) {
         }
     }
 
-    // 0. Render Headers (Only if NOT grouping by column logic in list view? No, keep headers)
-    let header_html = '';
+    // 0. Render Headers (Using Frappe List Style)
+    let header_html = `<th style="width: 50px;"></th> <!-- Working Status Icon Width -->`;
+
     frappe.pages['dak_task_list'].visible_columns.forEach((col, index) => {
+        if (col.field === 'is_working_now') return; // Skip if handled manually
         header_html += `<th class="dynamic-col-header" data-index="${index}" style="
-            border-top: none; 
-            color: #6b7280; 
-            font-weight: 600; 
-            font-size: 0.85rem; 
-            text-transform: uppercase; 
-            letter-spacing: 0.05em; 
-            cursor: pointer; 
-            position: relative;
-            background: #fff;
+            padding: 12px 15px; 
+            font-weight: normal; 
+            border-bottom: 1px solid #d1d8dd; 
+            text-align: left;
+            cursor: pointer;
         ">
             ${col.label} <i class="fa fa-caret-down" style="margin-left: 5px; opacity: 0.3;"></i>
         </th>`;
     });
+    header_html += `<th style="width: 50px;"></th>`; // Actions Column
     table_header.html(header_html);
+
+    // Note: The HTML template has <tr id="task-table-header"> inside table. 
+    // We should probably replace the CONTENTS of that TR, or ensuring table structure matches standard <thead><tbody>.
+    // The current HTML in `dak_task_list.js` (lines 209-217) uses:
+    // <table class="table ..."> <tr id="task-table-header"></tr> <tbody id="standard-task-table-body"></tbody> </table>
+    // To match clean styling, let's update the table class in JS or assume CSS handles .table class override.
+    // We'll proceed with populating the existing structure but applying NEW classes to rows/cells.
 
     // Bind Context Menu
     $('.dynamic-col-header').off('click').on('click', function (e) {
@@ -653,25 +781,18 @@ frappe.pages['dak_task_list'].render_tasks_visuals = function (wrapper, tasks) {
         frappe.pages['dak_task_list'].show_column_context_menu(e.pageX, e.pageY, index);
     });
 
-    // Initialize Pagination State if not set
+    // Initialize Pagination State
     if (!frappe.pages['dak_task_list'].pagination) {
-        frappe.pages['dak_task_list'].pagination = {
-            page: 1,
-            limit: 10
-        };
+        frappe.pages['dak_task_list'].pagination = { page: 1, limit: 10 };
     }
 
-    // Helper: Render Pagination Controls
+    // Helper: Render Pagination
     const render_pagination_controls = (totalTasks) => {
         let pagination = frappe.pages['dak_task_list'].pagination;
         let totalPages = Math.ceil(totalTasks / pagination.limit);
         let startRecord = ((pagination.page - 1) * pagination.limit) + 1;
         let endRecord = Math.min(pagination.page * pagination.limit, totalTasks);
-
-        if (totalTasks === 0) {
-            startRecord = 0;
-            endRecord = 0;
-        }
+        if (totalTasks === 0) { startRecord = 0; endRecord = 0; }
 
         let controlsHtml = `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #fff; border-top: 1px solid #e5e7eb; margin-top: 10px; border-radius: 0 0 8px 8px;">
@@ -683,43 +804,31 @@ frappe.pages['dak_task_list'].render_tasks_visuals = function (wrapper, tasks) {
                         <option value="50" ${pagination.limit === 50 ? 'selected' : ''}>50</option>
                     </select>
                 </div>
-
-                <div style="font-size: 0.9rem; color: #6b7280;">
-                    ${startRecord}-${endRecord} of ${totalTasks}
-                </div>
-
+                <div style="font-size: 0.9rem; color: #6b7280;">${startRecord}-${endRecord} of ${totalTasks}</div>
                 <div style="display: flex; gap: 5px;">
-                    <button class="btn btn-default btn-xs" id="prev-page" ${pagination.page === 1 ? 'disabled' : ''} style="padding: 4px 8px;">
-                        <i class="fa fa-chevron-left"></i>
-                    </button>
-                    <button class="btn btn-default btn-xs" id="next-page" ${pagination.page === totalPages ? 'disabled' : ''} style="padding: 4px 8px;">
-                        <i class="fa fa-chevron-right"></i>
-                    </button>
+                    <button class="btn btn-default btn-xs" id="prev-page" ${pagination.page === 1 ? 'disabled' : ''} style="padding: 4px 8px;"><i class="fa fa-chevron-left"></i></button>
+                    <button class="btn btn-default btn-xs" id="next-page" ${pagination.page === totalPages ? 'disabled' : ''} style="padding: 4px 8px;"><i class="fa fa-chevron-right"></i></button>
                 </div>
-            </div>
-        `;
+            </div>`;
 
-        // Append to suitable container (e.g., after table or at bottom of wrapper)
-        // Check if pagination container exists, else append
         if ($('#pagination-controls').length === 0) {
-            $('<div id="pagination-controls"></div>').insertAfter('#standard-task-table');
+            $('<div id="pagination-controls"></div>').insertAfter('#standard-task-table'); // Note: ID might need check, it was just "table" in HTML
+            // Actually, parent div is #standard-task-list. Let's append there if not found.
+            if ($('#pagination-controls').length === 0) $('#standard-task-list').append('<div id="pagination-controls"></div>');
         }
         $('#pagination-controls').html(controlsHtml);
 
-        // Event Handlers
         $('#rows-per-page').off('change').on('change', function () {
             frappe.pages['dak_task_list'].pagination.limit = parseInt($(this).val());
-            frappe.pages['dak_task_list'].pagination.page = 1; // Reset to page 1
+            frappe.pages['dak_task_list'].pagination.page = 1;
             frappe.pages['dak_task_list'].render_tasks_visuals(wrapper, tasks);
         });
-
         $('#prev-page').off('click').on('click', function () {
             if (frappe.pages['dak_task_list'].pagination.page > 1) {
                 frappe.pages['dak_task_list'].pagination.page--;
                 frappe.pages['dak_task_list'].render_tasks_visuals(wrapper, tasks);
             }
         });
-
         $('#next-page').off('click').on('click', function () {
             if (frappe.pages['dak_task_list'].pagination.page < totalPages) {
                 frappe.pages['dak_task_list'].pagination.page++;
@@ -729,133 +838,72 @@ frappe.pages['dak_task_list'].render_tasks_visuals = function (wrapper, tasks) {
     };
 
     if (tasks && tasks.length > 0) {
-        // --- PAGINATION LOGIC START ---
-        // Only apply pagination if NOT grouping (Kanban usually scrolls, List usually paginates)
-        // But user asked for list pagination.
-
         let paginatedTasks = tasks;
-        if (!groupBy) { // List View Logic
+        if (!groupBy) {
             let pagination = frappe.pages['dak_task_list'].pagination;
             let start = (pagination.page - 1) * pagination.limit;
             let end = start + pagination.limit;
             paginatedTasks = tasks.slice(start, end);
-
-            // Render Controls
             render_pagination_controls(tasks.length);
         } else {
-            // If grouping/kanban, maybe hide pagination or show all? 
-            // Usually Kanban implies "show all in columns". 
-            // Let's hide pagination controls if grouping is active for now.
             $('#pagination-controls').empty();
         }
-        // --- PAGINATION LOGIC END ---
 
-        let html = '';
-        let table_html = '';
+        let html = ''; // For Card View
+        let table_html = ''; // For List View
 
-        // Helper to render sections
         const render_group = (groupName, groupTasks) => {
-            // Card View Section
+            // Card View Group Header
             if (groupBy) {
-                html += `<h3 style="width: 100%; font-size: 1.1rem; font-weight: 700; color: #374151; margin: 20px 0 10px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">${groupName} <span style="font-size: 0.8rem; color: #9ca3af; font-weight: 400; margin-left: 10px;">(${groupTasks.length})</span></h3>`;
+                html += `<h3 style="width: 100%; font-size: 1.1rem; font-weight: 700; opacity: 0.7; margin: 20px 0 10px 0; border-bottom: 2px solid #eee; padding-bottom: 5px;">${groupName} (${groupTasks.length})</h3>`;
                 html += `<div style="display: flex; flex-wrap: wrap; gap: 30px; width: 100%;">`;
             }
+            groupTasks.forEach(task => { html += frappe.pages['dak_task_list'].get_task_card_html(task); });
+            if (groupBy) html += `</div>`;
 
-            groupTasks.forEach(task => {
-                html += frappe.pages['dak_task_list'].get_task_card_html(task);
-            });
-
+            // List View Group Header
             if (groupBy) {
-                html += `</div>`; // Close flex container
+                table_html += `<tr class="group-header" style="background:#f9fafb;"><td colspan="${frappe.pages['dak_task_list'].visible_columns.length + 2}" style="font-weight:700; padding:10px 15px; border-bottom:2px solid #e5e7eb;">${groupName} (${groupTasks.length})</td></tr>`;
             }
-
-            // List View Section
-            if (groupBy) {
-                table_html += `
-                    <tr class="group-header" style="background-color: #f9fafb;">
-                        <td colspan="${frappe.pages['dak_task_list'].visible_columns.length}" style="font-weight: 700; color: #374151; padding: 10px 15px; border-bottom: 2px solid #e5e7eb;">
-                            ${groupName} <span style="font-size: 0.8rem; color: #6b7280; font-weight: 400;">(${groupTasks.length})</span>
-                        </td>
-                    </tr>
-                `;
-            }
-
-            groupTasks.forEach(task => {
-                table_html += frappe.pages['dak_task_list'].get_task_row_html(task);
-            });
+            groupTasks.forEach(task => { table_html += frappe.pages['dak_task_list'].get_task_row_html(task); });
         };
 
-
         if (groupBy) {
-            // For now, let's keep grouping utilizing 'tasks' (all tasks) or 'paginatedTasks'?
-            // Usually pagination and grouping together is complex. 
-            // Let's apply pagination ONLY for flat list view as requested.
-
-            // Grouping Logic (remains unchanged, using FULL list 'tasks')
             let groups = {};
-            tasks.forEach(task => { // Use original 'tasks' for grouping/kanban
+            tasks.forEach(task => {
                 let key = task[groupBy] || 'Unassigned';
                 if (!groups[key]) groups[key] = [];
                 groups[key].push(task);
             });
-
-            Object.keys(groups).sort().forEach(key => {
-                render_group(key, groups[key]);
-            });
-
+            Object.keys(groups).sort().forEach(key => render_group(key, groups[key]));
         } else {
-            // List View - Use PAGINATED tasks
-            // Render card view for non-grouped list
+            // Card View
             html += `<div style="display: flex; flex-wrap: wrap; gap: 30px; width: 100%;">`;
-            paginatedTasks.forEach(task => {
-                html += frappe.pages['dak_task_list'].get_task_card_html(task);
-            });
+            paginatedTasks.forEach(task => { html += frappe.pages['dak_task_list'].get_task_card_html(task); });
             html += `</div>`;
 
-            // Render table view for non-grouped list
-            paginatedTasks.forEach(task => {
-                table_html += frappe.pages['dak_task_list'].get_task_row_html(task);
-            });
+            // List View
+            paginatedTasks.forEach(task => { table_html += frappe.pages['dak_task_list'].get_task_row_html(task); });
         }
 
         container.html(html);
         table_body.html(table_html);
 
-
-        // 3. Render Kanban View (Always grouped, based on kanban_field)
+        // Render Kanban (unchanged structure, just ensured data flow)
         let kanban_html = '';
         let kanban_current_field = frappe.pages['dak_task_list'].kanban_field || 'status';
-        let kanban_cols = [];
-
-        if (kanban_current_field === 'status') {
-            kanban_cols = ['Open', 'Working', 'Pending Review', 'Overdue', 'Completed'];
-        } else {
-            kanban_cols = ['Low', 'Medium', 'High', 'Urgent'];
-        }
-
-        // Update Kanban Button Label
+        let kanban_cols = kanban_current_field === 'status' ? ['Open', 'Working', 'Pending Review', 'Overdue', 'Completed'] : ['Low', 'Medium', 'High', 'Urgent'];
         $('#current-kanban-group').text(kanban_current_field === 'status' ? 'Status' : 'Priority');
 
         kanban_cols.forEach(groupVal => {
             let statusTasks = tasks.filter(t => t[kanban_current_field] === groupVal);
-
             kanban_html += `
-            <div class="kanban-column" ondrop="frappe.pages['dak_task_list'].kanban_drop(event, '${groupVal}')" ondragover="frappe.pages['dak_task_list'].kanban_allow_drop(event)">
-                <div class="kanban-column-header">
-                    <span>${groupVal}</span>
-                    <span style="background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">${statusTasks.length}</span>
-                </div>
-                <div class="kanban-column-body">
-            `;
-
-            statusTasks.forEach(task => {
-                kanban_html += frappe.pages['dak_task_list'].get_kanban_card_html(task, kanban_current_field);
-            });
-
-            kanban_html += `
-                </div>
-            </div>
-            `;
+                <div class="kanban-column" ondrop="frappe.pages['dak_task_list'].kanban_drop(event, '${groupVal}')" ondragover="frappe.pages['dak_task_list'].kanban_allow_drop(event)">
+                    <div class="kanban-column-header"><span>${groupVal}</span><span style="background:rgba(0,0,0,0.05); padding:2px 8px; border-radius:10px; font-size:0.8rem;">${statusTasks.length}</span></div>
+                    <div class="kanban-column-body">
+             `;
+            statusTasks.forEach(task => { kanban_html += frappe.pages['dak_task_list'].get_kanban_card_html(task, kanban_current_field); });
+            kanban_html += `</div></div>`;
         });
         kanban_wrapper.html(kanban_html);
 
@@ -863,8 +911,8 @@ frappe.pages['dak_task_list'].render_tasks_visuals = function (wrapper, tasks) {
 
     } else {
         container.html('<div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.5);">No tasks found matching criteria.</div>');
-        table_body.html(`<tr><td colspan="${frappe.pages['dak_task_list'].visible_columns.length}" style="text-align: center; padding: 20px; color: #6b7280;">No tasks found matching criteria.</td></tr>`);
-        $('#kanban-columns-wrapper').html('<div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.5); width: 100%;">No tasks found matching criteria.</div>');
+        table_body.html(`<tr><td colspan="100%" style="text-align: center; padding: 20px; color: #6b7280;">No tasks found matching criteria.</td></tr>`);
+        $('#kanban-columns-wrapper').html('<div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.5); width: 100%;">No tasks found.</div>');
         frappe.pages['dak_task_list'].toggle_view(frappe.pages['dak_task_list'].current_view);
     }
 };
@@ -905,7 +953,7 @@ frappe.pages['dak_task_list'].get_task_card_html = function (task) {
         margin-bottom: 0px;
         cursor: pointer;
         transition: transform 0.2s;
-    " onclick="frappe.pages['dak_task_list'].toggle_task_drawer(true, '${task.name}')"
+    " onclick="frappe.pages['dak_task_list'].show_task_details('${task.name}')"
         onmouseover="this.style.transform='translateY(-3px)'" 
         onmouseout="this.style.transform='translateY(0)'">
         
@@ -927,22 +975,15 @@ frappe.pages['dak_task_list'].get_task_card_html = function (task) {
 };
 
 frappe.pages['dak_task_list'].get_task_row_html = function (task) {
-    let statusColor = { bg: '#e0f2fe', text: '#0369a1' };
+    let assignee = task.owner ? task.owner.charAt(0).toUpperCase() : '?';
     let isWorking = task.is_working_now == 1;
     let workingIcon = isWorking
         ? `<i class="fa fa-dot-circle-o" style="color: #10b981; font-size: 1.2rem;"></i>`
         : `<i class="fa fa-circle-o" style="color: #d1d5db; font-size: 1.2rem; transition: color 0.2s;" class="working-selector"></i>`;
 
-    let priorityColor = { bg: '#f3e8ff', text: '#7e22ce' };
+    let tr = `<tr class="frappe-list-row" onclick="frappe.pages['dak_task_list'].show_task_details('${task.name}')">`;
 
-    if (task.priority === 'High' || task.priority === 'Urgent') priorityColor = { bg: '#fee2e2', text: '#b91c1c' };
-    if (task.status === 'Open') statusColor = { bg: '#dcfce7', text: '#166534' };
-    else if (task.status === 'Overdue') statusColor = { bg: '#ffedd5', text: '#c2410c' };
-
-
-    let tr = `<tr style="cursor: pointer;" onclick="frappe.pages['dak_task_list'].toggle_task_drawer(true, '${task.name}')">`;
-
-    // 1. Add Working Column (Always First)
+    // 1. Working Action Column
     tr += `
         <td style="text-align: center; vertical-align: middle;" onclick="event.stopPropagation(); frappe.pages['dak_task_list'].set_working_task('${task.name}')">
             <div style="cursor: pointer; padding: 5px;" title="${isWorking ? 'Currently Working' : 'Set as Working'}">
@@ -951,32 +992,104 @@ frappe.pages['dak_task_list'].get_task_row_html = function (task) {
         </td>
     `;
 
-    // 2. Add Dynamic Columns
+    // 2. Dynamic Columns
     frappe.pages['dak_task_list'].visible_columns.forEach(col => {
-        // Skip 'is_working_now' if it's in visible_columns (since we hardcoded it first)
         if (col.field === 'is_working_now') return;
 
-        let val = task[col.field];
-        let cellContent = val;
+        let cellContent = '';
 
-        if (col.field === 'status') {
-            cellContent = `<span class="status-badge" style="background: ${statusColor.bg}; color: ${statusColor.text}; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">${val}</span>`;
+        if (col.field === 'subject') {
+            cellContent = `
+               <div class="subject-cell">
+                    <div class="user-avatar-circle">${assignee}</div>
+                    <div style="display:flex; flex-direction:column; justify-content:center;">
+                        <span class="subject-main">${task.subject}</span>
+                    </div>
+               </div>`;
+        } else if (col.field === 'status') {
+            cellContent = frappe.pages['dak_task_list'].getStatusIndicator(task.status);
         } else if (col.field === 'priority') {
-            cellContent = `<span class="status-badge" style="background: ${priorityColor.bg}; color: ${priorityColor.text}; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">${val}</span>`;
-        } else if (col.field === 'exp_end_date' || col.field === 'creation' || col.field === 'modified') {
-            cellContent = val ? frappe.datetime.str_to_user(val) : '-';
-        } else if (!val) {
-            cellContent = '-';
-        } else if (col.field === 'subject') {
-            cellContent = `<span style="color: inherit; font-weight: 500;">${val}</span>`;
+            cellContent = `<span class="priority-text ${frappe.pages['dak_task_list'].getPriorityClass(task.priority)}">${task.priority}</span>`;
+        } else if (col.field === 'exp_end_date') {
+            let dateClass = 'due-date';
+            if (task.status === 'Overdue') dateClass += ' overdue';
+            cellContent = `<span class="${dateClass}">${task.exp_end_date ? frappe.datetime.str_to_user(task.exp_end_date) : '-'}</span>`;
+        } else {
+            cellContent = task[col.field] || '-';
         }
 
-        tr += `<td style="vertical-align: middle; color: inherit;">${cellContent}</td>`;
+        tr += `<td>${cellContent}</td>`;
     });
 
-    tr += `</tr>`;
+    let isCompleted = task.status === 'Completed';
+    let actionIcon = isCompleted ? 'fa-check-circle' : 'fa-check-circle-o';
+    let actionColor = isCompleted ? '#10b981' : '#d1d5db';
+    let actionCursor = isCompleted ? 'default' : 'pointer';
+    let onClick = isCompleted ? '' : `onclick="frappe.pages['dak_task_list'].mark_task_complete(event, '${task.name}')"`;
+    // Only add hover effect if not completed
+    let onHover = isCompleted ? '' : `onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='#d1d5db'"`;
+    let title = isCompleted ? 'Completed' : 'Mark as Completed';
+
+    tr += `
+        <td style="text-align: right; vertical-align: middle; padding-right: 15px;" onclick="event.stopPropagation()">
+            <div ${onClick} style="cursor: ${actionCursor}; color: ${actionColor}; transition: color 0.2s; font-size: 1.1rem; display: inline-block;" ${onHover} title="${title}">
+                <i class="fa ${actionIcon}"></i>
+            </div>
+        </td></tr>`;
     return tr;
 };
+
+
+
+frappe.pages['dak_task_list'].mark_task_complete = function (e, task_name) {
+    if (e) e.stopPropagation();
+
+    frappe.confirm(
+        `Are you sure you want to mark task <b>${task_name}</b> as Completed?`,
+        () => {
+            let now = frappe.datetime.now_datetime();
+            frappe.call({
+                method: 'frappe.client.set_value',
+                args: {
+                    doctype: 'Task',
+                    name: task_name,
+                    fieldname: {
+                        status: 'Completed',
+                        completed_on: now
+                    }
+                },
+                callback: function (r) {
+                    if (!r.exc) {
+                        frappe.show_alert({ message: __('Task Marked Completed'), indicator: 'green' });
+                        // Optimistic Update
+                        let t = frappe.pages['dak_task_list'].all_tasks.find(x => x.name === task_name);
+                        if (t) {
+                            t.status = 'Completed';
+                            t.completed_on = now;
+                        }
+                        frappe.pages['dak_task_list'].apply_task_filters();
+                    }
+                }
+            });
+        }
+    );
+};
+
+// --- Helpers for UI (New from Test Page) ---
+frappe.pages['dak_task_list'].getStatusIndicator = function (status) {
+    let color = 'gray';
+    if (status === 'Working') color = 'blue';
+    if (status === 'Overdue') color = 'red';
+    if (status === 'Completed') color = 'green';
+    if ((status || '').includes('Pending')) color = 'orange';
+    return `<span class="indicator ${color}">${status}</span>`;
+};
+
+frappe.pages['dak_task_list'].getPriorityClass = function (p) {
+    if (p === 'High') return 'priority-high';
+    if (p === 'Medium') return 'priority-medium';
+    return 'priority-low';
+}
 
 frappe.pages['dak_task_list'].get_kanban_card_html = function (task, group_field) {
     let borderColor = '#2563eb';
@@ -993,7 +1106,7 @@ frappe.pages['dak_task_list'].get_kanban_card_html = function (task, group_field
         <div class="kanban-card"
     draggable="true"
     ondragstart="frappe.pages['dak_task_list'].kanban_drag_start(event, '${task.name}')"
-    onclick="frappe.pages['dak_task_list'].toggle_task_drawer(true, '${task.name}')"
+    onclick="frappe.pages['dak_task_list'].show_task_details('${task.name}')"
     style="border-left-color: ${borderColor};">
         <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 5px; color: #1f2937;">${task.subject}</div>
         <div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
@@ -1094,7 +1207,89 @@ frappe.pages['dak_task_list'].refresh_tasks = function (wrapper) {
 }
 
 
-// Initialize Autocomplete (Helper)
+frappe.pages['dak_task_list'].toggle_details_drawer = function (show) {
+    let overlay = $('#list-details-overlay');
+    let drawer = $('#list-task-details-drawer');
+
+    if (show) {
+        overlay.css('display', 'flex');
+        setTimeout(() => { overlay.addClass('open'); drawer.addClass('open'); }, 10);
+    } else {
+        overlay.removeClass('open');
+        drawer.removeClass('open');
+        setTimeout(() => { overlay.hide(); }, 300);
+    }
+};
+
+frappe.pages['dak_task_list'].show_task_details = function (task_name) {
+    if (!task_name) return;
+
+    // Use local data if available to avoid delay
+    let task = frappe.pages['dak_task_list'].all_tasks ? frappe.pages['dak_task_list'].all_tasks.find(t => t.name === task_name) : null;
+
+    // Fallback to fetch if not found
+    if (!task) {
+        frappe.db.get_doc('Task', task_name).then(doc => {
+            if (doc) {
+                // Populate and Show
+                populate_details_drawer(doc);
+            }
+        });
+    } else {
+        // Populate and Show
+        populate_details_drawer(task);
+    }
+
+    function populate_details_drawer(t) {
+        $('#list-detail-subject').text(t.subject);
+        $('#list-detail-project').text(t.project || 'No Project');
+        $('#list-detail-status').text(t.status);
+        $('#list-detail-priority').text(t.priority);
+        let prioColor = '#10b981'; // Low
+        if (t.priority === 'Medium') prioColor = '#f59e0b';
+        if (t.priority === 'High' || t.priority === 'Urgent') prioColor = '#dc2626';
+        $('#list-detail-priority').css({ 'color': prioColor, 'border-color': prioColor });
+
+        $('#list-detail-date').html(`<i class="fa fa-calendar"></i> ${t.exp_end_date ? frappe.datetime.str_to_user(t.exp_end_date) : 'No Date'}`);
+        $('#list-detail-exp-time').text(t.expected_time || 0);
+        $('#list-detail-description').text(t.description || 'No description provided.');
+
+        // Assigned To
+        let assigned_div = $('#list-detail-assigned');
+        assigned_div.empty();
+        // Check if _assign is present
+        if (t._assign) {
+            let assigned_users = [];
+            try {
+                assigned_users = typeof t._assign === 'string' ? JSON.parse(t._assign) : t._assign;
+            } catch (e) { }
+
+            if (Array.isArray(assigned_users)) {
+                assigned_users.forEach(user => {
+                    let avatar = frappe.avatar(user, 'avatar-small');
+                    assigned_div.append(avatar);
+                });
+            }
+        } else {
+            assigned_div.text('No one assigned');
+        }
+
+        // Actions
+        $('#btn-edit-task-details').off('click').on('click', function () {
+            frappe.pages['dak_task_list'].toggle_details_drawer(false);
+            setTimeout(() => {
+                frappe.pages['dak_task_list'].toggle_task_drawer(true, t.name);
+            }, 300);
+        });
+
+        $('#btn-view-full-task-list').off('click').on('click', function () {
+            frappe.set_route('Form', 'Task', t.name);
+        });
+
+        frappe.pages['dak_task_list'].toggle_details_drawer(true);
+    }
+};
+
 frappe.pages['dak_task_list'].setup_autocomplete = function () {
     // Customer Autocomplete
     let customer_input = document.getElementById('drawer-customer');
@@ -1451,7 +1646,7 @@ frappe.pages['dak_task_list'].render_latest_task_card = function (task) {
     }
 
     let html = `
-    <div class="latest-task-card">
+    <div class="latest-task-card" style="margin-bottom: 0;">
         <!-- 3 Decorative Circles -->
         <div class="ltc-circle ltc-circle-1"></div>
         <div class="ltc-circle ltc-circle-2"></div>
