@@ -21,16 +21,7 @@ app_license = "mit"
 # 	}
 # ]
 
-fixtures = [
-    {
-        "dt": "Custom Field",
-        "filters": [
-            ["module", "in", [
-                "DakBabu"
-            ]]
-        ]
-    }
-]
+fixtures = [{"dt": "Custom Field", "filters": [["module", "in", ["DakBabu"]]]}]
 
 # Includes in <head>
 # ------------------
@@ -252,4 +243,3 @@ app_include_js = "/assets/dakbabu/js/dak_components.js"
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-

@@ -40,7 +40,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
         const page_css = `
             @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-            /* Palette 
+            /* Palette
                #031716 (Black Green)
                #032F30 (Dark Teal)
                #0A7075 (Teal)
@@ -76,8 +76,8 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
 
             /* --- DARK THEME OVERRIDES --- */
             .modern-task-container.dark-theme {
-                background: #021a19; 
-                color: #e0f2f1; 
+                background: #021a19;
+                color: #e0f2f1;
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);
                 border: 1px solid #0a3d3d;
             }
@@ -96,7 +96,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                 margin: 0;
                 transition: color 0.3s;
             }
-            .dark-theme .page-title { color: #80cbc4; } 
+            .dark-theme .page-title { color: #80cbc4; }
 
             .header-actions {
                 display: flex;
@@ -120,24 +120,24 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                 color: #fff;
                 border-color: #0A7075;
             }
-            
-            .btn-play-text { 
+
+            .btn-play-text {
                 background: #4caf50 !important; /* Solid Green */
                 border-color: #4caf50 !important;
                 box-shadow: 0 4px 6px rgba(76, 175, 80, 0.4);
             }
-            .btn-play-text:hover { 
-                background: #43a047 !important; 
+            .btn-play-text:hover {
+                background: #43a047 !important;
                 box-shadow: 0 6px 8px rgba(76, 175, 80, 0.6);
             }
 
-            .btn-stop-text { 
+            .btn-stop-text {
                 background: #f44336 !important; /* Solid Red */
                 border-color: #f44336 !important;
                 box-shadow: 0 4px 6px rgba(244, 67, 54, 0.4);
             }
-            .btn-stop-text:hover { 
-                background: #e53935 !important; 
+            .btn-stop-text:hover {
+                background: #e53935 !important;
                 box-shadow: 0 6px 8px rgba(244, 67, 54, 0.6);
             }
             .dark-theme .btn-action {
@@ -251,16 +251,16 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                 white-space: nowrap;
             }
             .sphere-inner-col {
-                display: flex; 
-                flex-direction: column; 
-                align-items: center; 
+                display: flex;
+                flex-direction: column;
+                align-items: center;
                 justify-content: center;
                 gap: 12px;
                 z-index: 5;
             }
             .sphere-clock {
                 font-family: 'Courier New', Courier, monospace;
-                font-size: 20px; 
+                font-size: 20px;
                 font-weight: 700;
                 color: #ffffff;
                 text-shadow: 0 2px 4px rgba(0,0,0,0.5);
@@ -270,7 +270,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
             }
             .sphere-internal-controls {
                 position: absolute;
-                bottom: 10px; 
+                bottom: 10px;
                 right: 0px; /* Moved right 20px */
                 left: auto;
                 transform: none;
@@ -293,15 +293,15 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
             }
             .sphere-icon-btn:hover { transform: scale(1.1); box-shadow: 0 6px 10px rgba(0,0,0,0.4); }
             .sphere-icon-btn:active { transform: scale(0.95); }
-            
+
             .sphere-icon-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
-            .btn-play-icon { 
+            .btn-play-icon {
                 background: #4caf50 !important; /* Solid Green */
             }
             .btn-play-icon:hover { background: #43a047 !important; }
 
-            .btn-stop-icon { 
+            .btn-stop-icon {
                 background: #f44336 !important; /* Solid Red */
             }
             .btn-stop-icon:hover { background: #e53935 !important; }
@@ -319,7 +319,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
             .btn-sphere:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
             .btn-start { background: #4caf50; color: white; }
             .btn-end { background: #f44336; color: white; }
-            
+
             .card-content {
                 margin-left: 60px;
                 color: #ffffff;
@@ -328,14 +328,14 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
             }
             .card-content h3 { font-size: 24px; font-weight: 700; margin: 0 0 5px 0; color: #fff; }
             .card-content p { font-size: 14px; opacity: 0.9; margin: 0; }
-            
+
             /* --- VIEWS --- */
             .view-container { flex: 1; overflow-y: auto; overflow-x: hidden; }
 
             /* --- FRA-PPE (Standard) LIST VIEW MIMIC --- */
             .frappe-list-table {
                 width: 100%;
-                border-collapse: separate; 
+                border-collapse: separate;
                 border-spacing: 0;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             }
@@ -413,10 +413,10 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                 margin-right: 8px;
             }
             .dark-theme .indicator { color: #d1d8dd; }
-            
+
             /* Status Colors */
             .indicator.green::before { background: #28a745; }
-            .indicator.red::before { background: #ff5858; } 
+            .indicator.red::before { background: #ff5858; }
             .indicator.orange::before { background: #ffa00a; }
             .indicator.blue::before { background: #5e64ff; }
             .indicator.gray::before { background: #8d99a6; }
@@ -428,13 +428,13 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                 gap: 20px;
                 padding: 10px;
             }
-            
+
             .task-card {
                 /* Multi-layer Background: Noise -> Main Circles -> Shadow Circles -> Base Gradient */
                 background-color: #ffffff;
-                background-image: 
+                background-image:
                     url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"),
-                    
+
                     /* Circle 1 & Shadow */
                     radial-gradient(circle at 90% 10%, rgba(14, 51, 42, 0.08) 0%, transparent 40%),
                     radial-gradient(circle at 92% 12%, rgba(0,0,0,0.1) 0%, transparent 45%), /* Shadow 1 */
@@ -444,7 +444,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                     radial-gradient(circle at 12% 92%, rgba(0,0,0,0.1) 0%, transparent 45%), /* Shadow 2 */
 
                     linear-gradient(145deg, #f0f4f4 0%, #ffffff 100%);
-                
+
                 border: 1px solid rgba(255,255,255,0.5);
                 border-radius: 16px;
                 padding: 20px;
@@ -453,14 +453,14 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                 overflow: hidden;
                 box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             }
-            
+
             .task-card:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 10px 25px rgba(14, 51, 42, 0.1);
             }
             .dark-theme .task-card {
                 background-color: #021a19;
-                background-image: 
+                background-image:
                      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"),
                     radial-gradient(circle at 90% 10%, rgba(128, 203, 196, 0.05) 0%, transparent 40%),
                     radial-gradient(circle at 10% 90%, rgba(10, 112, 117, 0.1) 0%, transparent 40%),
@@ -496,7 +496,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                 font-weight: 700;
                 color: #274D60;
                 margin-bottom: 15px;
-                display: flex; 
+                display: flex;
                 justify-content: space-between;
                 align-items: center;
             }
@@ -581,11 +581,11 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
             /* Re-defining Status Pill only for cards/kanban, List uses Indicators */
             .status-pill { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
             /* Adapted Status Colors */
-            .status-working { background: #e0f2f1; color: #0A7075; } 
-            .status-open { background: #f4f8f9; color: #274D60; } 
+            .status-working { background: #e0f2f1; color: #0A7075; }
+            .status-open { background: #f4f8f9; color: #274D60; }
             .status-overdue { background: #fef2f2; color: #ef4444; }
-            .status-completed { background: #ecfdf5; color: #10b981; } 
-            .status-pending { background: #f1f5f9; color: #6BA3BE; } 
+            .status-completed { background: #ecfdf5; color: #10b981; }
+            .status-pending { background: #f1f5f9; color: #6BA3BE; }
 
             /* Dark Mode Status Overrides */
             .dark-theme .status-working { background: #004d40; color: #80cbc4; }
@@ -630,7 +630,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                     <button class="btn-new-task">+ New Task</button>
                 </div>
             </div>
-            
+
             <!-- Column Picker Dropdown -->
             <div class="col-picker-popover" id="colPicker">
                 <strong>Select Columns</strong>
@@ -751,7 +751,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
 
                 $cardTitle.text("Focusing...");
                 $cardDesc.text("Recording time.");
-                // Reset Badge on new start? Or keep accumulating? 
+                // Reset Badge on new start? Or keep accumulating?
                 // Using simple stopwatch logic: start from 0.
                 $minuteBadge.text("0m");
 
@@ -777,7 +777,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
                             clockInterval = setInterval(updateWallClock, 1000);
                             $cardTitle.text(titleOriginal);
                             $cardDesc.text("Track your task duration.");
-                            // Badge resets to 0m when back to clock mode usually? 
+                            // Badge resets to 0m when back to clock mode usually?
                             // Or keeps last time? Let's reset to 0m for cleanliness or keep last?
                             // "show total time" usually implies ongoing or result.
                             // I'll leave result for 5s then reset.
@@ -888,7 +888,7 @@ frappe.pages['test'].on_page_load = function (wrapper: HTMLElement) {
 
                     // Subject + Avatar + Name (Simulating List)
                     if (state.visibleColumns.includes('Subject')) {
-                        html += `<td> 
+                        html += `<td>
                            <div class="subject-cell">
                                 <div class="user-avatar-circle">${assignee}</div>
                                 <div>

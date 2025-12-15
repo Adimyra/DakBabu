@@ -1,13 +1,13 @@
-frappe.pages['maindashboard'].on_page_load = function (wrapper) {
-    const page = frappe.ui.make_app_page({
-        parent: wrapper,
-        title: 'Dashboard',
-        single_column: true
-    });
-    const $wrapper = $(wrapper);
+frappe.pages["maindashboard"].on_page_load = function (wrapper) {
+	const page = frappe.ui.make_app_page({
+		parent: wrapper,
+		title: "Dashboard",
+		single_column: true,
+	});
+	const $wrapper = $(wrapper);
 
-    // Inject CSS
-    const page_css = `
+	// Inject CSS
+	const page_css = `
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
@@ -101,7 +101,7 @@ frappe.pages['maindashboard'].on_page_load = function (wrapper) {
                 color: #ffffff;
             }
             /* h2 removed */
-            
+
             /* Content Padding Wrapper */
             .dash-content {
                 padding: 20px;
@@ -181,8 +181,8 @@ frappe.pages['maindashboard'].on_page_load = function (wrapper) {
                     border-bottom: 1px dashed #e0e0e0; /* Add spacer border */
                 }
                 .dash-col-3 { border-bottom: none; }
-                
-                .dark-theme .dash-col-1, 
+
+                .dark-theme .dash-col-1,
                 .dark-theme .dash-col-2 {
                     border-color: #274D60;
                 }
@@ -190,8 +190,8 @@ frappe.pages['maindashboard'].on_page_load = function (wrapper) {
         </style>
     `;
 
-    // Set page content
-    page.main.html(`
+	// Set page content
+	page.main.html(`
         ${page_css}
         <div class="dashboard-main-card" id="dashboardMain">
             <div class="split-layout-container">
@@ -249,179 +249,193 @@ frappe.pages['maindashboard'].on_page_load = function (wrapper) {
         </div>
     `);
 
-    // --- Theme Sync Logic ---
-    function applyTheme() {
-        const currentTheme = document.body.getAttribute('data-theme') || 'light';
-        const isDark = currentTheme === 'dark';
+	// --- Theme Sync Logic ---
+	function applyTheme() {
+		const currentTheme = document.body.getAttribute("data-theme") || "light";
+		const isDark = currentTheme === "dark";
 
-        if (isDark) {
-            $wrapper.find('#dashboardMain').addClass('dark-theme');
-            $wrapper.closest('.page-container').addClass('dark-theme-active');
-        } else {
-            $wrapper.find('#dashboardMain').removeClass('dark-theme');
-            $wrapper.closest('.page-container').removeClass('dark-theme-active');
-        }
-    }
+		if (isDark) {
+			$wrapper.find("#dashboardMain").addClass("dark-theme");
+			$wrapper.closest(".page-container").addClass("dark-theme-active");
+		} else {
+			$wrapper.find("#dashboardMain").removeClass("dark-theme");
+			$wrapper.closest(".page-container").removeClass("dark-theme-active");
+		}
+	}
 
-    // Apply on load
-    applyTheme();
+	// Apply on load
+	applyTheme();
 
-    // Listen for theme changes
-    const observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
-                applyTheme();
-            }
-        });
-    });
+	// Listen for theme changes
+	const observer = new MutationObserver(function (mutations) {
+		mutations.forEach(function (mutation) {
+			if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
+				applyTheme();
+			}
+		});
+	});
 
-    observer.observe(document.body, {
-        attributes: true,
-        attributeFilter: ['data-theme']
-    });
+	observer.observe(document.body, {
+		attributes: true,
+		attributeFilter: ["data-theme"],
+	});
 
-    // Fetch latest task
-    function fetchLatestTask() {
-        // Ensure skeleton is shown before fetch
-        $('#dashTaskSkeleton').show();
-        $('#dashTaskReal').hide();
+	// Fetch latest task
+	function fetchLatestTask() {
+		// Ensure skeleton is shown before fetch
+		$("#dashTaskSkeleton").show();
+		$("#dashTaskReal").hide();
 
-        frappe.db.get_list('Task', {
-            fields: ['name', 'subject', 'status', 'priority', 'exp_end_date', 'description', 'project'],
-            filters: [['status', '!=', 'Completed']],
-            order_by: 'modified desc',
-            limit: 1
-        }).then(r => {
-            if (r.length > 0) {
-                const task = r[0];
+		frappe.db
+			.get_list("Task", {
+				fields: [
+					"name",
+					"subject",
+					"status",
+					"priority",
+					"exp_end_date",
+					"description",
+					"project",
+				],
+				filters: [["status", "!=", "Completed"]],
+				order_by: "modified desc",
+				limit: 1,
+			})
+			.then((r) => {
+				if (r.length > 0) {
+					const task = r[0];
 
-                const projectId = task.project || 'Personal';
-                $('#dashTaskTitle').text(task.subject || 'Untitled Task');
+					const projectId = task.project || "Personal";
+					$("#dashTaskTitle").text(task.subject || "Untitled Task");
 
-                // Fetch Project Name if projectId is not 'Personal'
-                if (projectId !== 'Personal') {
-                    frappe.db.get_value('Project', projectId, 'project_name')
-                        .then(r => {
-                            if (r && r.message && r.message.project_name) {
-                                $('#dashTaskProject').text(r.message.project_name);
-                            } else {
-                                $('#dashTaskProject').text(projectId);
-                            }
-                        });
-                } else {
-                    $('#dashTaskProject').text('Personal');
-                }
+					// Fetch Project Name if projectId is not 'Personal'
+					if (projectId !== "Personal") {
+						frappe.db.get_value("Project", projectId, "project_name").then((r) => {
+							if (r && r.message && r.message.project_name) {
+								$("#dashTaskProject").text(r.message.project_name);
+							} else {
+								$("#dashTaskProject").text(projectId);
+							}
+						});
+					} else {
+						$("#dashTaskProject").text("Personal");
+					}
 
-                $('#dashTaskDue').text(task.exp_end_date ? frappe.datetime.str_to_user(task.exp_end_date) : 'No Due Date');
+					$("#dashTaskDue").text(
+						task.exp_end_date
+							? frappe.datetime.str_to_user(task.exp_end_date)
+							: "No Due Date"
+					);
 
-                // Description
-                const desc = task.description || 'No description provided.';
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = desc;
-                $('#dashTaskDesc').text(tempDiv.textContent || tempDiv.innerText || desc);
+					// Description
+					const desc = task.description || "No description provided.";
+					const tempDiv = document.createElement("div");
+					tempDiv.innerHTML = desc;
+					$("#dashTaskDesc").text(tempDiv.textContent || tempDiv.innerText || desc);
 
-                // Priority & Status Badges
-                let metaHtml = '';
+					// Priority & Status Badges
+					let metaHtml = "";
 
-                if (task.priority) {
-                    const colors = {
-                        'High': '#ef5350',
-                        'Medium': '#ffb74d',
-                        'Low': '#4db6ac'
-                    };
-                    const color = colors[task.priority] || '#6BA3BE';
-                    metaHtml += `<span class="priority-text" style="background:${color}20; color:${color};">${task.priority}</span>`;
-                }
+					if (task.priority) {
+						const colors = {
+							High: "#ef5350",
+							Medium: "#ffb74d",
+							Low: "#4db6ac",
+						};
+						const color = colors[task.priority] || "#6BA3BE";
+						metaHtml += `<span class="priority-text" style="background:${color}20; color:${color};">${task.priority}</span>`;
+					}
 
-                if (task.status) {
-                    const statusColors = {
-                        'Open': '#29b6f6',
-                        'Working': '#ffb74d',
-                        'Pending Review': '#9575cd',
-                        'Overdue': '#ef5350',
-                        'Completed': '#66bb6a'
-                    };
-                    const color = statusColors[task.status] || '#6BA3BE';
-                    metaHtml += `<span class="status-pill" style="margin-left:8px; background:${color}20; color:${color};">${task.status}</span>`;
-                }
+					if (task.status) {
+						const statusColors = {
+							Open: "#29b6f6",
+							Working: "#ffb74d",
+							"Pending Review": "#9575cd",
+							Overdue: "#ef5350",
+							Completed: "#66bb6a",
+						};
+						const color = statusColors[task.status] || "#6BA3BE";
+						metaHtml += `<span class="status-pill" style="margin-left:8px; background:${color}20; color:${color};">${task.status}</span>`;
+					}
 
-                $('#dashTaskMeta').html(metaHtml);
+					$("#dashTaskMeta").html(metaHtml);
 
-                // Switch to Real Content
-                setTimeout(() => { // Small delay to prevent flicker if fast
-                    $('#dashTaskSkeleton').hide();
-                    $('#dashTaskReal').fadeIn(200);
-                }, 300);
+					// Switch to Real Content
+					setTimeout(() => {
+						// Small delay to prevent flicker if fast
+						$("#dashTaskSkeleton").hide();
+						$("#dashTaskReal").fadeIn(200);
+					}, 300);
+				} else {
+					$("#dashTaskTitle").text("No Open Tasks");
+					$("#dashTaskDesc").text("All tasks completed or none created yet.");
+					$("#dashTaskDue, #dashTaskProject").text("-");
+					$("#dashTaskMeta").empty();
 
-            } else {
-                $('#dashTaskTitle').text('No Open Tasks');
-                $('#dashTaskDesc').text('All tasks completed or none created yet.');
-                $('#dashTaskDue, #dashTaskProject').text('-');
-                $('#dashTaskMeta').empty();
+					// Switch to Real Content (Empty State)
+					$("#dashTaskSkeleton").hide();
+					$("#dashTaskReal").show();
+				}
+			})
+			.catch((err) => {
+				console.error("Failed to fetch task:", err);
+				$("#dashTaskTitle").text("Error Loading Task");
+				$("#dashTaskDesc").text("Please try again later.");
 
-                // Switch to Real Content (Empty State)
-                $('#dashTaskSkeleton').hide();
-                $('#dashTaskReal').show();
-            }
-        }).catch(err => {
-            console.error('Failed to fetch task:', err);
-            $('#dashTaskTitle').text('Error Loading Task');
-            $('#dashTaskDesc').text('Please try again later.');
+				// Show error state
+				$("#dashTaskSkeleton").hide();
+				$("#dashTaskReal").show();
+			});
+	}
 
-            // Show error state
-            $('#dashTaskSkeleton').hide();
-            $('#dashTaskReal').show();
-        });
-    }
+	// Initial data load
+	fetchLatestTask();
 
-    // Initial data load
-    fetchLatestTask();
+	// --- Chart Logic ---
+	function renderChart() {
+		if (!frappe.Chart) return;
 
-    // --- Chart Logic ---
-    function renderChart() {
-        if (!frappe.Chart) return;
+		const data = {
+			labels: ["Current Task"],
+			datasets: [
+				{
+					name: "Expected",
+					type: "bar",
+					values: [8],
+				},
+				{
+					name: "Actual",
+					type: "bar",
+					values: [12],
+				},
+			],
+		};
 
-        const data = {
-            labels: ["Current Task"],
-            datasets: [
-                {
-                    name: "Expected",
-                    type: "bar",
-                    values: [8]
-                },
-                {
-                    name: "Actual",
-                    type: "bar",
-                    values: [12]
-                }
-            ]
-        };
+		const chart = new frappe.Chart("#time-chart", {
+			title: "Time Comparison (Hrs)",
+			data: data,
+			type: "bar",
+			height: 180,
+			colors: ["#6BA3BE", "#ef5350"],
+			axisOptions: {
+				xAxisMode: "tick",
+				xIsSeries: true,
+				clean: true,
+			},
+			barOptions: {
+				spaceRatio: 0.2, // Reduced space for fatter bars
+				radius: 4, // Rounded top bars
+			},
+		});
 
-        const chart = new frappe.Chart("#time-chart", {
-            title: "Time Comparison (Hrs)",
-            data: data,
-            type: 'bar',
-            height: 180,
-            colors: ['#6BA3BE', '#ef5350'],
-            axisOptions: {
-                xAxisMode: 'tick',
-                xIsSeries: true,
-                clean: true
-            },
-            barOptions: {
-                spaceRatio: 0.2, // Reduced space for fatter bars
-                radius: 4        // Rounded top bars
-            },
-        });
+		// Handle Theme Sync for Chart
+		const updateChartTheme = () => {
+			// Re-render or update colors if needed based on theme
+		};
+	}
 
-        // Handle Theme Sync for Chart
-        const updateChartTheme = () => {
-            // Re-render or update colors if needed based on theme
-        };
-    }
+	// Render Chart
+	setTimeout(renderChart, 500);
 
-    // Render Chart
-    setTimeout(renderChart, 500);
-
-    console.log('Main Dashboard Loaded Successfully');
+	console.log("Main Dashboard Loaded Successfully");
 };

@@ -798,7 +798,7 @@ select.lucid-input {
 /* Frappe List Table Structure */
 .frappe-list-table {
     width: 100%;
-    border-collapse: separate; 
+    border-collapse: separate;
     border-spacing: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
@@ -882,7 +882,7 @@ select.lucid-input {
 
 /* Status Colors (Synced with existing definitions) */
 .indicator.green::before { background: #28a745; }
-.indicator.red::before { background: #ff5858; } 
+.indicator.red::before { background: #ff5858; }
 .indicator.orange::before { background: #ffa00a; }
 .indicator.blue::before { background: #5e64ff; }
 .indicator.gray::before { background: #8d99a6; }
@@ -895,7 +895,7 @@ select.lucid-input {
     color: #ffffff;
     font-weight: 600; font-size: 12px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 5px; 
+    border-radius: 5px;
 }
 [data-theme="dark"] .user-avatar-circle { background: #80cbc4; color: #004d40; }
 

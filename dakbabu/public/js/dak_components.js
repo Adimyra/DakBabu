@@ -1,8 +1,8 @@
-frappe.provide('dakbabu.components');
+frappe.provide("dakbabu.components");
 
 dakbabu.components.get_reminder_card = function (id_suffix = "") {
-    let suffix = id_suffix ? `-${id_suffix}` : "";
-    return `
+	let suffix = id_suffix ? `-${id_suffix}` : "";
+	return `
 		<!-- Reminder Section(Full Width) -->
 		<div class="reminder-section" style="
 			width: 100%;
@@ -29,16 +29,16 @@ dakbabu.components.get_reminder_card = function (id_suffix = "") {
 					<span style="font-size: 1.1rem; margin-right: 8px;">🔔</span>
 					<span id="latest-task-status${suffix}" style="font-weight: 500; font-size: 0.95rem; letter-spacing: 0.02em;">Loading reminder...</span>
 				</div>
-				
+
 				<h2 id="latest-task-subject${suffix}" style="font-size: 2rem; font-weight: 700; margin-bottom: 15px; color: #fff;">
                     <div class="skeleton" style="width: 60%; height: 32px; border-radius: 8px;"></div>
                 </h2>
-				
+
 				<div style="display: flex; align-items: center; gap: 20px; font-size: 0.95rem;">
 					<span style="
-						background: rgba(255,255,255,0.2); 
-						padding: 5px 12px; 
-						border-radius: 6px; 
+						background: rgba(255,255,255,0.2);
+						padding: 5px 12px;
+						border-radius: 6px;
 						backdrop-filter: blur(5px);
 						display: flex; align-items: center;
 					">
@@ -55,11 +55,11 @@ dakbabu.components.get_reminder_card = function (id_suffix = "") {
 
 			<div style="position: relative; z-index: 1; flex: 0 0 auto;">
 				<button class="btn" onclick="window.toggle_reminder_drawer(true)" style="
-					background: #ffffff; 
-					color: #7c3aed; 
-					padding: 10px 24px; 
-					border-radius: 8px; 
-					font-weight: 600; 
+					background: #ffffff;
+					color: #7c3aed;
+					padding: 10px 24px;
+					border-radius: 8px;
+					font-weight: 600;
 					border: none;
 					box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 					transition: all 0.2s;
@@ -73,7 +73,7 @@ dakbabu.components.get_reminder_card = function (id_suffix = "") {
 };
 
 dakbabu.components.get_performance_card = function () {
-    return `
+	return `
 
         <div class="reminder-section" style="
                 flex: 1;
@@ -101,23 +101,23 @@ dakbabu.components.get_performance_card = function () {
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
                     <!-- Circular Progress (Smaller) -->
                     <div id="perf-circle" style="
-                        width: 100px; 
-                        height: 100px; 
-                        border-radius: 50%; 
-                        background: conic-gradient(rgba(255,255,255,0.9) 0% 0%, rgba(255,255,255,0.2) 0% 100%); 
-                        display: flex; 
-                        align-items: center; 
+                        width: 100px;
+                        height: 100px;
+                        border-radius: 50%;
+                        background: conic-gradient(rgba(255,255,255,0.9) 0% 0%, rgba(255,255,255,0.2) 0% 100%);
+                        display: flex;
+                        align-items: center;
                         justify-content: center;
                         position: relative;
                         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
                     ">
                         <div style="
-                            width: 82px; 
-                            height: 82px; 
-                            background: rgba(255,255,255,0.1); 
-                            border-radius: 50%; 
-                            display: flex; 
-                            align-items: center; 
+                            width: 82px;
+                            height: 82px;
+                            background: rgba(255,255,255,0.1);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
                             justify-content: center;
                             backdrop-filter: blur(5px);
                         ">
@@ -140,11 +140,11 @@ dakbabu.components.get_performance_card = function () {
 
                 <!-- Footer / Badge -->
                 <div style="
-                    background: rgba(255,255,255,0.1); 
-                    padding: 10px 15px; 
-                    border-radius: 10px; 
-                    display: flex; 
-                    align-items: center; 
+                    background: rgba(255,255,255,0.1);
+                    padding: 10px 15px;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
                     justify-content: space-between;
                     backdrop-filter: blur(5px);
                     border: 1px solid rgba(255,255,255,0.1);
@@ -152,11 +152,11 @@ dakbabu.components.get_performance_card = function () {
                 ">
                     <span style="font-size: 0.85rem; color: #ffffff;">Efficiency</span>
                     <span style="
-                        background: rgba(255,255,255,0.9); 
-                        color: #d946ef; 
-                        padding: 4px 10px; 
-                        border-radius: 12px; 
-                        font-size: 0.75rem; 
+                        background: rgba(255,255,255,0.9);
+                        color: #d946ef;
+                        padding: 4px 10px;
+                        border-radius: 12px;
+                        font-size: 0.75rem;
                         font-weight: 700;
                     ">Needs Imp.</span>
                 </div>
