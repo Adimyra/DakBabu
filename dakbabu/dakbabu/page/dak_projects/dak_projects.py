@@ -7,28 +7,25 @@ def get_users():
 
 
 @frappe.whitelist()
+@frappe.whitelist()
 def get_task_counts(timespan="All Time"):
 	filters = {}
-	now = frappe.utils.nowdate()
-	
 	if timespan == "Today":
-		filters["exp_end_date"] = now
+		filters["creation"] = (">=", frappe.utils.nowdate())
 	elif timespan == "This Week":
-		from frappe.utils import get_first_day_of_week, get_last_day_of_week
-		filters["exp_end_date"] = ["between", [get_first_day_of_week(now), get_last_day_of_week(now)]]
+		filters["creation"] = (">=", frappe.utils.add_days(frappe.utils.nowdate(), -7))
 	elif timespan == "This Month":
-		from frappe.utils import get_first_day, get_last_day
-		filters["exp_end_date"] = ["between", [get_first_day(now), get_last_day(now)]]
+		filters["creation"] = (">=", frappe.utils.add_days(frappe.utils.nowdate(), -30))
 
 	return {
 		"total_tasks": frappe.db.count("Task", filters=filters),
 		"open_tasks": frappe.db.count("Task", filters={**filters, "status": "Open"}),
 		"overdue_tasks": frappe.db.count("Task", filters={**filters, "status": "Overdue"}),
-		"high_priority": frappe.db.count("Task", filters={**filters, "priority": ["in", ["High", "Urgent"]]}),
+		"high_priority": frappe.db.count("Task", filters={**filters, "priority": "High"}),
 		"completed_tasks": frappe.db.count("Task", filters={**filters, "status": "Completed"}),
 		"pending_review_tasks": frappe.db.count("Task", filters={**filters, "status": "Pending Review"}),
-		"total_projects": frappe.db.count("Project", filters={}),
-		"completed_projects": frappe.db.count("Project", filters={"status": "Completed"}),
+		"total_projects": frappe.db.count("Project", filters=filters),
+		"completed_projects": frappe.db.count("Project", filters={**filters, "status": "Completed"}),
 	}
 
 
@@ -238,3 +235,122 @@ def get_due_tasks_for_month(month, year):
 		fields=["name", "subject", "exp_end_date", "priority"],
 	)
 	return tasks
+
+
+@frappe.whitelist()
+def get_projects_summary():
+	projects = frappe.get_all(
+		"Project", fields=["name", "project_name", "status", "priority", "expected_start_date", "expected_end_date", "percent_complete", "custom_working_now"]
+	)
+
+	for project in projects:
+		# Count tasks per project
+		task_counts = frappe.db.sql(
+			"""
+			SELECT
+				COUNT(name) as total,
+				SUM(CASE WHEN status = 'Open' THEN 1 ELSE 0 END) as open,
+				SUM(CASE WHEN status = 'Overdue' THEN 1 ELSE 0 END) as overdue,
+				SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed
+			FROM `tabTask`
+			WHERE project = %s
+		""",
+			(project.name),
+			as_dict=True,
+		)
+
+		if task_counts:
+			project.update(task_counts[0])
+
+		# User aggregation for avatars (simplified)
+		project.users = []  # Ideally fetch from Team or Assignments
+
+	return projects
+
+
+@frappe.whitelist()
+def get_project_tasks(project_name):
+	tasks = frappe.get_all(
+		"Task",
+		filters={"project": project_name},
+		fields=[
+			"name",
+			"subject",
+			"status",
+			"priority",
+			"description",
+			"exp_start_date",
+			"exp_end_date",
+			"creation",
+			"_assign",
+			"custom_working_now",
+		],
+		order_by="priority desc",
+	)
+
+	# Enhance with User Images if needed
+	for task in tasks:
+		if task._assign:
+			import json
+
+			assignees = json.loads(task._assign)
+			task.assignees = []
+			for user_email in assignees:
+				user = frappe.db.get_value("User", user_email, ["user_image", "full_name"], as_dict=True)
+				if user:
+					task.assignees.append(user)
+
+	return tasks
+
+
+@frappe.whitelist()
+def update_task_status(task_name, status):
+	frappe.db.set_value("Task", task_name, "status", status)
+	return True
+
+
+@frappe.whitelist()
+def get_task_templates():
+    return frappe.get_all("Task Template", fields=["name", "subject", "project", "expected_time"], order_by="modified desc")
+
+@frappe.whitelist()
+def set_working_project(project_name):
+	try:
+		# 1. Reset all other projects
+		frappe.db.sql("UPDATE `tabProject` SET custom_working_now = 0 WHERE custom_working_now = 1")
+
+		# 2. Set new project as working
+		frappe.db.set_value("Project", project_name, "custom_working_now", 1)
+		frappe.db.commit()
+		return True
+	except Exception as e:
+		frappe.log_error(f"Error setting working project: {e!s}")
+		return False
+
+@frappe.whitelist()
+def complete_project(project_name):
+	try:
+		# Check for incomplete tasks
+		incomplete_count = frappe.db.count("Task", filters={"project": project_name, "status": ["!=", "Completed"]})
+
+		if incomplete_count > 0:
+			frappe.throw(
+				f"Cannot complete project. There are {incomplete_count} incomplete tasks linked to this project.",
+				title="Active Tasks Remaining",
+			)
+
+		frappe.db.set_value(
+			"Project",
+			project_name,
+			{
+				"status": "Completed",
+				"percent_complete": 100,
+				"actual_end_date": frappe.utils.nowdate(),
+				"custom_working_now": 0,
+			},
+		)
+		frappe.db.commit()
+		return True
+	except Exception as e:
+		frappe.log_error(f"Error completing project: {e!s}")
+		raise e

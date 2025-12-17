@@ -96,9 +96,51 @@
 }
 
 .vibrant-input:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    border-color: #2e605c;
+    box-shadow: 0 0 0 3px rgba(46, 96, 92, 0.1);
     outline: none;
+}
+
+/* Match Frappe Controls to Vibrant Style */
+.vibrant-link-field .frappe-control {
+    margin-bottom: 0 !important;
+}
+
+.vibrant-link-field .control-input-wrapper {
+    margin-bottom: 0 !important;
+}
+
+.vibrant-link-field input.form-control,
+.vibrant-link-field select.form-control {
+    width: 100% !important;
+    padding: 12px 15px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #1f2937 !important;
+    transition: all 0.2s !important;
+    height: auto !important;
+    box-shadow: none !important;
+}
+
+.vibrant-link-field input.form-control:focus {
+    border-color: #2e605c !important;
+    box-shadow: 0 0 0 3px rgba(46, 96, 92, 0.1) !important;
+    outline: none !important;
+}
+
+.vibrant-link-field .link-field-ui {
+    border: none !important;
+}
+
+.vibrant-link-field .control-input {
+    background: transparent !important;
+}
+
+.vibrant-input::placeholder,
+.vibrant-link-field input::placeholder {
+    color: #9ca3af !important;
+    opacity: 1;
 }
 
 .vibrant-label {

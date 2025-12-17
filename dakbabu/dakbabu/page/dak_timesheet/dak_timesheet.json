@@ -1,0 +1,19 @@
+{
+    "content": null,
+    "creation": "2024-12-18 01:23:45.000000",
+    "docstatus": 0,
+    "doctype": "Page",
+    "idx": 0,
+    "modified": "2024-12-18 01:23:45.000000",
+    "modified_by": "Administrator",
+    "module": "Dakbabu",
+    "name": "dak_timesheet",
+    "owner": "Administrator",
+    "page_name": "dak_timesheet",
+    "roles": [],
+    "script": null,
+    "standard": "Yes",
+    "style": null,
+    "system_page": 0,
+    "title": "Timesheets"
+}

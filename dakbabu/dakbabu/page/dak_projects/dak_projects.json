@@ -1,0 +1,23 @@
+{
+    "content": null,
+    "creation": "2025-12-06 23:57:38.107934",
+    "docstatus": 0,
+    "doctype": "Page",
+    "idx": 0,
+    "modified": "2025-12-10 11:09:25.952100",
+    "modified_by": "Administrator",
+    "module": "DakBabu",
+    "name": "dak_projects",
+    "owner": "Administrator",
+    "page_name": "dak_projects",
+    "roles": [
+        {
+            "role": "Customer"
+        }
+    ],
+    "script": null,
+    "standard": "Yes",
+    "style": null,
+    "system_page": 0,
+    "title": "Projects"
+}

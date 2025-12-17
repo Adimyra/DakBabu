@@ -28,12 +28,7 @@
 
 
 /* Custom Table Styles for Dak List */
-#standard-task-table-body tr:nth-child(even) {
-    background-color: #f3f4f6 !important;
-    /* Clearly distinct light gray/blue */
-}
-
-#standard-task-table-body tr:nth-child(odd) {
+#standard-task-table-body tr {
     background-color: #ffffff !important;
 }
 
@@ -64,6 +59,12 @@
     display: flex;
     flex-direction: column;
     max-height: 80vh;
+    transition: background 0.2s, border 0.2s;
+}
+
+.kanban-column.drag-over {
+    background: #e2e8f0;
+    border: 2px dashed #94a3b8;
 }
 
 .kanban-column-header {
@@ -640,14 +641,8 @@ select.lucid-input {
 }
 
 /* 1. List View (Table) */
-[data-theme="dark"] #standard-task-table-body tr:nth-child(even) {
-    background-color: #1E1E1E !important;
-    /* Deep Charcoal for even rows */
-}
-
-[data-theme="dark"] #standard-task-table-body tr:nth-child(odd) {
+[data-theme="dark"] #standard-task-table-body tr {
     background-color: #121212 !important;
-    /* Darker for odd rows */
 }
 
 [data-theme="dark"] #standard-task-table-body tr:hover {
@@ -667,10 +662,6 @@ select.lucid-input {
 }
 
 /* 2. Kanban View */
-[data-theme="dark"] #kanban-task-list {
-    /* bg handled by global */
-}
-
 [data-theme="dark"] .kanban-column {
     background: #1E1E1E;
 }
@@ -802,6 +793,7 @@ select.lucid-input {
     border-spacing: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+
 .frappe-list-table thead th {
     background-color: #f7fafc;
     color: #8d99a6;
@@ -813,6 +805,7 @@ select.lucid-input {
     border-bottom: 1px solid #d1d8dd;
     text-align: left;
 }
+
 [data-theme="dark"] .frappe-list-table thead th {
     background-color: #0e1e25;
     color: #5c6975;
@@ -824,12 +817,15 @@ select.lucid-input {
     cursor: pointer;
     background-color: #ffffff;
 }
+
 .frappe-list-row:hover td {
     background-color: #f7fafc;
 }
+
 [data-theme="dark"] .frappe-list-row {
     background-color: #131b20;
 }
+
 [data-theme="dark"] .frappe-list-row:hover td {
     background-color: #1a272e;
 }
@@ -842,6 +838,7 @@ select.lucid-input {
     color: #000;
     font-size: 13px;
 }
+
 [data-theme="dark"] .frappe-list-table td {
     border-bottom-color: #23313a;
     color: #d1d8dd;
@@ -856,12 +853,19 @@ select.lucid-input {
     display: block;
     text-decoration: none;
 }
+
 .subject-meta {
     color: #8d99a6;
     font-size: 11px;
 }
-[data-theme="dark"] .subject-main { color: #d1d8dd; }
-[data-theme="dark"] .subject-meta { color: #5c6975; }
+
+[data-theme="dark"] .subject-main {
+    color: #d1d8dd;
+}
+
+[data-theme="dark"] .subject-meta {
+    color: #5c6975;
+}
 
 /* Status Indicator (Dot) */
 .indicator {
@@ -870,6 +874,7 @@ select.lucid-input {
     font-size: 12px;
     color: #1f272e;
 }
+
 .indicator::before {
     content: '';
     display: inline-block;
@@ -878,36 +883,189 @@ select.lucid-input {
     border-radius: 50%;
     margin-right: 8px;
 }
-[data-theme="dark"] .indicator { color: #d1d8dd; }
+
+[data-theme="dark"] .indicator {
+    color: #d1d8dd;
+}
 
 /* Status Colors (Synced with existing definitions) */
-.indicator.green::before { background: #28a745; }
-.indicator.red::before { background: #ff5858; }
-.indicator.orange::before { background: #ffa00a; }
-.indicator.blue::before { background: #5e64ff; }
-.indicator.gray::before { background: #8d99a6; }
+.indicator.green::before {
+    background: #28a745;
+}
+
+.indicator.red::before {
+    background: #ff5858;
+}
+
+.indicator.orange::before {
+    background: #ffa00a;
+}
+
+.indicator.blue::before {
+    background: #5e64ff;
+}
+
+.indicator.gray::before {
+    background: #8d99a6;
+}
 
 /* Components */
-.subject-cell { display: flex; align-items: flex-start; gap: 12px; }
+.subject-cell {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
 .user-avatar-circle {
-    width: 32px; height: 32px;
-    background: #032F30; /* Dark Teal */
+    width: 32px;
+    height: 32px;
+    background: #032F30;
+    /* Dark Teal */
     color: #ffffff;
-    font-weight: 600; font-size: 12px;
-    display: flex; align-items: center; justify-content: center;
+    font-weight: 600;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 5px;
 }
-[data-theme="dark"] .user-avatar-circle { background: #80cbc4; color: #004d40; }
 
-.priority-text { font-weight: 500; font-size: 12px; }
-.priority-high { color: #d32f2f; }
-.priority-medium { color: #f57c00; }
-.priority-low { color: #6BA3BE; }
-[data-theme="dark"] .priority-high { color: #ef9a9a; }
-[data-theme="dark"] .priority-medium { color: #ffcc80; }
-[data-theme="dark"] .priority-low { color: #90a4ae; }
+[data-theme="dark"] .user-avatar-circle {
+    background: #80cbc4;
+    color: #004d40;
+}
 
-.due-date { font-size: 12px; color: #8d99a6; }
-.due-date.overdue { color: #d32f2f; font-weight: 500; }
-[data-theme="dark"] .due-date { color: #80cbc4; }
-[data-theme="dark"] .due-date.overdue { color: #ef9a9a; }
+.priority-text {
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.priority-high {
+    color: #d32f2f;
+}
+
+.priority-medium {
+    color: #f57c00;
+}
+
+.priority-low {
+    color: #6BA3BE;
+}
+
+[data-theme="dark"] .priority-high {
+    color: #ef9a9a;
+}
+
+[data-theme="dark"] .priority-medium {
+    color: #ffcc80;
+}
+
+[data-theme="dark"] .priority-low {
+    color: #90a4ae;
+}
+
+.due-date {
+    font-size: 12px;
+    color: #8d99a6;
+}
+
+.due-date.overdue {
+    color: #d32f2f;
+    font-weight: 500;
+}
+
+[data-theme="dark"] .due-date {
+    color: #80cbc4;
+}
+
+[data-theme="dark"] .due-date.overdue {
+    color: #ef9a9a;
+}
+
+/* Gantt View Styles */
+#gantt-view-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+[data-theme="dark"] #gantt-view-container {
+    background: #1e1e1e;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] #gantt-view-container h4 {
+    color: #e0e0e0 !important;
+}
+
+#gantt-chart-svg {
+    overflow-x: auto;
+    padding: 20px 0;
+}
+
+/* Gantt Task Bars */
+.gantt-task-completed .bar-progress {
+    fill: #10b981 !important;
+}
+
+.gantt-task-completed .bar {
+    fill: #d1fae5 !important;
+}
+
+.gantt-task-overdue .bar-progress {
+    fill: #ef4444 !important;
+}
+
+.gantt-task-overdue .bar {
+    fill: #fee2e2 !important;
+}
+
+.gantt-task-working .bar-progress {
+    fill: #f59e0b !important;
+}
+
+.gantt-task-working .bar {
+    fill: #fef3c7 !important;
+}
+
+.gantt-task-open .bar-progress {
+    fill: #3b82f6 !important;
+}
+
+.gantt-task-open .bar {
+    fill: #dbeafe !important;
+}
+
+/* Dark Mode Gantt Adjustments - Simple Overrides */
+[data-theme="dark"] .gantt .grid-header {
+    fill: #2c2c2c;
+}
+
+[data-theme="dark"] .gantt .grid-row {
+    fill: #1e1e1e;
+}
+
+[data-theme="dark"] .gantt .grid-row:nth-child(even) {
+    fill: #2c2c2c;
+}
+
+[data-theme="dark"] .gantt text {
+    fill: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .gantt-task-completed .bar {
+    fill: #064e3b !important;
+}
+
+[data-theme="dark"] .gantt-task-overdue .bar {
+    fill: #7f1d1d !important;
+}
+
+[data-theme="dark"] .gantt-task-working .bar {
+    fill: #78350f !important;
+}
+
+[data-theme="dark"] .gantt-task-open .bar {
+    fill: #1e3a8a !important;
+}
