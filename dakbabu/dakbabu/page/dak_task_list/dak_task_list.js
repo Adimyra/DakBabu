@@ -142,47 +142,31 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
         <!-- Latest Task Featured Card -->
         <div id="latest-task-container" style="width: 100%; margin-bottom: 0px; display: none;"></div>
 
-        <!-- Bottom Cards Wrapper: Task List Container (Card View) -->
-        <div style="width: 100%; margin-bottom: 50px; display: flex; flex-wrap: wrap; row-gap: 15px; column-gap: 30px; margin-top: 5px;" id="task-list-container">
-            <div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.5); width: 100%;">
-                <i class="fa fa-spinner fa-spin" style="font-size: 2rem;"></i><br>Loading Tasks...
-            </div>
-        </div>
-        <div id="card-pagination-controls" style="width: 100%; display: flex; justify-content: center; margin-top: 20px;"></div>
-
-
-        <!-- Kanban View -->
-        <div id="kanban-task-list" style="display: none; width: 100%; overflow-x: auto; padding-bottom: 20px; margin-top: 0px; flex-direction: column;">
-             <div style="margin-bottom: 10px; display: flex; justify-content: flex-end;">
-                  <button class="btn btn-default btn-sm" onclick="frappe.pages['dak_task_list'].prompt_kanban_grouping()" style="background: #fff; border: 1px solid #e5e7eb; color: #374151; font-weight: 600;">
-                    <i class="fa fa-sliders" style="margin-right: 5px;"></i> Group By: <span id="current-kanban-group">Status</span>
-                  </button>
-             </div>
-             <div id="kanban-columns-wrapper" style="display: flex; gap: 20px;"></div>
-        </div>
-
-
-        <!-- Standard List View -->
-        <div id="standard-task-list" style="width: 100%; margin-bottom: 50px; background: #ffffff; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 20px; display: none;">
-            <!-- Filters -->
-            <div class="row" style="margin-bottom: 20px;">
-                <div class="col-md-2">
-                    <div class="dropdown" style="width: 100%;">
-                        <button class="btn btn-default btn-sm dropdown-toggle form-control" type="button" data-toggle="dropdown" style="text-align: left; display: flex; justify-content: space-between; align-items: center;">
-                            <span><i class="fa fa-list-ul"></i> Group: <span id="group-by-label">None</span></span> <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" style="width: 100%; margin-top: 5px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: none;">
-                            <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by(null)" style="padding: 8px 15px;">None</a></li>
-                            <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by('status')" style="padding: 8px 15px;">Status</a></li>
-                            <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by('priority')" style="padding: 8px 15px;">Priority</a></li>
-                        </ul>
+        <!-- Shared Filter Bar (Premium Pill Design) -->
+        <div id="task-filter-wrapper" style="width: 100%; padding: 10px 40px; background: #ffffff; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center;">
+            <div class="dak-filter-bar" style="width: 100%;">
+                <!-- Grouping Pill -->
+                <div class="dropdown" id="task-group-pill-dropdown">
+                    <div class="dak-filter-pill dropdown-toggle" data-toggle="dropdown" id="task-group-pill">
+                        <i class="fa fa-list-ul"></i>
+                        <span>Group: <span id="group-by-label" style="font-weight: 700;">None</span></span>
                     </div>
+                    <ul class="dropdown-menu" style="margin-top: 10px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: none; padding: 5px;">
+                        <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by(null)" style="padding: 10px 15px; border-radius: 8px;">None</a></li>
+                        <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by('status')" style="padding: 10px 15px; border-radius: 8px;">Status</a></li>
+                        <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by('priority')" style="padding: 10px 15px; border-radius: 8px;">Priority</a></li>
+                    </ul>
                 </div>
-                <div class="col-md-4">
-                    <input type="text" id="filter-subject" class="form-control" placeholder="Filter by Subject..." onkeyup="frappe.pages['dak_task_list'].apply_task_filters()">
+
+                <!-- Search Pill -->
+                <div class="dak-filter-search">
+                    <i class="fa fa-search" style="color: #9ca3af;"></i>
+                    <input type="text" id="filter-subject" placeholder="Filter by Subject..." onkeyup="frappe.pages['dak_task_list'].apply_task_filters()">
                 </div>
-                <div class="col-md-2">
-                    <select id="filter-status" class="form-control" onchange="frappe.pages['dak_task_list'].apply_task_filters()">
+
+                <!-- Status Pill -->
+                <div class="dak-filter-pill" id="status-pill">
+                    <select id="filter-status" onchange="frappe.pages['dak_task_list'].apply_task_filters(); $(this).closest('.dak-filter-pill').toggleClass('active', !!this.value)">
                         <option value="">All Statuses</option>
                         <option value="Open">Open</option>
                         <option value="Working">Working</option>
@@ -191,8 +175,10 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
                         <option value="Completed">Completed</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <select id="filter-priority" class="form-control" onchange="frappe.pages['dak_task_list'].apply_task_filters()">
+
+                <!-- Priority Pill -->
+                <div class="dak-filter-pill" id="priority-pill">
+                    <select id="filter-priority" onchange="frappe.pages['dak_task_list'].apply_task_filters(); $(this).closest('.dak-filter-pill').toggleClass('active', !!this.value)">
                         <option value="">All Priorities</option>
                         <option value="Low">Low</option>
                         <option value="Medium">Medium</option>
@@ -200,8 +186,10 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
                         <option value="Urgent">Urgent</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <select id="filter-date" class="form-control" onchange="frappe.pages['dak_task_list'].apply_task_filters()">
+
+                <!-- Date Pill -->
+                <div class="dak-filter-pill" id="date-pill">
+                    <select id="filter-date" onchange="frappe.pages['dak_task_list'].apply_task_filters(); $(this).closest('.dak-filter-pill').toggleClass('active', !!this.value)">
                         <option value="">All Dates</option>
                         <option value="Today">Today</option>
                         <option value="Tomorrow">Tomorrow</option>
@@ -213,6 +201,25 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
                     </select>
                 </div>
             </div>
+        </div>
+
+        <!-- Bottom Cards Wrapper: Task List Container (Card View) -->
+        <div style="width: 100%; margin-bottom: 50px; display: flex; flex-wrap: wrap; row-gap: 15px; column-gap: 30px; margin-top: 5px;" id="task-list-container">
+            <div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.5); width: 100%;">
+                <i class="fa fa-spinner fa-spin" style="font-size: 2rem;"></i><br>Loading Tasks...
+            </div>
+        </div>
+        <div id="card-pagination-controls" style="width: 100%; display: flex; justify-content: center; margin-top: 20px;"></div>
+
+
+        <!-- Kanban View -->
+        <div id="kanban-task-list" style="display: none; width: 100%; overflow-x: auto; padding-bottom: 20px; margin-top: 0px; flex-direction: column;">
+             <div id="kanban-columns-wrapper" style="display: flex; gap: 20px;"></div>
+        </div>
+
+
+        <!-- Standard List View -->
+        <div id="standard-task-list" style="width: 100%; margin-bottom: 50px; background: #ffffff; border-radius: 0px; padding: 20px 40px; display: none;">
 
             <div class="table-responsive">
                 <table class="frappe-list-table" id="standard-task-table">
@@ -321,11 +328,19 @@ frappe.pages["dak_task_list"].toggle_view = function (view) {
     let $wrapper = $(frappe.pages["dak_task_list"].page_wrapper);
     $wrapper.find("#view-toggle-list, #view-toggle-card, #view-toggle-kanban").css("display", "flex");
 
+    // Filter Bar Logic
+    const $filterWrapper = $wrapper.find("#task-filter-wrapper");
+    const $groupPill = $wrapper.find("#task-group-pill-dropdown");
+
     if (view === "list") {
+        $filterWrapper.show();
+        $groupPill.show();
         $wrapper.find("#task-list-container, #kanban-task-list").hide();
         $wrapper.find("#standard-task-list").fadeIn(200);
         $wrapper.find("#view-toggle-list").hide();
     } else if (view === "card" || view === "grid") {
+        $filterWrapper.show();
+        $groupPill.hide();
         $wrapper.find("#standard-task-list, #kanban-task-list").hide();
         $wrapper.find("#task-list-container").css("display", "flex").fadeIn(200);
         $wrapper.find("#view-toggle-card").hide();
@@ -334,6 +349,8 @@ frappe.pages["dak_task_list"].toggle_view = function (view) {
             frappe.pages["dak_task_list"].prompt_kanban_grouping();
             return;
         }
+        $filterWrapper.show();
+        $groupPill.show();
         $wrapper.find("#task-list-container, #standard-task-list").hide();
         $wrapper.find("#kanban-task-list").css("display", "flex").fadeIn(200);
         $wrapper.find("#view-toggle-kanban").hide();

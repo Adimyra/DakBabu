@@ -181,45 +181,51 @@ class DakProjects {
                 </div>
             </div>
 
-            <!-- Standard List View -->
-            <div id="standard-project-list" style="width: 100%; margin-bottom: 50px; background: #ffffff; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 20px; margin-top: 0px;">
-                <h3 style="margin-bottom: 20px; font-size: 1.5rem; color: #374151;">All Projects</h3>
-                
-                <!-- Standardized Filters -->
-                <div class="row" style="margin-bottom: 20px;">
-                    <div class="col-md-2">
-                        <div class="dropdown" style="width: 100%;">
-                            <button class="btn btn-default btn-sm dropdown-toggle form-control" type="button" data-toggle="dropdown" style="text-align: left; display: flex; justify-content: space-between; align-items: center;">
-                                <span><i class="fa fa-list-ul"></i> Group: <span id="project-group-by-label">None</span></span> <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" style="width: 100%; margin-top: 5px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: none;">
-                                <li><a href="#" onclick="frappe.pages['dak_projects'].controller.set_group_by(null)" style="padding: 8px 15px;">None</a></li>
-                                <li><a href="#" onclick="frappe.pages['dak_projects'].controller.set_group_by('status')" style="padding: 8px 15px;">Status</a></li>
-                                <li><a href="#" onclick="frappe.pages['dak_projects'].controller.set_group_by('priority')" style="padding: 8px 15px;">Priority</a></li>
-                            </ul>
+            <!-- Shared Filter Bar (Premium Pill Design) -->
+            <div id="project-filter-wrapper" style="width: 100%; padding: 5px 40px; background: #ffffff; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center;">
+                <div class="dak-filter-bar" style="width: 100%;">
+                    <!-- Grouping Pill -->
+                    <div class="dropdown" id="project-group-pill-dropdown">
+                        <div class="dak-filter-pill dropdown-toggle" data-toggle="dropdown" id="project-group-pill">
+                            <i class="fa fa-list-ul"></i>
+                            <span>Group: <span id="project-group-by-label" style="font-weight: 700;">None</span></span>
                         </div>
+                        <ul class="dropdown-menu" style="margin-top: 10px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: none; padding: 5px;">
+                            <li><a href="#" onclick="frappe.pages['dak_projects'].controller.set_group_by(null)" style="padding: 10px 15px; border-radius: 8px;">None</a></li>
+                            <li><a href="#" onclick="frappe.pages['dak_projects'].controller.set_group_by('status')" style="padding: 10px 15px; border-radius: 8px;">Status</a></li>
+                            <li><a href="#" onclick="frappe.pages['dak_projects'].controller.set_group_by('priority')" style="padding: 10px 15px; border-radius: 8px;">Priority</a></li>
+                        </ul>
                     </div>
-                    <div class="col-md-4">
-                        <input type="text" id="project-filter-name" class="form-control" placeholder="Filter by Project Name..." onkeyup="frappe.pages['dak_projects'].controller.apply_project_filters()">
+
+                    <!-- Search Pill -->
+                    <div class="dak-filter-search">
+                        <i class="fa fa-search" style="color: #9ca3af;"></i>
+                        <input type="text" id="project-filter-name" placeholder="Filter by Subject..." onkeyup="frappe.pages['dak_projects'].controller.apply_project_filters()">
                     </div>
-                    <div class="col-md-2">
-                        <select id="project-filter-status" class="form-control" onchange="frappe.pages['dak_projects'].controller.apply_project_filters()">
+
+                    <!-- Status Pill -->
+                    <div class="dak-filter-pill" id="status-pill">
+                        <select id="project-filter-status" onchange="frappe.pages['dak_projects'].controller.apply_project_filters(); $(this).closest('.dak-filter-pill').toggleClass('active', !!this.value)">
                             <option value="">All Statuses</option>
                             <option value="Open">Open</option>
                             <option value="Working">Working</option>
                             <option value="Completed">Completed</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <select id="project-filter-priority" class="form-control" onchange="frappe.pages['dak_projects'].controller.apply_project_filters()">
+
+                    <!-- Priority Pill -->
+                    <div class="dak-filter-pill" id="priority-pill">
+                        <select id="project-filter-priority" onchange="frappe.pages['dak_projects'].controller.apply_project_filters(); $(this).closest('.dak-filter-pill').toggleClass('active', !!this.value)">
                             <option value="">All Priorities</option>
                             <option value="Low">Low</option>
                             <option value="Medium">Medium</option>
                             <option value="High">High</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <select id="project-filter-date" class="form-control" onchange="frappe.pages['dak_projects'].controller.apply_project_filters()">
+
+                    <!-- Date Pill -->
+                    <div class="dak-filter-pill" id="date-pill">
+                        <select id="project-filter-date" onchange="frappe.pages['dak_projects'].controller.apply_project_filters(); $(this).closest('.dak-filter-pill').toggleClass('active', !!this.value)">
                             <option value="">All Dates</option>
                             <option value="Today">Today</option>
                             <option value="This Week">This Week</option>
@@ -227,6 +233,12 @@ class DakProjects {
                         </select>
                     </div>
                 </div>
+            </div>
+
+            <!-- Standard List View -->
+            <div id="standard-project-list" style="width: 100%; margin-bottom: 50px; background: #ffffff; border-radius: 0; padding: 20px 40px; margin-top: 0px;">
+                <h3 style="margin-bottom: 20px; font-size: 1.5rem; color: #374151;">All Projects</h3>
+                
                 <div class="table-responsive">
                     <table class="frappe-list-table" id="project-table" style="width: 100%; table-layout: fixed;">
                         <thead>
@@ -323,12 +335,20 @@ class DakProjects {
         // Reset visibility of toggle buttons
         this.page.main.find("#project-view-list, #project-view-gantt, #project-view-grid").css("display", "flex");
 
+        // Global Filter Bar Handling
+        const $filterWrapper = this.page.main.find("#project-filter-wrapper");
+        const $groupPill = this.page.main.find("#project-group-pill-dropdown");
+
         if (view === 'list') {
+            $filterWrapper.show();
+            $groupPill.show();
             this.page.main.find("#project-gantt-view").hide();
             this.page.main.find("#project-grid-view").hide();
+            this.page.main.find("#project-details-view").hide();
             this.page.main.find("#standard-project-list").fadeIn(200);
             this.page.main.find("#project-view-list").css("display", "none");
         } else if (view === 'gantt') {
+            $filterWrapper.hide();
             this.page.main.find("#standard-project-list").hide();
             this.page.main.find("#project-grid-view").hide();
             this.page.main.find("#project-details-view").hide();
@@ -345,7 +365,8 @@ class DakProjects {
 
             this.render_gantt_view();
         } else if (view === 'grid') {
-            console.log("Projects: Switching to Grid View. Data available:", (this.all_projects || []).length);
+            $filterWrapper.show();
+            $groupPill.hide(); // Grouping not supported in Grid yet
             this.page.main.find("#standard-project-list").hide();
             this.page.main.find("#project-gantt-view").hide();
             this.page.main.find("#project-details-view").hide();
@@ -920,7 +941,24 @@ class DakProjects {
                     <!-- Right Column: Tasks & Timeline -->
                     <div style="flex: 2; min-width: 400px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0; color: #374151;">Project Tasks</h3>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0; color: #374151;">Project Tasks</h3>
+                                <button class="btn btn-default" id="btn-add-task-to-project" style="
+                                    width: 28px;
+                                    height: 28px;
+                                    padding: 0;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    border-radius: 6px;
+                                    background: #f3f4f6;
+                                    border: 1px solid #e5e7eb;
+                                    color: #4b5563;
+                                    transition: all 0.2s;
+                                " onmouseover="this.style.background='#e5e7eb'; this.style.color='#111827'" onmouseout="this.style.background='#f3f4f6'; this.style.color='#4b5563'">
+                                    <i class="fa fa-plus" style="font-size: 0.9rem;"></i>
+                                </button>
+                            </div>
                             <div class="btn-group">
                                 <button class="btn btn-default btn-xs active" id="btn-tasks-list">List</button>
                                 <button class="btn btn-default btn-xs" id="btn-tasks-gantt">Timeline</button>
@@ -943,13 +981,15 @@ class DakProjects {
         `;
 
         this.page.main.find("#project-details-card").html(detailsHtml);
+        this.page.main.find("#project-filter-wrapper").hide();
         this.page.main.find("#standard-project-list").hide();
+        this.page.main.find("#project-grid-view").hide();
         this.page.main.find("#project-details-view").fadeIn();
 
         // Bind Back Button
         this.page.main.find("#btn-back-projects").off("click").on("click", function () {
             me.page.main.find("#project-details-view").hide();
-            me.page.main.find("#standard-project-list").fadeIn();
+            me.toggle_view(me.current_view || 'list');
         });
 
         // Load Tasks
@@ -975,6 +1015,10 @@ class DakProjects {
                     me.page.main.find("#project-tasks-list-container").html(tasksHtml);
 
                     // Setup Toggles
+                    me.page.main.find("#btn-add-task-to-project").on("click", function () {
+                        me.open_add_task_modal(project.name, project.customer);
+                    });
+
                     me.page.main.find("#btn-tasks-list").on("click", function () {
                         $(this).addClass("active");
                         me.page.main.find("#btn-tasks-gantt").removeClass("active");
@@ -1202,6 +1246,107 @@ class DakProjects {
                 function () { $(this).css("background-color", "#2e605c").css("border-color", "#2e605c"); }
             );
         }
+    }
+
+    open_add_task_modal(project_name, customer_name) {
+        let me = this;
+        let d = new frappe.ui.Dialog({
+            title: __('Add New Task'),
+            fields: [
+                {
+                    label: __('Subject'),
+                    fieldname: 'subject',
+                    fieldtype: 'Data',
+                    reqd: 1
+                },
+                {
+                    fieldtype: 'Section Break'
+                },
+                {
+                    label: __('Project'),
+                    fieldname: 'project',
+                    fieldtype: 'Link',
+                    options: 'Project',
+                    default: project_name,
+                    read_only: 1
+                },
+                {
+                    label: __('Customer'),
+                    fieldname: 'customer',
+                    fieldtype: 'Link',
+                    options: 'Customer',
+                    default: customer_name,
+                    read_only: 1,
+                    hidden: !customer_name
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    label: __('Status'),
+                    fieldname: 'status',
+                    fieldtype: 'Select',
+                    options: ['Open', 'Working', 'Pending Review', 'Completed', 'Cancelled'],
+                    default: 'Open'
+                },
+                {
+                    label: __('Priority'),
+                    fieldname: 'priority',
+                    fieldtype: 'Select',
+                    options: ['Low', 'Medium', 'High', 'Urgent'],
+                    default: 'Medium'
+                },
+                {
+                    fieldtype: 'Section Break'
+                },
+                {
+                    label: __('Exp Start Date'),
+                    fieldname: 'exp_start_date',
+                    fieldtype: 'Date',
+                    default: frappe.datetime.get_today()
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    label: __('Exp End Date'),
+                    fieldname: 'exp_end_date',
+                    fieldtype: 'Date'
+                },
+                {
+                    fieldtype: 'Section Break'
+                },
+                {
+                    label: __('Description'),
+                    fieldname: 'description',
+                    fieldtype: 'Text',
+                }
+            ],
+            primary_action_label: __('Create Task'),
+            primary_action(values) {
+                frappe.call({
+                    method: 'frappe.client.insert',
+                    args: {
+                        doc: {
+                            doctype: 'Task',
+                            ...values
+                        }
+                    },
+                    callback: function (r) {
+                        if (r.message) {
+                            frappe.show_alert({
+                                message: __('Task created successfully'),
+                                indicator: 'green'
+                            });
+                            d.hide();
+                            // Refresh project details to show the new task
+                            me.open_project_details(project_name);
+                        }
+                    }
+                });
+            }
+        });
+        d.show();
     }
 
     open_task_details_modal(task_name) {
