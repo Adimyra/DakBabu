@@ -88,11 +88,11 @@ class DakTimesheets {
                             font-size: 1.1rem;
                             backdrop-filter: blur(5px);
                         ">
-                            <i class="fa fa-cubes"></i>
+                            <i class="fa fa-check"></i>
                         </div>
                         <div style="display: flex; flex-direction: column;">
-                            <h1 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #ffffff; line-height: 1.2; letter-spacing: 0.02em;">DakBabu</h1>
-                            <span style="font-size: 0.7rem; color: rgba(255,255,255,0.6); font-weight: 500; letter-spacing: 0.5px;">Project Management</span>
+                            <h1 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #ffffff; line-height: 1.2; letter-spacing: 0.02em;">TaskFlow</h1>
+                            <span style="font-size: 0.7rem; color: rgba(255,255,255,0.6); font-weight: 500; letter-spacing: 0.5px;">ERPNext Extension</span>
                         </div>
                     </div>
 
@@ -106,6 +106,9 @@ class DakTimesheets {
                         </div>
                         <div style="display: flex; align-items: center; color: rgba(255,255,255,0.7); font-weight: 500; cursor: pointer; transition: color 0.2s;" onclick="frappe.set_route('dak_projects')" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
                             <i class="fa fa-briefcase" style="margin-right: 8px; font-size: 1rem;"></i> Projects
+                        </div>
+                        <div style="display: flex; align-items: center; color: rgba(255,255,255,0.7); font-weight: 500; cursor: pointer; transition: color 0.2s;" onclick="frappe.set_route('dak_day_planner')" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
+                            <i class="fa fa-calendar-check-o" style="margin-right: 8px; font-size: 1rem;"></i> Day Planner
                         </div>
                          <div style="display: flex; align-items: center; color: #ffffff; font-weight: 600; cursor: pointer; border-bottom: 2px solid #ffffff; padding-bottom: 5px;">
                             <i class="fa fa-clock-o" style="margin-right: 8px; font-size: 1rem;"></i> Timesheets

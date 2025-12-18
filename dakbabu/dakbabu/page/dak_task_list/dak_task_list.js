@@ -276,7 +276,7 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
 frappe.pages["dak_task_list"].render_task_list = function (wrapper) {
     if (!frappe.pages["dak_task_list"].visible_columns) {
         frappe.pages["dak_task_list"].visible_columns = [
-            { label: "Working", field: "custom_working_now", width: "10%" },
+            { label: "Working", field: "custom_working_now", width: "5%" },
             { label: "Subject", field: "subject", width: "30%" },
             { label: "Status", field: "status", width: "15%" },
             { label: "Priority", field: "priority", width: "15%" },
@@ -686,6 +686,7 @@ frappe.pages["dak_task_list"].get_task_row_html = function (task) {
 				<div class="user-avatar-circle">${assignee}</div>
 				<div style="display:flex; flex-direction:column; justify-content:center;">
 					<span class="subject-main">${task.subject}</span>
+                    <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 2px;">${task.name}</div>
 				</div>
 			</div>`;
         } else if (col.field === "status") {
@@ -695,6 +696,8 @@ frappe.pages["dak_task_list"].get_task_row_html = function (task) {
         } else if (col.field === "exp_end_date") {
             let dateClass = task.status === "Overdue" ? "due-date overdue" : "due-date";
             cellContent = `<span class="${dateClass}">${task.exp_end_date ? frappe.datetime.str_to_user(task.exp_end_date) : "-"}</span>`;
+        } else if (col.field === "name") {
+            cellContent = `<span style="font-weight: 600; color: #374151;">${task.name}</span>`;
         } else {
             cellContent = task[col.field] || "-";
         }
