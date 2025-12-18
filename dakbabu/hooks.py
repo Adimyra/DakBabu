@@ -21,7 +21,7 @@ app_license = "mit"
 # 	}
 # ]
 
-fixtures = [{"dt": "Custom Field", "filters": [["module", "in", ["DakBabu"]]]}]
+# fixtures = [{"dt": "Custom Field", "filters": [["module", "in", ["DakBabu"]]]}]
 
 # Includes in <head>
 # ------------------
