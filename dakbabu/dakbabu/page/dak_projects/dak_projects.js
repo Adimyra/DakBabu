@@ -1365,11 +1365,10 @@ class DakProjects {
                     });
 
                     let statusColor = task.status === 'Completed' ? 'green' : (task.status === 'Overdue' ? 'red' : 'blue');
-                    // Removing 'Open Full Task Form' button by default, just showing 'Close' as secondary if needed, 
-                    // or we can add a custom action.
 
                     let html = `
                         <div style="padding: 20px;">
+                            <!-- Header Info -->
                             <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                                 <span class="indicator ${statusColor}" style="font-size: 14px; font-weight: 500;">${task.status}</span>
                                 <span style="background: #f3f4f6; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #4b5563; font-weight: 600;">${task.priority}</span>
@@ -1378,29 +1377,45 @@ class DakProjects {
                             
                             <h3 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 15px; color: #111827; line-height: 1.3;">${task.subject}</h3>
                             
-                            <div style="background: #f9fafb; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e5e7eb;">
-                                <div style="font-size: 0.95rem; color: #4b5563; line-height: 1.6; white-space: pre-wrap;">${task.description || '<span style="color: #9ca3af; font-style: italic;">No description provided.</span>'}</div>
-                            </div>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                                <div style="padding: 10px; border-radius: 8px; border: 1px solid #f3f4f6;">
-                                    <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Start Date</div>
-                                    <div style="font-weight: 600; color: #374151;">${task.exp_start_date ? frappe.datetime.str_to_user(task.exp_start_date) : '-'}</div>
-                                </div>
-                                <div style="padding: 10px; border-radius: 8px; border: 1px solid #f3f4f6;">
-                                    <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Due Date</div>
-                                    <div style="font-weight: 600; color: #374151;">${task.exp_end_date ? frappe.datetime.str_to_user(task.exp_end_date) : '-'}</div>
-                                </div>
-                                 <div style="padding: 10px; border-radius: 8px; border: 1px solid #f3f4f6;">
-                                    <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Assigned To</div>
-                                    <div style="font-weight: 600; color: #374151;">${task.allocated_to || '-'}</div> <!-- Assuming allocated_to field exists, or _assign -->
-                                </div>
-                            </div>
+                            <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+                                 <!-- Left Col: Description & Activities -->
+                                 <div style="flex: 3; min-width: 300px;">
+                                    <h4 style="font-size: 1rem; font-weight: 600; color: #374151; margin-bottom: 10px; text-transform: uppercase;">Description</h4>
+                                    <div style="background: #f9fafb; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e5e7eb;">
+                                        <div style="font-size: 0.95rem; color: #4b5563; line-height: 1.6; white-space: pre-wrap;">${task.description || '<span style="color: #9ca3af; font-style: italic;">No description provided.</span>'}</div>
+                                    </div>
 
-                            <div style="text-align: right; margin-top: 10px;">
-                                <button class="btn btn-default btn-xs" onclick="frappe.set_route('Form', 'Task', '${task.name}')">
-                                    Open Full Form <i class="fa fa-external-link" style="margin-left: 5px;"></i>
-                                </button>
+                                    <h4 style="font-size: 1rem; font-weight: 600; color: #374151; margin-bottom: 10px; text-transform: uppercase;">Timesheets</h4>
+                                    <div id="modal-timesheets-container" style="margin-bottom: 25px;">
+                                        <div style="padding: 10px; color: #9ca3af; font-style: italic;"><i class="fa fa-spinner fa-spin"></i> Loading timesheets...</div>
+                                    </div>
+
+                                    <h4 style="font-size: 1rem; font-weight: 600; color: #374151; margin-bottom: 10px; text-transform: uppercase;">Activity Log</h4>
+                                    <div id="modal-activities-container">
+                                         <div style="padding: 10px; color: #9ca3af; font-style: italic;"><i class="fa fa-spinner fa-spin"></i> Loading activities...</div>
+                                    </div>
+                                 </div>
+
+                                 <!-- Right Col: Meta Data -->
+                                 <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 15px;">
+                                    <div style="padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff;">
+                                        <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Start Date</div>
+                                        <div style="font-weight: 600; color: #374151;">${task.exp_start_date ? frappe.datetime.str_to_user(task.exp_start_date) : '-'}</div>
+                                    </div>
+                                    <div style="padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff;">
+                                        <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Due Date</div>
+                                        <div style="font-weight: 600; color: #374151;">${task.exp_end_date ? frappe.datetime.str_to_user(task.exp_end_date) : '-'}</div>
+                                    </div>
+                                     <div style="padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff;">
+                                        <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Assigned To</div>
+                                        <div style="font-weight: 600; color: #374151;">${task.allocated_to || '-'}</div>
+                                    </div>
+                                    <div style="margin-top: auto; text-align: center;">
+                                         <button class="btn btn-default btn-block" onclick="frappe.set_route('Form', 'Task', '${task.name}')" style="background-color: #f3f4f6; border: none; color: #374151; font-weight: 500;">
+                                            Open Full Details
+                                        </button>
+                                    </div>
+                                 </div>
                             </div>
                         </div>
                     `;
@@ -1408,9 +1423,89 @@ class DakProjects {
                     d.$body.html(html);
                     d.show();
 
-                    // Apply theme
-                    this.apply_modal_theme(d);
+                    // Apply Header Theme
+                    d.header.css({
+                        "background": "#2e605c",
+                        "color": "white"
+                    });
+                    d.header.find(".close").css("color", "white");
+                    d.header.find(".modal-title").css("color", "white");
+
+                    // Fetch Async Data
+                    this.fetch_timesheets(task.name, d);
+                    this.fetch_activities(task.name, d);
                 }
+            }
+        });
+    }
+
+    fetch_timesheets(task_name, d) {
+        frappe.call({
+            method: 'dakbabu.dakbabu.page.dak_timesheet.dak_timesheet.get_timesheets_for_task',
+            args: { task_name: task_name },
+            callback: (r) => {
+                let timesheets = r.message || [];
+                let html = '';
+                if (timesheets.length > 0) {
+                    html = `<table class="table table-bordered table-condensed" style="font-size: 0.9rem; margin-top: 10px;">
+                        <thead><tr style="background: #f9fafb;"><th>Date</th><th>Activity</th><th>Hrs</th></tr></thead>
+                        <tbody>`;
+                    timesheets.forEach(ts => {
+                        let date_val = ts.from_time ? frappe.datetime.str_to_user(ts.from_time).split(' ')[0] : '-';
+                        html += `<tr>
+                            <td>${date_val}</td>
+                            <td>${ts.activity_type || '-'}</td>
+                            <td style="font-weight: 600;">${ts.hours}</td>
+                        </tr>`;
+                    });
+                    html += `</tbody></table>`;
+                } else {
+                    html = `<div style="padding: 15px; text-align: center; color: #9ca3af; font-style: italic; background: #f9fafb; border-radius: 8px;">No timesheets recorded.</div>`;
+                }
+                d.$wrapper.find('#modal-timesheets-container').html(html);
+            },
+            error: () => {
+                d.$wrapper.find('#modal-timesheets-container').html(`<div style="padding: 10px; color: #ef4444; font-size: 0.85rem;">Permission denied for Timesheets.</div>`);
+                return true;
+            }
+        });
+    }
+
+    fetch_activities(task_name, d) {
+        frappe.call({
+            method: 'frappe.client.get_list',
+            args: {
+                doctype: 'Comment',
+                filters: {
+                    reference_doctype: 'Task',
+                    reference_name: task_name,
+                    comment_type: 'Comment'
+                },
+                fields: ['content', 'creation', 'owner'],
+                order_by: 'creation desc',
+                limit_page_length: 5
+            },
+            callback: (r) => {
+                let activities = r.message || [];
+                let html = '';
+                if (activities.length > 0) {
+                    activities.forEach(c => {
+                        html += `<div style="margin-bottom: 15px; border-bottom: 1px solid #f3f4f6; padding-bottom: 10px;">
+                            <div style="font-size: 0.8rem; color: #6b7280; display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <strong>${frappe.user.full_name(c.owner)}</strong>
+                                <span>${frappe.datetime.comment_when(c.creation)}</span>
+                            </div>
+                            <div style="font-size: 0.9rem; color: #374151;">${c.content}</div>
+                         </div>`;
+                    });
+                } else {
+                    html = `<div style="padding: 15px; text-align: center; color: #9ca3af; font-style: italic; background: #f9fafb; border-radius: 8px;">No recent comments.</div>`;
+                }
+                d.$wrapper.find('#modal-activities-container').html(html);
+            },
+            error: () => {
+                d.$wrapper.find('#modal-activities-container').html(`<div style="padding: 10px; color: #ef4444; font-size: 0.85rem;">Unable to load activities.</div>`);
+                return true;
             }
         });
     }
