@@ -143,64 +143,87 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
         <div id="latest-task-container" style="width: 100%; margin-bottom: 0px; display: none;"></div>
 
         <!-- Shared Filter Bar (Premium Pill Design) -->
-        <div id="task-filter-wrapper" style="width: 100%; padding: 10px 40px; background: #ffffff; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center;">
-            <div class="dak-filter-bar" style="width: 100%;">
-                <!-- Grouping Pill -->
-                <div class="dropdown" id="task-group-pill-dropdown">
-                    <div class="dak-filter-pill dropdown-toggle" data-toggle="dropdown" id="task-group-pill">
-                        <i class="fa fa-list-ul"></i>
-                        <span>Group: <span id="group-by-label" style="font-weight: 700;">None</span></span>
-                    </div>
-                    <ul class="dropdown-menu" style="margin-top: 10px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: none; padding: 5px;">
-                        <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by(null)" style="padding: 10px 15px; border-radius: 8px;">None</a></li>
-                        <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by('status')" style="padding: 10px 15px; border-radius: 8px;">Status</a></li>
-                        <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by('priority')" style="padding: 10px 15px; border-radius: 8px;">Priority</a></li>
-                    </ul>
-                </div>
-
-                <!-- Search Pill -->
-                <div class="dak-filter-search">
-                    <i class="fa fa-search" style="color: #9ca3af;"></i>
-                    <input type="text" id="filter-subject" placeholder="Filter by Subject..." onkeyup="frappe.pages['dak_task_list'].apply_task_filters()">
-                </div>
-
-                <!-- Status Pill -->
-                <div class="dak-filter-pill" id="status-pill">
-                    <select id="filter-status" onchange="frappe.pages['dak_task_list'].apply_task_filters(); $(this).closest('.dak-filter-pill').toggleClass('active', !!this.value)">
-                        <option value="">All Statuses</option>
-                        <option value="Open">Open</option>
-                        <option value="Working">Working</option>
-                        <option value="Pending Review">Pending Review</option>
-                        <option value="Overdue">Overdue</option>
-                        <option value="Completed">Completed</option>
-                    </select>
-                </div>
-
-                <!-- Priority Pill -->
-                <div class="dak-filter-pill" id="priority-pill">
-                    <select id="filter-priority" onchange="frappe.pages['dak_task_list'].apply_task_filters(); $(this).closest('.dak-filter-pill').toggleClass('active', !!this.value)">
-                        <option value="">All Priorities</option>
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
-                        <option value="Urgent">Urgent</option>
-                    </select>
-                </div>
-
-                <!-- Date Pill -->
-                <div class="dak-filter-pill" id="date-pill">
-                    <select id="filter-date" onchange="frappe.pages['dak_task_list'].apply_task_filters(); $(this).closest('.dak-filter-pill').toggleClass('active', !!this.value)">
-                        <option value="">All Dates</option>
-                        <option value="Today">Today</option>
-                        <option value="Tomorrow">Tomorrow</option>
-                        <option value="This Week">This Week</option>
-                        <option value="Next Week">Next Week</option>
-                        <option value="This Month">This Month</option>
-                        <option value="Next Month">Next Month</option>
-                        <option value="Overdue">Overdue</option>
-                    </select>
-                </div>
+        <div id="task-filter-wrapper" style="width: 100%; padding: 12px 40px; background: #ffffff; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 10px;">
+            
+            <!-- Grouping Pill -->
+            <div class="dropdown" id="task-group-pill-dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="
+                    background: #f3f4f6; border: none; color: #374151; font-weight: 600; font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; display: flex; align-items: center; gap: 8px; height: 36px;
+                ">
+                    <i class="fa fa-list-ul" style="color: #6b7280;"></i>
+                    <span>Group: <span id="group-by-label" style="columns: #111827;">None</span></span>
+                    <i class="fa fa-caret-down" style="color: #9ca3af; margin-left: 4px;"></i>
+                </button>
+                <ul class="dropdown-menu" style="margin-top: 5px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: none; padding: 5px;">
+                    <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by(null)" style="padding: 8px 15px; border-radius: 6px; font-weight: 500;">None</a></li>
+                    <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by('status')" style="padding: 8px 15px; border-radius: 6px; font-weight: 500;">Status</a></li>
+                    <li><a href="#" onclick="frappe.pages['dak_task_list'].set_group_by('priority')" style="padding: 8px 15px; border-radius: 6px; font-weight: 500;">Priority</a></li>
+                </ul>
             </div>
+
+            <!-- Search Pill -->
+            <div style="position: relative; flex-grow: 1; max-width: 400px;">
+                <i class="fa fa-search" style="position: absolute; left: 12px; top: 10px; color: #9ca3af; font-size: 0.9rem;"></i>
+                <input type="text" id="filter-subject" placeholder="Filter by Subject..." onkeyup="frappe.pages['dak_task_list'].apply_task_filters()" style="
+                    background: #f3f4f6; border: none; padding: 8px 12px 8px 36px; border-radius: 8px; width: 100%; font-size: 0.85rem; color: #374151; height: 36px; font-weight: 500; outline: none;
+                ">
+            </div>
+
+            <!-- Status Pill -->
+            <div style="position: relative;">
+                <select id="filter-status" onchange="frappe.pages['dak_task_list'].apply_task_filters();" style="
+                    appearance: none; -webkit-appearance: none;
+                    background: #f3f4f6; border: none; padding: 8px 32px 8px 16px; border-radius: 8px; font-size: 0.85rem; color: #374151; font-weight: 600; height: 36px; cursor: pointer; outline: none; min-width: 130px;
+                ">
+                    <option value="">All Statuses</option>
+                    <option value="Open">Open</option>
+                    <option value="Working">Working</option>
+                    <option value="Pending Review">Pending Review</option>
+                    <option value="Overdue">Overdue</option>
+                    <option value="Completed">Completed</option>
+                </select>
+                <i class="fa fa-chevron-down" style="position: absolute; right: 12px; top: 12px; color: #9ca3af; font-size: 0.7rem; pointer-events: none;"></i>
+            </div>
+
+            <!-- Priority Pill -->
+            <div style="position: relative;">
+                <select id="filter-priority" onchange="frappe.pages['dak_task_list'].apply_task_filters();" style="
+                    appearance: none; -webkit-appearance: none;
+                    background: #f3f4f6; border: none; padding: 8px 32px 8px 16px; border-radius: 8px; font-size: 0.85rem; color: #374151; font-weight: 600; height: 36px; cursor: pointer; outline: none; min-width: 130px;
+                ">
+                    <option value="">All Priorities</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
+                </select>
+                <i class="fa fa-chevron-down" style="position: absolute; right: 12px; top: 12px; color: #9ca3af; font-size: 0.7rem; pointer-events: none;"></i>
+            </div>
+
+            <!-- Date Pill -->
+            <div style="position: relative;">
+                <select id="filter-date" onchange="frappe.pages['dak_task_list'].apply_task_filters();" style="
+                    appearance: none; -webkit-appearance: none;
+                    background: #f3f4f6; border: none; padding: 8px 32px 8px 16px; border-radius: 8px; font-size: 0.85rem; color: #374151; font-weight: 600; height: 36px; cursor: pointer; outline: none; min-width: 120px;
+                ">
+                    <option value="">All Dates</option>
+                    <option value="Today">Today</option>
+                    <option value="Tomorrow">Tomorrow</option>
+                    <option value="This Week">This Week</option>
+                    <option value="Next Week">Next Week</option>
+                    <option value="This Month">This Month</option>
+                    <option value="Next Month">Next Month</option>
+                    <option value="Overdue">Overdue</option>
+                </select>
+                <i class="fa fa-chevron-down" style="position: absolute; right: 12px; top: 12px; color: #9ca3af; font-size: 0.7rem; pointer-events: none;"></i>
+            </div>
+
+            <!-- Reset Button -->
+            <button class="btn btn-default" onclick="frappe.pages['dak_task_list'].reset_all_filters()" style="
+                background: #ffffff; border: 1px solid #d1d5db; color: #6b7280; font-weight: 600; padding: 6px 14px; border-radius: 8px; height: 36px; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+            " onmouseover="this.style.borderColor='#9ca3af'; this.style.color='#374151'" onmouseout="this.style.borderColor='#d1d5db'; this.style.color='#6b7280'">
+                <i class="fa fa-refresh"></i> Reset
+            </button>
         </div>
 
         <!-- Bottom Cards Wrapper: Task List Container (Card View) -->
@@ -357,6 +380,23 @@ frappe.pages["dak_task_list"].toggle_view = function (view) {
     }
 };
 
+
+frappe.pages["dak_task_list"].reset_all_filters = function () {
+    $("#filter-subject").val("");
+    $("#filter-status").val("").change(); // Trigger change to update pill styling if needed
+    $("#filter-priority").val("").change();
+    $("#filter-date").val("").change();
+
+    // Reset Grouping
+    frappe.pages["dak_task_list"].group_by_field = null;
+    $("#group-by-label").text("None");
+
+    // Reset Pills Visuals
+    $(".dak-filter-pill").removeClass("active");
+
+    frappe.pages["dak_task_list"].apply_task_filters();
+    frappe.show_alert({ message: "Filters Reset", indicator: "blue" });
+};
 
 frappe.pages["dak_task_list"].apply_task_filters = function (reset_pagination = true) {
     if (reset_pagination) frappe.pages["dak_task_list"].currentPage = 1;

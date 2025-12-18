@@ -1,16 +1,33 @@
 import frappe
 
 @frappe.whitelist()
-def get_timesheets_summary(status=None):
+def get_timesheets_summary(status=None, from_date=None, to_date=None, employee=None, search_term=None):
     filters = {}
+    
+    # Status Filter
     if status and status != 'All':
         filters['status'] = status
     
+    # Date Range Filter
+    if from_date and to_date:
+        filters['start_date'] = ['between', [from_date, to_date]]
+    elif from_date:
+        filters['start_date'] = ['>=', from_date]
+    elif to_date:
+        filters['start_date'] = ['<=', to_date]
+
+    # Employee Filter
+    if employee:
+        filters['employee'] = employee
+
+    # Search Filter
+    if search_term:
+        filters['name|note|employee_name'] = ['like', f'%{search_term}%']
+    
     timesheets = frappe.get_list('Timesheet', 
-        fields=['name', 'status', 'start_date', 'total_hours', 'note', 'employee_name', 'owner'], 
+        fields=['name', 'status', 'start_date', 'end_date', 'total_hours', 'note', 'employee_name', 'owner', 'employee'], 
         filters=filters, 
-        order_by='modified desc',
-        ignore_permissions=True
+        order_by='modified desc'
     )
     
     return timesheets

@@ -102,6 +102,7 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
                         <li><a href="#" onclick="frappe.msgprint('Day Planner focuses on specific days. Use the date picker below for detailed navigation.'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">All Time</a></li>
                         <li><a href="#" onclick="frappe.msgprint('Already showing Today\'s Plan'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Today</a></li>
                          <li><a href="#" onclick="frappe.msgprint('Future planning coming soon!'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Tomorrow</a></li>
+                         <li style="border-top: 1px solid #f3f4f6; margin-top: 5px; padding-top: 5px;"><a href="#" onclick="frappe.pages['dak_day_planner'].load_tasks(); frappe.pages['dak_day_planner'].render_grid(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #4b5563;"><i class="fa fa-refresh" style="margin-right:8px;"></i> Reset / Reload</a></li>
                     </ul>
                 </div>
             </div>

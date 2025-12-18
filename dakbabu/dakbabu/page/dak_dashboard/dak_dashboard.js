@@ -125,6 +125,7 @@ frappe.pages["dak_dashboard"].render_page_content = function (wrapper) {
                         <li><a href="#" onclick="frappe.pages['dak_dashboard'].refresh_stats('Today', true); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Today</a></li>
                         <li><a href="#" onclick="frappe.pages['dak_dashboard'].refresh_stats('This Week', true); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">This Week</a></li>
                         <li><a href="#" onclick="frappe.pages['dak_dashboard'].refresh_stats('This Month', true); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">This Month</a></li>
+                        <li style="border-top: 1px solid #f3f4f6; margin-top: 5px; padding-top: 5px;"><a href="#" onclick="frappe.pages['dak_dashboard'].refresh_stats('All Time', true); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #4b5563;"><i class="fa fa-refresh" style="margin-right:8px;"></i> Reset Filter</a></li>
                     </ul>
                 </div>
 
@@ -316,7 +317,7 @@ frappe.pages["dak_dashboard"].render_page_content = function (wrapper) {
                                     Recent Activity
                                 </h4>
 
-                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div id="recent-activity-container" style="display: flex; flex-direction: column; gap: 20px;">
                                     <!-- Latest Task Item -->
                                     <div id="recent-activity-task" style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer;" onclick="frappe.set_route('List', 'Task')">
                                         <div style="width: 8px; height: 8px; background: #a7f3d0; border-radius: 50%;"></div>
@@ -519,6 +520,47 @@ frappe.pages["dak_dashboard"].render_page_content = function (wrapper) {
                             </div>
                         </div>
 
+                    </div>
+
+                    <!-- Timesheet Info Card -->
+                    <div class="reminder-section dashboard-matrix-card" style="
+                        margin-top: 15px; 
+                        background: linear-gradient(135deg, #3d807a 0%, #5baaa4 100%);
+                        padding: 10px 20px;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+                        border-radius: 12px;
+                        position: relative;
+                        overflow: hidden;
+                        border: none;
+                        color: #ffffff;
+                    ">
+                        <!-- Decorative Circles -->
+                        <div style="position: absolute; top: -30px; left: -30px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+                        <div style="position: absolute; bottom: -20px; right: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+
+                        <div style="position: relative; z-index: 1;">
+                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                <span style="font-size: 1rem; margin-right: 8px; background: rgba(255,255,255,0.2); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; backdrop-filter: blur(5px);">
+                                    <i class="fa fa-clock-o"></i>
+                                </span>
+                                <h3 style="font-size: 1rem; font-weight: 700; margin: 0; color: #ffffff;">Timesheet Info</h3>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <div style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 5px;">Total Logged</div>
+                                    <div id="ts-total-hours" style="font-size: 1.8rem; font-weight: 700;">
+                                        <div class="skeleton" style="width: 60px; height: 30px; border-radius: 4px; background: rgba(255,255,255,0.2);"></div>
+                                    </div>
+                                    <div class="active-filter-label" style="font-size: 0.7rem; opacity: 0.6; margin-top: 3px;">All Time</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <button class="btn btn-default btn-sm" onclick="frappe.set_route('dak_timesheet')" style="background: rgba(255,255,255,0.2); color: white; border: none;">
+                                        View Logs
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 </div>
@@ -1095,6 +1137,11 @@ frappe.pages["dak_dashboard"].toggle_skeletons = function (show) {
 			'<div class="skeleton" style="height: 0.8rem; width: 50px; border-radius: 4px; margin-top: 2px;"></div>'
 		);
 
+		// Timesheet Info
+		$("#ts-total-hours").html(
+			'<div class="skeleton" style="width: 60px; height: 30px; border-radius: 4px; background: rgba(255,255,255,0.2);"></div>'
+		);
+
 		// Active Task Card
 		let cardSkeleton = `
         <div class="decorative-sphere-card" style="opacity: 0.9; cursor: default;">
@@ -1118,18 +1165,20 @@ frappe.pages["dak_dashboard"].toggle_skeletons = function (show) {
 		$("#task-cards-container").html(cardSkeleton);
 
 		// Recent Activity
-		$("#recent-activity-task .activity-text").html(
-			'<div class="skeleton skeleton-dark" style="height: 14px; width: 120px; margin-bottom: 4px;"></div>'
-		);
-		$("#recent-activity-task .activity-time").html(
-			'<div class="skeleton skeleton-dark" style="height: 10px; width: 60px;"></div>'
-		);
-		$("#recent-activity-project .activity-text").html(
-			'<div class="skeleton skeleton-dark" style="height: 14px; width: 120px; margin-bottom: 4px;"></div>'
-		);
-		$("#recent-activity-project .activity-time").html(
-			'<div class="skeleton skeleton-dark" style="height: 10px; width: 60px;"></div>'
-		);
+		let activitySkeleton = "";
+		for (let i = 0; i < 3; i++) {
+			activitySkeleton += `
+				<div style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+					<div class="skeleton skeleton-dark" style="width: 8px; height: 8px; border-radius: 50%;"></div>
+					<div style="display: flex; flex-direction: column; flex: 1;">
+						<div class="skeleton skeleton-dark" style="height: 14px; width: 120px; margin-bottom: 4px;"></div>
+						<div class="skeleton skeleton-dark" style="height: 10px; width: 40px;"></div>
+					</div>
+					<div class="skeleton skeleton-dark" style="height: 10px; width: 60px;"></div>
+				</div>
+			`;
+		}
+		$("#recent-activity-container").html(activitySkeleton);
 	}
 };
 
@@ -1188,6 +1237,8 @@ frappe.pages["dak_dashboard"].refresh_stats = function (timespan, show_message =
 				// Update Performance Matrix (Projects)
 				let total_proj = r.message.total_projects || 0;
 				let completed_proj = r.message.completed_projects || 0;
+				// Update Timesheet Hours
+				$("#ts-total-hours").text(r.message.total_hours || "0.0");
 				let percent_proj =
 					total_proj > 0 ? Math.round((completed_proj / total_proj) * 100) : 0;
 
@@ -1522,50 +1573,39 @@ frappe.pages["dak_dashboard"].update_recent_activity = function () {
 	frappe.call({
 		method: "dakbabu.dakbabu.page.dak_dashboard.dak_dashboard.get_recent_activity",
 		callback: function (r) {
-			if (r.message) {
-				// Update Task
-				if (r.message.task) {
-					$("#recent-activity-task .activity-text").text(r.message.task.subject);
-					$("#recent-activity-task .activity-time").html(
-						frappe.datetime.comment_when(r.message.task.creation)
-					);
+			let container = $("#recent-activity-container");
+			let html = "";
 
-					// Update Click Handlers safely
-					$("#recent-activity-task")
-						.attr("onclick", null)
-						.off("click")
-						.on("click", function () {
-							frappe.pages["dak_dashboard"].show_task_details(r.message.task.name);
-						});
-				} else {
-					$("#recent-activity-task .activity-text").text("No recent tasks");
-					$("#recent-activity-task .activity-time").text("");
-					$("#recent-activity-task").attr("onclick", null).off("click");
-				}
+			if (r.message && r.message.length > 0) {
+				r.message.forEach(item => {
+					let iconColor = item.type === 'Task' ? '#a7f3d0' : '#fde047';
+					// Use specific detail view functions or fallback to route
+					let clickAction = "";
 
-				// Update Project
-				if (r.message.project) {
-					let projName = r.message.project.project_name || r.message.project.name;
-					$("#recent-activity-project .activity-text").text(projName);
-					$("#recent-activity-project .activity-time").html(
-						frappe.datetime.comment_when(r.message.project.creation)
-					);
+					if (item.type === 'Task') {
+						clickAction = `frappe.pages['dak_dashboard'].show_task_details('${item.name}')`;
+					} else {
+						clickAction = `frappe.pages['dak_dashboard'].show_project_details('${item.name}')`;
+					}
 
-					// Update Click Handlers safely
-					$("#recent-activity-project")
-						.attr("onclick", null)
-						.off("click")
-						.on("click", function () {
-							frappe.pages["dak_dashboard"].show_project_details(
-								r.message.project.name
-							);
-						});
-				} else {
-					$("#recent-activity-project .activity-text").text("No recent projects");
-					$("#recent-activity-project .activity-time").text("");
-					$("#recent-activity-project").attr("onclick", null).off("click");
-				}
+					html += `
+					<div style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s;" onclick="${clickAction}" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+						<div style="width: 8px; height: 8px; background: ${iconColor}; border-radius: 50%;"></div>
+						<div style="display: flex; flex-direction: column; flex: 1;">
+							<span style="font-size: 0.9rem; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; font-weight: 500;">${item.title}</span>
+							<div style="display: flex; justify-content: space-between; align-items: center;">
+								<span style="font-size: 0.7rem; opacity: 0.6; text-transform: uppercase;">${item.name}</span>
+							</div>
+						</div>
+						<span style="margin-left: auto; font-size: 0.75rem; opacity: 0.7;">${frappe.datetime.comment_when(item.time)}</span>
+					</div>
+					`;
+				});
+			} else {
+				html = `<div style="text-align: center; font-size: 0.8rem; opacity: 0.7; padding: 10px; font-style: italic;">No recent activity</div>`;
 			}
+
+			container.html(html);
 		},
 	});
 };

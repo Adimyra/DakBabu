@@ -9,16 +9,22 @@ def get_users():
 @frappe.whitelist()
 def get_task_counts(timespan="All Time"):
 	filters = {}
+	ts_filters = {"docstatus": 1}
 	now = frappe.utils.nowdate()
-	
+
 	if timespan == "Today":
 		filters["exp_end_date"] = now
+		ts_filters["from_time"] = [">=", now]
 	elif timespan == "This Week":
 		from frappe.utils import get_first_day_of_week, get_last_day_of_week
 		filters["exp_end_date"] = ["between", [get_first_day_of_week(now), get_last_day_of_week(now)]]
+		ts_filters["from_time"] = [">=", get_first_day_of_week(now)]
 	elif timespan == "This Month":
 		from frappe.utils import get_first_day, get_last_day
 		filters["exp_end_date"] = ["between", [get_first_day(now), get_last_day(now)]]
+		ts_filters["from_time"] = [">=", get_first_day(now)]
+
+	total_hours = frappe.db.get_value("Timesheet Detail", ts_filters, "sum(hours)") or 0.0
 
 	return {
 		"total_tasks": frappe.db.count("Task", filters=filters),
@@ -29,6 +35,7 @@ def get_task_counts(timespan="All Time"):
 		"pending_review_tasks": frappe.db.count("Task", filters={**filters, "status": "Pending Review"}),
 		"total_projects": frappe.db.count("Project", filters={}),
 		"completed_projects": frappe.db.count("Project", filters={"status": "Completed"}),
+		"total_hours": round(total_hours, 2)
 	}
 
 
@@ -210,21 +217,46 @@ def stop_working_task(task_name):
 
 @frappe.whitelist()
 def get_recent_activity():
-	latest_task = frappe.get_all(
-		"Task", fields=["name", "subject", "creation"], order_by="creation desc", limit=1
+	activities = []
+
+	# Get recent tasks
+	recent_tasks = frappe.get_all(
+		"Task", 
+		fields=["name", "subject", "creation", "status"], 
+		order_by="creation desc", 
+		limit=3
 	)
+	for t in recent_tasks:
+		activities.append({
+			"type": "Task",
+			"name": t.name,
+			"title": t.subject,
+			"time": t.creation,
+            "status": t.status
+		})
 
+	# Get recent projects
 	try:
-		latest_project = frappe.get_all(
-			"Project", fields=["name", "project_name", "creation"], order_by="creation desc", limit=1
+		recent_projects = frappe.get_all(
+			"Project", 
+			fields=["name", "project_name", "creation", "status"], 
+			order_by="creation desc", 
+			limit=3
 		)
+		for p in recent_projects:
+			activities.append({
+				"type": "Project",
+				"name": p.name,
+				"title": p.project_name or p.name,
+				"time": p.creation,
+                "status": p.status
+			})
 	except Exception:
-		latest_project = []
+		pass
 
-	return {
-		"task": latest_task[0] if latest_task else None,
-		"project": latest_project[0] if latest_project else None,
-	}
+	# Sort by time descending and take top 3
+	activities.sort(key=lambda x: x["time"], reverse=True)
+	return activities[:3]
 
 
 @frappe.whitelist()
