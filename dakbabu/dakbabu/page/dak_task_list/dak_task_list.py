@@ -18,10 +18,23 @@ def get_all_tasks_list():
 			"custom_working_now",
 			"owner",
 			"progress",
+			"expected_time",
 		],
 		order_by="creation desc",
 		limit=None,
 	)
+
+	# Calculate Actual Time for each task
+	for task in tasks:
+		actual_time = frappe.db.sql(
+			"""
+			SELECT SUM(hours) FROM `tabTimesheet Detail`
+			WHERE task = %s AND docstatus < 2
+		""",
+			(task.name),
+		)
+		task["actual_time"] = float(actual_time[0][0]) if actual_time and actual_time[0][0] else 0.0
+
 	return tasks
 
 @frappe.whitelist()

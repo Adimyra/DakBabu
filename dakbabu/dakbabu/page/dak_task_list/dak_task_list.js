@@ -140,7 +140,7 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
         </div>
 
         <!-- Latest Task Featured Card -->
-        <div id="latest-task-container" style="width: 100%; margin-bottom: 5px; display: none;"></div>
+        <div id="latest-task-container" style="width: 100%; margin-bottom: 0px; display: none;"></div>
 
         <!-- Bottom Cards Wrapper: Task List Container (Card View) -->
         <div style="width: 100%; margin-bottom: 50px; display: flex; flex-wrap: wrap; row-gap: 15px; column-gap: 30px; margin-top: 5px;" id="task-list-container">
@@ -148,9 +148,11 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
                 <i class="fa fa-spinner fa-spin" style="font-size: 2rem;"></i><br>Loading Tasks...
             </div>
         </div>
+        <div id="card-pagination-controls" style="width: 100%; display: flex; justify-content: center; margin-top: 20px;"></div>
+
 
         <!-- Kanban View -->
-        <div id="kanban-task-list" style="display: none; width: 100%; overflow-x: auto; padding-bottom: 20px; margin-top: 20px; flex-direction: column;">
+        <div id="kanban-task-list" style="display: none; width: 100%; overflow-x: auto; padding-bottom: 20px; margin-top: 0px; flex-direction: column;">
              <div style="margin-bottom: 10px; display: flex; justify-content: flex-end;">
                   <button class="btn btn-default btn-sm" onclick="frappe.pages['dak_task_list'].prompt_kanban_grouping()" style="background: #fff; border: 1px solid #e5e7eb; color: #374151; font-weight: 600;">
                     <i class="fa fa-sliders" style="margin-right: 5px;"></i> Group By: <span id="current-kanban-group">Status</span>
@@ -262,6 +264,10 @@ frappe.pages["dak_task_list"].render_task_list = function (wrapper) {
                 if (!frappe.pages["dak_task_list"].kanban_field) frappe.pages["dak_task_list"].kanban_field = "status";
                 if (frappe.pages["dak_task_list"].group_by_field === undefined) frappe.pages["dak_task_list"].group_by_field = null;
 
+                // Initialize Pagination
+                if (!frappe.pages["dak_task_list"].pageSize) frappe.pages["dak_task_list"].pageSize = 10;
+                if (!frappe.pages["dak_task_list"].currentPage) frappe.pages["dak_task_list"].currentPage = 1;
+
                 frappe.pages["dak_task_list"].toggle_view(frappe.pages["dak_task_list"].current_view);
 
                 // Handle route options
@@ -335,7 +341,8 @@ frappe.pages["dak_task_list"].toggle_view = function (view) {
 };
 
 
-frappe.pages["dak_task_list"].apply_task_filters = function () {
+frappe.pages["dak_task_list"].apply_task_filters = function (reset_pagination = true) {
+    if (reset_pagination) frappe.pages["dak_task_list"].currentPage = 1;
     let wrapper = frappe.pages["dak_task_list"].page_wrapper;
     let subject = $("#filter-subject").val() ? $("#filter-subject").val().toLowerCase() : "";
     let status = $("#filter-status").val();
@@ -411,39 +418,7 @@ frappe.pages["dak_task_list"].render_tasks_visuals = function (wrapper, tasks) {
     });
 
     if (tasks && tasks.length > 0) {
-        let html = "";
-        let table_html = "";
-        let groups = {};
-
-        if (groupBy) {
-            tasks.forEach((task) => {
-                let key = task[groupBy] || "Unassigned";
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(task);
-            });
-            Object.keys(groups).sort().forEach((key) => {
-                let groupTasks = groups[key];
-                // Card Views
-                html += `<h3 style="width: 100%; font-size: 1.1rem; font-weight: 700; opacity: 0.7; margin: 20px 0 10px 0; border-bottom: 2px solid #eee; padding-bottom: 5px;">${key} (${groupTasks.length})</h3>`;
-                html += `<div style="display: flex; flex-wrap: wrap; gap: 30px; width: 100%;">`;
-                groupTasks.forEach(task => html += frappe.pages["dak_task_list"].get_task_card_html(task));
-                html += `</div>`;
-
-                // Table Views
-                table_html += `<tr class="group-header" style="background:#f9fafb;"><td colspan="${frappe.pages["dak_task_list"].visible_columns.length + 2}" style="font-weight: 700; padding: 10px 15px; border-bottom: 2px solid #e5e7eb;">${key} (${groupTasks.length})</td></tr>`;
-                groupTasks.forEach(task => table_html += frappe.pages["dak_task_list"].get_task_row_html(task));
-            });
-        } else {
-            html += `<div style="display: flex; flex-wrap: wrap; gap: 30px; width: 100%;">`;
-            tasks.forEach(task => html += frappe.pages["dak_task_list"].get_task_card_html(task));
-            html += `</div>`;
-            tasks.forEach(task => table_html += frappe.pages["dak_task_list"].get_task_row_html(task));
-        }
-
-        container.html(html);
-        table_body.html(table_html);
-
-        // Render Kanban
+        // --- Render Kanban (Full list) ---
         let kanban_html = "";
         let kanban_current_field = frappe.pages["dak_task_list"].kanban_field || "status";
         let kanban_cols = kanban_current_field === "status" ? ["Open", "Working", "Pending Review", "Overdue", "Completed"] : ["Low", "Medium", "High", "Urgent"];
@@ -462,10 +437,88 @@ frappe.pages["dak_task_list"].render_tasks_visuals = function (wrapper, tasks) {
         });
         kanban_wrapper.html(kanban_html);
 
+        // --- Pagination Logic for List & Card Views ---
+        let totalItems = tasks.length;
+        let pageSize = frappe.pages["dak_task_list"].pageSize || 10;
+        let currentPage = frappe.pages["dak_task_list"].currentPage || 1;
+        let totalPages = Math.ceil(totalItems / pageSize);
+
+        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+        let start = (currentPage - 1) * pageSize;
+        let end = start + pageSize;
+        let pagedTasks = tasks.slice(start, end);
+
+        let pagedGridHtml = "";
+        let pagedTableHtml = "";
+
+        if (groupBy) {
+            let pagedGroups = {};
+            pagedTasks.forEach((task) => {
+                let key = task[groupBy] || "Unassigned";
+                if (!pagedGroups[key]) pagedGroups[key] = [];
+                pagedGroups[key].push(task);
+            });
+            Object.keys(pagedGroups).sort().forEach((key) => {
+                let groupTasks = pagedGroups[key];
+                pagedGridHtml += `<h3 style="width: 100%; font-size: 1.1rem; font-weight: 700; opacity: 0.7; margin: 20px 0 10px 0; border-bottom: 2px solid #eee; padding-bottom: 5px;">${key} (${groupTasks.length})</h3>`;
+                pagedGridHtml += `<div style="display: flex; flex-wrap: wrap; gap: 30px; width: 100%;">`;
+                groupTasks.forEach(task => pagedGridHtml += frappe.pages["dak_task_list"].get_task_card_html(task));
+                pagedGridHtml += `</div>`;
+
+                pagedTableHtml += `<tr class="group-header" style="background:#f9fafb;"><td colspan="${frappe.pages['dak_task_list'].visible_columns.length + 2}" style="font-weight: 700; padding: 10px 15px; border-bottom: 2px solid #e5e7eb;">${key}</td></tr>`;
+                groupTasks.forEach(task => pagedTableHtml += frappe.pages["dak_task_list"].get_task_row_html(task));
+            });
+        } else {
+            pagedGridHtml += `<div style="display: flex; flex-wrap: wrap; gap: 30px; width: 100%;">`;
+            pagedTasks.forEach(task => pagedGridHtml += frappe.pages["dak_task_list"].get_task_card_html(task));
+            pagedGridHtml += `</div>`;
+            pagedTasks.forEach(task => pagedTableHtml += frappe.pages["dak_task_list"].get_task_row_html(task));
+        }
+
+        container.html(pagedGridHtml);
+        table_body.html(pagedTableHtml);
+
+        let paginationHtml = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #f3f4f6;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 0.9rem; color: #6b7280;">Show</span>
+                    <select id="task-page-size" class="form-control" style="width: 80px; height: 35px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600;">
+                        <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                        <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+                        <option value="50" ${pageSize == 50 ? 'selected' : ''}>50</option>
+                    </select>
+                    <span style="font-size: 0.9rem; color: #6b7280;">(Total: ${totalItems})</span>
+                </div>
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <button class="btn btn-default btn-sm" id="task-prev-page" style="border-radius: 8px; min-width: 40px; font-weight: 700; visibility: ${currentPage === 1 ? 'hidden' : 'visible'};">&lt;</button>
+                    <div style="display: flex; align-items: center; padding: 0 15px; font-weight: 700; color: #111827; min-width: 100px; justify-content: center;">Page ${currentPage} of ${totalPages || 1}</div>
+                    <button class="btn btn-default btn-sm" id="task-next-page" style="border-radius: 8px; min-width: 40px; font-weight: 700; visibility: ${currentPage >= totalPages ? 'hidden' : 'visible'};">&gt;</button>
+                </div>
+            </div>`;
+
+        $("#pagination-controls").html(paginationHtml);
+
+        $("#task-page-size").off("change").on("change", function () {
+            frappe.pages["dak_task_list"].pageSize = parseInt($(this).val());
+            frappe.pages["dak_task_list"].apply_task_filters();
+        });
+        $("#task-prev-page").off("click").on("click", function () {
+            if (frappe.pages["dak_task_list"].currentPage > 1) {
+                frappe.pages["dak_task_list"].currentPage--;
+                frappe.pages["dak_task_list"].apply_task_filters(false);
+            }
+        });
+        $("#task-next-page").off("click").on("click", function () {
+            if (frappe.pages["dak_task_list"].currentPage < totalPages) {
+                frappe.pages["dak_task_list"].currentPage++;
+                frappe.pages["dak_task_list"].apply_task_filters(false);
+            }
+        });
     } else {
         container.html('<div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.5);">No tasks found matching criteria.</div>');
         table_body.html(`<tr><td colspan="100%" style="text-align: center; padding: 20px; color: #6b7280;">No tasks found matching criteria.</td></tr>`);
-        kanban_wrapper.html('<div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.5); width: 100%;">No tasks found.</div>');
+        $("#pagination-controls").empty();
     }
 };
 
@@ -1035,33 +1088,76 @@ frappe.pages["dak_task_list"].render_latest_task_card = function (task) {
         return;
     }
 
+    // Prepare Time Data
+    let exp_time = parseFloat(task.expected_time || 0).toFixed(1);
+    let act_time = parseFloat(task.actual_time || 0).toFixed(1);
+    let max_time = Math.max(parseFloat(exp_time), parseFloat(act_time));
+    if (max_time === 0) max_time = 1;
+
+    let exp_width = (parseFloat(exp_time) / max_time) * 100;
+    let act_width = (parseFloat(act_time) / max_time) * 100;
+
     let html = `
-		<div class="latest-task-card" style="margin-bottom: 0;">
-        <div class="ltc-circle ltc-circle-1"></div>
-        <div class="ltc-circle ltc-circle-2"></div>
-        <div class="ltc-circle ltc-circle-3"></div>
-
-        <div class="ltc-content">
-            <div class="ltc-header">
-                <span class="ltc-badge">Active Task</span>
-                <span class="ltc-status">${task.status}</span>
-                <span class="ltc-date"><i class="fa fa-calendar" style="margin-right: 5px;"></i> ${frappe.datetime.str_to_user(task.creation).split(" ")[0]}</span>
+        <div class="decorative-sphere-card" onclick="frappe.pages['dak_task_list'].show_task_details('${task.name}')" style="cursor: pointer; border-radius: 12px; margin-bottom: 5px;">
+            <!-- Part 1: Details -->
+            <div class="card-content" style="flex: 2; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 20px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <span class="sphere-badge-pill" style="background: rgba(255,255,255,0.2); border: none; font-weight: 700; padding: 2px 8px; font-size: 0.65rem;">ACTIVE TASK</span>
+                    <span class="sphere-badge-pill" style="padding: 2px 8px; font-size: 0.65rem;">${task.status}</span>
+                </div>
+                <h3 style="margin-top: 0; font-size: 1.2rem; margin-bottom: 4px;">${task.subject}</h3>
+                <p style="margin-bottom: 8px; opacity: 0.8; font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${task.description || "No description provided."}</p>
+                <div class="sphere-meta" style="margin-top: 5px;">
+                    <span class="sphere-badge-pill" style="border:none; opacity:0.8; padding: 0 8px 0 0; font-size: 0.7rem;">
+                        <i class="fa fa-calendar" style="margin-right:4px;"></i> ${task.exp_end_date ? frappe.datetime.str_to_user(task.exp_end_date) : "No Due Date"}
+                    </span>
+                    <span class="sphere-badge-pill" style="border:none; opacity:0.8; padding: 0; font-size: 0.7rem;">
+                        <i class="fa fa-tag" style="margin-right:4px;"></i> ${task.priority}
+                    </span>
+                </div>
             </div>
-            <h2 class="ltc-title">${task.subject}</h2>
-            <p class="ltc-desc">
-                ${task.description || "No detailed description available for this task."}
-            </p>
-        </div>
 
-        <div class="ltc-actions" style="flex-direction: column; align-items: flex-end; gap: 10px;">
+            <!-- Part 2: Time Tracking Graph -->
+            <div style="flex: 1; padding: 0 20px; display: flex; flex-direction: column; justify-content: center;">
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: rgba(255,255,255,0.8); margin-bottom: 4px;">
+                        <span>Expected</span>
+                        <span>${exp_time}h</span>
+                    </div>
+                    <div style="height: 4px; background: rgba(0,0,0,0.2); border-radius: 2px; overflow: hidden;">
+                        <div style="width: ${exp_width}%; background: rgba(255,255,255,0.9); height: 100%; border-radius: 2px;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: rgba(255,255,255,0.8); margin-bottom: 4px;">
+                        <span>Actual</span>
+                        <span>${act_time}h</span>
+                    </div>
+                    <div style="height: 4px; background: rgba(0,0,0,0.2); border-radius: 2px; overflow: hidden;">
+                        <div style="width: ${act_width}%; background: #a7f3d0; height: 100%; border-radius: 2px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 3: Team & Shared Info -->
+            <div style="flex: 1; border-left: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; margin-bottom: 2px; font-weight: 600;">Team</div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: #ffffff;">Product Design</div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; margin-bottom: 6px; font-weight: 600;">Shared With</div>
+                    <div style="display: flex; justify-content: center; padding-left: 8px;">
+                        <div style="width: 26px; height: 26px; border-radius: 50%; background: #fbbf24; border: 2px solid #2e605c; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: #92400e; margin-left: -8px; position: relative; z-index: 4;">JD</div>
+                        <div style="width: 26px; height: 26px; border-radius: 50%; background: #34d399; border: 2px solid #2e605c; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: #065f46; margin-left: -8px; position: relative; z-index: 3;">AS</div>
+                        <div style="width: 26px; height: 26px; border-radius: 50%; background: #60a5fa; border: 2px solid #2e605c; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: #1e40af; margin-left: -8px; position: relative; z-index: 2;">MK</div>
+                        <div style="width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid #2e605c; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: #ffffff; margin-left: -8px; position: relative; z-index: 1; backdrop-filter: blur(4px);">+2</div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-		<style>
-			@keyframes ping {
-				75%, 100% { transform: scale(2); opacity: 0; }
-			}
-		</style>
-	`;
+    `;
     container.html(html).show();
 };
 

@@ -1069,3 +1069,61 @@ select.lucid-input {
 [data-theme="dark"] .gantt-task-open .bar {
     fill: #1e3a8a !important;
 }
+
+/* --- Decorative Sphere Card (Shared from Dashboard) --- */
+.decorative-sphere-card {
+    margin: 0 0 5px 0;
+    padding: 15px 30px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2e605c 0%, #468e88 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 10px 30px rgba(47, 79, 79, 0.3);
+    min-height: 110px;
+    color: #fff;
+}
+
+.card-content {
+    margin-left: 0;
+    text-align: left;
+    flex: 1;
+    color: #ffffff;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding-right: 30px;
+}
+
+.card-content h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    color: #fff;
+    cursor: pointer;
+}
+
+.card-content p {
+    font-size: 13px;
+    opacity: 0.9;
+    margin: 0;
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+.sphere-meta {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.sphere-badge-pill {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+}

@@ -182,8 +182,51 @@ class DakProjects {
             </div>
 
             <!-- Standard List View -->
-            <div id="standard-project-list" style="width: 100%; margin-bottom: 50px; background: #ffffff; border-radius: 0; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 20px; margin-top: 0px;">
+            <div id="standard-project-list" style="width: 100%; margin-bottom: 50px; background: #ffffff; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 20px; margin-top: 0px;">
                 <h3 style="margin-bottom: 20px; font-size: 1.5rem; color: #374151;">All Projects</h3>
+                
+                <!-- Standardized Filters -->
+                <div class="row" style="margin-bottom: 20px;">
+                    <div class="col-md-2">
+                        <div class="dropdown" style="width: 100%;">
+                            <button class="btn btn-default btn-sm dropdown-toggle form-control" type="button" data-toggle="dropdown" style="text-align: left; display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class="fa fa-list-ul"></i> Group: <span id="project-group-by-label">None</span></span> <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" style="width: 100%; margin-top: 5px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: none;">
+                                <li><a href="#" onclick="frappe.pages['dak_projects'].controller.set_group_by(null)" style="padding: 8px 15px;">None</a></li>
+                                <li><a href="#" onclick="frappe.pages['dak_projects'].controller.set_group_by('status')" style="padding: 8px 15px;">Status</a></li>
+                                <li><a href="#" onclick="frappe.pages['dak_projects'].controller.set_group_by('priority')" style="padding: 8px 15px;">Priority</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" id="project-filter-name" class="form-control" placeholder="Filter by Project Name..." onkeyup="frappe.pages['dak_projects'].controller.apply_project_filters()">
+                    </div>
+                    <div class="col-md-2">
+                        <select id="project-filter-status" class="form-control" onchange="frappe.pages['dak_projects'].controller.apply_project_filters()">
+                            <option value="">All Statuses</option>
+                            <option value="Open">Open</option>
+                            <option value="Working">Working</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select id="project-filter-priority" class="form-control" onchange="frappe.pages['dak_projects'].controller.apply_project_filters()">
+                            <option value="">All Priorities</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select id="project-filter-date" class="form-control" onchange="frappe.pages['dak_projects'].controller.apply_project_filters()">
+                            <option value="">All Dates</option>
+                            <option value="Today">Today</option>
+                            <option value="This Week">This Week</option>
+                            <option value="This Month">This Month</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="frappe-list-table" id="project-table" style="width: 100%; table-layout: fixed;">
                         <thead>
@@ -216,13 +259,13 @@ class DakProjects {
                 <div id="project-gantt-container" style="flex: 1; width: 100%; border: 1px solid #e5e7eb; border-radius: 12px; overflow: auto; background: #ffffff;"></div>
             </div>
 
-            <!-- Grid View -->
-            <div id="project-grid-view" style="display: none; width: 100%; padding: 30px 40px;">
-                <h3 style="margin-bottom: 25px; font-size: 1.5rem; color: #374151;">Projects Overview</h3>
-                <div id="project-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
-                    <!-- Cards injected via JS -->
+                <div id="project-grid-view" style="display: none; width: 100%; padding: 30px 40px;">
+                    <h3 style="margin-bottom: 25px; font-size: 1.5rem; color: #374151;">Projects Overview</h3>
+                    <div id="project-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
+                        <!-- Cards injected via JS -->
+                    </div>
                 </div>
-            </div>
+                <div id="project-pagination-controls" style="padding: 0 40px 40px 40px;"></div>
 
             <!-- Project Details View (Hidden by Default) -->
             <div id="project-details-view" style="display: none; width: 100%; padding-top: 20px;">
@@ -239,6 +282,9 @@ class DakProjects {
 
         frappe.pages["dak_projects"].controller = this;
         this.current_view = "list";
+        this.currentPage = 1;
+        this.pageSize = 10;
+        this.group_by = null;
 
         // Bind View Toggles (Delegated)
         this.page.main.off("click", "#project-view-list").on("click", "#project-view-list", () => this.toggle_view('list'));
@@ -258,11 +304,12 @@ class DakProjects {
             $(this).css('background', 'rgba(255,255,255,0.2)');
         });
 
-        // Bind Dropdown Filters (Delegated)
-        this.page.main.off("click", ".dropdown-menu a").on("click", ".dropdown-menu a", (e) => {
+        // Bind Dropdown Filters (Delegated) - Header Time Dropdown
+        this.page.main.off("click", "#projectsFilterDropdown + .dropdown-menu a").on("click", "#projectsFilterDropdown + .dropdown-menu a", (e) => {
             e.preventDefault();
             let filter = $(e.currentTarget).text().trim();
             console.log("Filter selected:", filter);
+            this.currentPage = 1;
             this.apply_project_filters(filter);
         });
 
@@ -481,31 +528,54 @@ class DakProjects {
         });
     }
 
-    apply_project_filters(time_filter) {
+    apply_project_filters(time_dropdown_filter = null) {
         if (!this.all_projects) return;
 
-        let filtered_projects = this.all_projects;
-        if (time_filter && time_filter !== 'All Time') {
-            let now = moment();
-            filtered_projects = this.all_projects.filter(p => {
+        this.currentPage = 1; // Reset pagination on filter
+
+        let name_filter = $("#project-filter-name").val()?.toLowerCase();
+        let status_filter = $("#project-filter-status").val();
+        let priority_filter = $("#project-filter-priority").val();
+        let date_filter = time_dropdown_filter || $("#project-filter-date").val();
+
+        let filtered_projects = this.all_projects.filter(p => {
+            // 1. Name Filter
+            if (name_filter && !p.project_name.toLowerCase().includes(name_filter)) return false;
+
+            // 2. Status Filter
+            if (status_filter && p.status !== status_filter) return false;
+
+            // 3. Priority Filter
+            if (priority_filter && p.priority !== priority_filter) return false;
+
+            // 4. Date Filter
+            if (date_filter && date_filter !== 'All Time') {
                 if (!p.expected_end_date) return false;
                 let d = moment(p.expected_end_date);
-                if (time_filter === 'Today') return d.isSame(now, 'day');
-                if (time_filter === 'This Week') return d.isSame(now, 'week');
-                if (time_filter === 'This Month') return d.isSame(now, 'month');
-                return true;
-            });
-        }
+                let now = moment();
+                if (date_filter === 'Today') return d.isSame(now, 'day');
+                if (date_filter === 'This Week') return d.isSame(now, 'week');
+                if (date_filter === 'This Month') return d.isSame(now, 'month');
+            }
 
-        // Show alert for feedback
-        if (time_filter) {
-            frappe.show_alert({
-                message: `Showing ${time_filter}`,
-                indicator: 'blue'
-            });
-        }
+            return true;
+        });
 
-        this.render_projects_list(filtered_projects);
+        if (this.current_view === 'grid') {
+            this.render_grid_view(filtered_projects);
+        } else {
+            this.render_projects_list(filtered_projects);
+        }
+    }
+
+    set_group_by(field) {
+        this.group_by = field;
+        let label = "None";
+        if (field === 'status') label = "Status";
+        if (field === 'priority') label = "Priority";
+
+        this.page.main.find("#project-group-by-label").text(label);
+        this.apply_project_filters();
     }
 
     set_working_project(project_name) {
@@ -531,10 +601,17 @@ class DakProjects {
         });
     }
 
-    render_grid_view() {
-        if (!this.all_projects) return;
+    render_grid_view(projects = null) {
+        let list = projects || this.all_projects;
+        if (!list) return;
+
+        let totalItems = list.length;
+        let start = (this.currentPage - 1) * this.pageSize;
+        let end = start + this.pageSize;
+        let pagedList = list.slice(start, end);
+
         let html = "";
-        this.all_projects.forEach(p => {
+        pagedList.forEach(p => {
             let progress = p.percent_complete || 0;
             let statusColor = p.status === 'Completed' ? '#10b981' : '#3b82f6';
             if (p.status === 'Open') statusColor = '#10b981';
@@ -615,6 +692,7 @@ class DakProjects {
             `;
         });
         this.page.main.find("#project-grid-container").html(html);
+        this.render_pagination_controls(list);
     }
 
     complete_project(project_name) {
@@ -634,51 +712,152 @@ class DakProjects {
 
     render_projects_list(projects) {
         if (projects && projects.length > 0) {
+            let totalItems = projects.length;
+            let start = (this.currentPage - 1) * this.pageSize;
+            let end = start + this.pageSize;
+            let pagedList = projects.slice(start, end);
+
             let html = "";
-            projects.forEach(p => {
-                let statusColor = p.status === 'Completed' ? '#10b981' : '#3b82f6';
-                if (p.status === 'Open') statusColor = '#10b981';
+            let groupBy = this.group_by;
 
-                let isWorking = p.custom_working_now == 1;
-                let workingIcon = isWorking
-                    ? `<i class="fa fa-dot-circle-o" style="color: #2e605c; font-size: 1.2rem;"></i>`
-                    : `<i class="fa fa-circle-o" style="color: #d1d5db; font-size: 1.2rem; transition: color 0.2s;"></i>`;
+            if (groupBy) {
+                // --- Grouped Rendering ---
+                let grouped = {};
+                pagedList.forEach(p => {
+                    let val = p[groupBy] || "None";
+                    if (!grouped[val]) grouped[val] = [];
+                    grouped[val].push(p);
+                });
 
-                html += `
-                    <tr class="frappe-list-row" onclick="frappe.pages['dak_projects'].controller.open_project_details('${p.name}')" style="cursor: pointer;">
-                        <td style="text-align: center; vertical-align: middle;" onclick="event.stopPropagation(); frappe.pages['dak_projects'].controller.set_working_project('${p.name}')">
-                            <div style="cursor: pointer; padding: 5px;" title="${isWorking ? 'Currently Active' : 'Set as Active'}">${workingIcon}</div>
-                        </td>
-                        <td style="padding: 12px 15px;">
-                            <div style="font-weight: 600; color: #1f2937;">${p.project_name}</div>
-                            <div style="font-size: 0.8rem; color: #6b7280;">${p.name}</div>
-                        </td>
-                        <td style="padding: 12px 15px;">
-                            <span style="color: ${statusColor}; font-weight: 500;">${p.status}</span>
-                        </td>
-                        <td style="padding: 12px 15px;">
-                            ${p.priority || '-'}
-                        </td>
-                        <td style="padding: 12px 15px;">
-                            <div style="display: flex; gap: 10px;">
-                                <span class="badge" style="background: #f3f4f6; color: #374151;">${p.total || 0} Total</span>
-                                <span class="badge" style="background: #e0f2fe; color: #0369a1;">${p.open || 0} Open</span>
-                                ${p.overdue > 0 ? `<span class="badge" style="background: #fee2e2; color: #b91c1c;">${p.overdue} Overdue</span>` : ''}
-                            </div>
-                        </td>
-                        <td style="padding: 12px 15px; text-align: center;" onclick="event.stopPropagation(); ${p.status !== 'Completed' ? `frappe.pages['dak_projects'].controller.complete_project('${p.name}')` : ''}">
-                             ${p.status === 'Completed' ?
-                        `<i class="fa fa-check-circle" title="Completed" style="color: #1e6058; font-size: 1.5rem;"></i>` :
-                        `<i class="fa fa-check-circle" title="Mark as Completed" style="color: #d1d5db; font-size: 1.5rem; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#1e6058'" onmouseout="this.style.color='#d1d5db'"></i>`
+                // Group values based on current field
+                let groupOrders = groupBy === 'status'
+                    ? ["Open", "Working", "Completed"]
+                    : ["Urgent", "High", "Medium", "Low", "None"];
+
+                groupOrders.forEach(groupVal => {
+                    if (grouped[groupVal] && grouped[groupVal].length > 0) {
+                        // Header Row
+                        html += `
+                            <tr style="background: #f8fafc;">
+                                <td colspan="6" style="padding: 12px 20px; font-weight: 800; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0;">
+                                    ${groupVal} <span style="margin-left: 10px; background: #e2e8f0; padding: 2px 8px; border-radius: 10px; font-weight: 600; font-size: 0.75rem; color: #64748b;">${grouped[groupVal].length}</span>
+                                </td>
+                            </tr>
+                        `;
+
+                        // Data Rows
+                        grouped[groupVal].forEach(p => html += this.get_project_row_html(p));
                     }
-                        </td>
-                    </tr>
-                `;
-            });
+                });
+
+                // Check for other groups not in predefined order
+                Object.keys(grouped).forEach(k => {
+                    if (!groupOrders.includes(k)) {
+                        html += `
+                            <tr style="background: #f8fafc;">
+                                <td colspan="6" style="padding: 12px 20px; font-weight: 800; color: #475569; font-size: 0.85rem; text-transform: uppercase;">${k}</td>
+                            </tr>
+                        `;
+                        grouped[k].forEach(p => html += this.get_project_row_html(p));
+                    }
+                });
+            } else {
+                // --- Normal Rendering ---
+                pagedList.forEach(p => html += this.get_project_row_html(p));
+            }
+
             this.page.main.find("#project-table-body").html(html);
+            this.render_pagination_controls(projects);
         } else {
             this.page.main.find("#project-table-body").html('<tr><td colspan="6" style="text-align:center; padding:20px;">No projects found for this filter.</td></tr>');
+            this.page.main.find("#project-pagination-controls").empty();
         }
+    }
+
+    get_project_row_html(p) {
+        let statusColor = p.status === 'Completed' ? '#10b981' : '#3b82f6';
+        if (p.status === 'Open') statusColor = '#10b981';
+
+        let isWorking = p.custom_working_now == 1;
+        let workingIcon = isWorking
+            ? `<i class="fa fa-dot-circle-o" style="color: #2e605c; font-size: 1.2rem;"></i>`
+            : `<i class="fa fa-circle-o" style="color: #d1d5db; font-size: 1.2rem; transition: color 0.2s;"></i>`;
+
+        return `
+            <tr class="frappe-list-row" onclick="frappe.pages['dak_projects'].controller.open_project_details('${p.name}')" style="cursor: pointer;">
+                <td style="text-align: center; vertical-align: middle;" onclick="event.stopPropagation(); frappe.pages['dak_projects'].controller.set_working_project('${p.name}')">
+                    <div style="cursor: pointer; padding: 5px;" title="${isWorking ? 'Currently Active' : 'Set as Active'}">${workingIcon}</div>
+                </td>
+                <td style="padding: 12px 15px; vertical-align: middle;">
+                    <div style="font-weight: 600; color: #111827;">${p.project_name}</div>
+                    <div style="font-size: 0.75rem; color: #6b7280;">${p.name}</div>
+                </td>
+                <td style="vertical-align: middle;"><span style="padding: 4px 10px; border-radius: 20px; background: ${statusColor}15; color: ${statusColor}; font-size: 0.75rem; font-weight: 600;">${p.status}</span></td>
+                <td style="vertical-align: middle;"><span style="padding: 4px 10px; border-radius: 20px; background: #f3f4f6; color: #4b5563; font-size: 0.75rem; font-weight: 600;">${p.priority || 'Medium'}</span></td>
+                <td style="vertical-align: middle;">
+                    <div style="font-size: 0.85rem; color: #374151;">
+                        <b>${p.total || 0}</b> total / <span style="color: #0369a1;"><b>${p.open || 0}</b> open</span> / <span style="color: #b91c1c;"><b>${p.overdue || 0}</b> overdue</span>
+                    </div>
+                </td>
+                <td style="text-align: right; vertical-align: middle; padding-right: 15px;" onclick="event.stopPropagation()">
+                    <div onclick="frappe.pages['dak_projects'].controller.complete_project('${p.name}')" style="cursor: pointer; color: ${p.status === 'Completed' ? '#2e605c' : '#d1d5db'}; transition: color 0.2s; font-size: 1.1rem; display: inline-block;" onmouseover="this.style.color='#2e605c'" onmouseout="this.style.color='#d1d5db'" title="${p.status === 'Completed' ? 'Completed' : 'Mark as Completed'}">
+                        <i class="fa ${p.status === 'Completed' ? 'fa-check-circle' : 'fa-check-circle-o'}"></i>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    render_pagination_controls(list) {
+        if (!list || list.length === 0) {
+            this.page.main.find("#project-pagination-controls").empty();
+            return;
+        }
+
+        let totalItems = list.length;
+        let totalPages = Math.ceil(totalItems / this.pageSize);
+        let currentPage = this.currentPage;
+
+        let html = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #f3f4f6;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 0.9rem; color: #6b7280;">Show</span>
+                    <select id="project-page-size" class="form-control" style="width: 80px; height: 35px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600;">
+                        <option value="10" ${this.pageSize == 10 ? 'selected' : ''}>10</option>
+                        <option value="20" ${this.pageSize == 20 ? 'selected' : ''}>20</option>
+                        <option value="50" ${this.pageSize == 50 ? 'selected' : ''}>50</option>
+                    </select>
+                    <span style="font-size: 0.9rem; color: #6b7280;">(Total: ${totalItems})</span>
+                </div>
+                
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <button class="btn btn-default btn-sm" id="project-prev-page" style="border-radius: 8px; min-width: 40px; font-weight: 700; visibility: ${currentPage === 1 ? 'hidden' : 'visible'};">&lt;</button>
+                    <div style="display: flex; align-items: center; padding: 0 15px; font-weight: 700; color: #111827; min-width: 100px; justify-content: center;">Page ${currentPage} of ${totalPages || 1}</div>
+                    <button class="btn btn-default btn-sm" id="project-next-page" style="border-radius: 8px; min-width: 40px; font-weight: 700; visibility: ${currentPage >= totalPages ? 'hidden' : 'visible'};">&gt;</button>
+                </div>
+            </div>`;
+
+        this.page.main.find("#project-pagination-controls").html(html);
+
+        $("#project-page-size").off("change").on("change", (e) => {
+            this.pageSize = parseInt($(e.target).val());
+            this.currentPage = 1;
+            this.render_projects();
+        });
+
+        $("#project-prev-page").off("click").on("click", () => {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.render_projects();
+            }
+        });
+
+        $("#project-next-page").off("click").on("click", () => {
+            if (this.currentPage < totalPages) {
+                this.currentPage++;
+                this.render_projects();
+            }
+        });
     }
 
     open_project_details(project_name) {
