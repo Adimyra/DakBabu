@@ -10,7 +10,7 @@ def get_day_plan(date):
     schedule = frappe.get_all(
         "Dak Schedule",
         filters={"schedule_date": date},
-        fields=["name", "task", "start_time", "end_time", "task.subject", "task.project", "task.priority", "task.status", "task.expected_time", "task.exp_end_date"]
+        fields=["name", "task", "start_time", "end_time", "task.subject", "task.project", "task.priority", "task.status", "task.expected_time", "task.exp_end_date", "task.custom_working_now"]
     )
     return schedule
 

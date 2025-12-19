@@ -597,12 +597,23 @@ frappe.pages["dak_day_planner"].render_grid = function () {
                         }
 
                         slotContent += `
-                            <div class="slot-task" ${dragAttr} data-schedule-id="${item.name}" data-task-obj="${encodeURIComponent(JSON.stringify(item))}">
-                                <h5>${item.subject || item.task}</h5>
-                                <p><i class="fa fa-clock-o"></i> ${moment(item.start_time, "HH:mm:ss").format("h:mm A")} - ${moment(item.end_time, "HH:mm:ss").format("h:mm A")}</p>
-                                ${deleteBtn}
-                            </div>
-                        `;
+                                <div class="slot-task" ${dragAttr} data-schedule-id="${item.name}" data-task-obj="${encodeURIComponent(JSON.stringify(item))}">
+                                    ${deleteBtn}
+                                    <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 3px; display: flex; align-items: center; gap: 5px;">
+                                        <i class="fa fa-briefcase"></i> ${item.project || 'No Project'}
+                                    </div>
+                                    <h5 style="font-size: 0.95rem; margin-bottom: 5px; font-weight: 700; line-height: 1.2;">${item.subject || item.task}</h5>
+                                    
+                                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; opacity: 0.9; margin-bottom: 6px;">
+                                        <span><i class="fa fa-clock-o"></i> ${moment(item.start_time, "HH:mm:ss").format("h:mm A")} - ${moment(item.end_time, "HH:mm:ss").format("h:mm A")}</span>
+                                    </div>
+
+                                    <div style="display: flex; gap: 6px; align-items: center;">
+                                         <span class="sphere-badge-pill" style="font-size: 0.65rem; padding: 2px 8px; background: rgba(0,0,0,0.06); border-radius: 10px; font-weight: 600; color: inherit; border: none;">${item.priority}</span>
+                                         <span class="sphere-badge-pill" style="font-size: 0.65rem; padding: 2px 8px; background: rgba(0,0,0,0.06); border-radius: 10px; font-weight: 600; color: inherit; border: none;">${item.status}</span>
+                                    </div>
+                                </div>
+                            `;
                     }
                 });
 
@@ -637,6 +648,19 @@ frappe.pages["dak_day_planner"].unschedule = function (schedule_name) {
     });
 };
 
+
+frappe.pages["dak_day_planner"].set_active_task = function (task_name) {
+    frappe.call({
+        method: "dakbabu.dakbabu.page.dak_dashboard.dak_dashboard.set_working_task",
+        args: { task_name: task_name },
+        callback: function (r) {
+            if (r.message) {
+                frappe.show_alert({ message: "Active Task Updated", indicator: "green" });
+                frappe.pages["dak_day_planner"].render_grid(); // Refresh to update UI
+            }
+        }
+    });
+};
 
 function bind_drop_events() {
     $(".time-slot-dropzone").on("dragover", function (e) {

@@ -173,6 +173,9 @@
     flex: 1;
     padding: 5px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .time-slot-dropzone.drag-over {
@@ -191,13 +194,52 @@
     /* Teal 50 */
     border-left: 4px solid #468e88;
     /* Teal */
-    padding: 8px 12px;
-    border-radius: 4px;
+    padding: 10px 15px;
+    /* Increased padding (Whitespace) */
+    border-radius: 6px;
+    /* Slightly rounder */
     font-size: 0.9rem;
     color: #004d40;
     /* Teal 900 */
-    margin-bottom: 5px;
+    margin-bottom: 0;
     cursor: grab;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    /* Depth */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(70, 142, 136, 0.2);
+    border-left-width: 4px;
+    /* Keep accent */
+}
+
+.slot-task:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.slot-task.is-active-task {
+    background: #ecfdf5;
+    border-color: #10b981;
+    color: #065f46;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
 }
 
 [data-theme="dark"] .slot-task {
@@ -219,4 +261,76 @@
     margin: 2px 0 0;
     font-size: 0.75rem;
     opacity: 0.8;
+}
+
+/* Planner Action Buttons */
+.slot-task {
+    position: relative;
+    padding-right: 70px !important;
+    /* Make space for buttons */
+}
+
+.planner-btn-delete {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.planner-btn-delete:hover {
+    transform: translateY(-50%) scale(1.1);
+    background: #dc2626;
+}
+
+.planner-btn-focus {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4b5563;
+    /* Gray */
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    z-index: 10;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.planner-btn-focus:hover {
+    color: #059669;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.planner-btn-focus.is-active {
+    color: #059669;
+    /* Emerald 600 */
+    font-weight: bold;
+    animation: spin-slow 8s linear infinite;
+}
+
+@keyframes spin-slow {
+    from {
+        transform: translateY(-50%) rotate(0deg);
+    }
+
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
 }
