@@ -9,7 +9,7 @@ def get_users():
 @frappe.whitelist()
 def get_task_counts(timespan="All Time"):
 	filters = {}
-	ts_filters = {"docstatus": 1}
+	ts_filters = {"docstatus": ["<", 2]}
 	now = frappe.utils.nowdate()
 
 	if timespan == "Today":
@@ -61,6 +61,20 @@ def get_latest_task():
 		)
 		if working_task:
 			tasks = working_task
+			# Fetch active timer details if any (Draft timesheet for this task)
+			active_ts = frappe.get_all(
+				"Timesheet Detail",
+				filters={"task": tasks[0].name, "docstatus": 0},
+				fields=["parent", "from_time", "activity_type"],
+				order_by="from_time desc",
+				limit=1
+			)
+			if active_ts:
+				tasks[0]["running_timer_info"] = {
+					"timesheet": active_ts[0].parent,
+					"start_time": active_ts[0].from_time,
+					"activity": active_ts[0].activity_type
+				}
 		else:
 			# 0.5. Recently Modified (Within last 1 hour) - Stickiness for just-stopped tasks
 			# Since 'stop_working_task' updates the task, it will be the most recently modified.
@@ -146,7 +160,30 @@ def get_latest_task():
 @frappe.whitelist()
 def set_working_task(task_name):
 	try:
-		# 1. Reset all other tasks
+		# 0. Find currently working task and STOP its timer
+		current_working = frappe.db.get_value("Task", {"custom_working_now": 1}, "name")
+		if current_working and current_working != task_name:
+			# Find active (Draft) timesheet for this task
+			active_ts_name = frappe.db.get_value("Timesheet Detail", {"task": current_working, "docstatus": 0}, "parent")
+			
+			if active_ts_name:
+				ts = frappe.get_doc("Timesheet", active_ts_name)
+				# Assuming single row for timer usage
+				if ts.time_logs:
+					row = ts.time_logs[0]
+					if not row.to_time and row.from_time:
+						end_time = frappe.utils.now_datetime()
+						start_time = frappe.utils.get_datetime(row.from_time)
+						duration_sq = frappe.utils.time_diff_in_seconds(end_time, start_time)
+						duration_hours = duration_sq / 3600.0
+						
+						if duration_hours < 0.01: duration_hours = 0.01
+						
+						row.to_time = end_time
+						row.hours = duration_hours
+						ts.save()
+
+		# 1. Reset all others
 		frappe.db.sql("UPDATE `tabTask` SET custom_working_now = 0 WHERE custom_working_now = 1")
 
 		# 2. Set new task as working

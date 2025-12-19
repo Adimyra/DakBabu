@@ -30,6 +30,14 @@ def get_timesheets_summary(status=None, from_date=None, to_date=None, employee=N
         order_by='modified desc'
     )
     
+    # Enrich with Task Details
+    for ts in timesheets:
+        # Get the first task from child table
+        details = frappe.get_all('Timesheet Detail', filters={'parent': ts.name}, fields=['task'], limit=1)
+        if details and details[0].task:
+            ts.task_id = details[0].task
+            ts.task_subject = frappe.db.get_value('Task', details[0].task, 'subject')
+    
     return timesheets
 
 @frappe.whitelist()

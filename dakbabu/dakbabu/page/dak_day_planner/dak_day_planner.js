@@ -100,10 +100,17 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dayPlannerFilterDropdown" style="margin-top: 10px; border-radius: 8px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); min-width: 150px; overflow: hidden;">
                         <li style="border-bottom: 1px solid #f3f4f6;"><div style="padding: 8px 15px; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Filter Time</div></li>
-                        <li><a href="#" onclick="frappe.msgprint('Day Planner focuses on specific days. Use the date picker below for detailed navigation.'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">All Time</a></li>
-                        <li><a href="#" onclick="frappe.msgprint('Already showing Today\'s Plan'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Today</a></li>
-                         <li><a href="#" onclick="frappe.msgprint('Future planning coming soon!'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Tomorrow</a></li>
-                         <li style="border-top: 1px solid #f3f4f6; margin-top: 5px; padding-top: 5px;"><a href="#" onclick="frappe.pages['dak_day_planner'].load_tasks(); frappe.pages['dak_day_planner'].render_grid(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #4b5563;"><i class="fa fa-refresh" style="margin-right:8px;"></i> Reset / Reload</a></li>
+                        <li><a href="#" onclick="$('#planner-date-picker').val(moment().format('YYYY-MM-DD')).trigger('change'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Today</a></li>
+                        <li><a href="#" onclick="$('#planner-date-picker').val(moment().add(1, 'days').format('YYYY-MM-DD')).trigger('change'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Tomorrow</a></li>
+                        <li style="border-top: 1px solid #f3f4f6; margin-top: 5px; padding-top: 5px;">
+                            <a href="#" onclick="$('#planner-date-picker').removeAttr('min'); frappe.show_alert('Past dates enabled in picker', 'green'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;"><i class="fa fa-history" style="margin-right:8px;"></i> Past Dates</a>
+                        </li>
+                        <li>
+                            <a href="#" onclick="frappe.pages['dak_day_planner'].reset_schedule(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #dc2626;"><i class="fa fa-trash" style="margin-right:8px;"></i> Clear Plan</a>
+                        </li>
+                        <li>
+                            <a href="#" onclick="frappe.pages['dak_day_planner'].load_tasks(); frappe.pages['dak_day_planner'].render_grid(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #4b5563;"><i class="fa fa-refresh" style="margin-right:8px;"></i> Refresh</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -112,12 +119,23 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
         <!-- Planner Body -->
         <div class="planner-wrapper">
             <!-- Left Column: Tasks -->
+            <!-- Left Column: Tasks -->
             <div class="task-pool-col">
-                <div class="pool-header">
-                    <h4 style="margin: 0; font-weight: 700; color: #374151;">Unscheduled Tasks</h4>
-                    <span style="font-size: 0.8rem; color: #6b7280;">Drag tasks to time slots</span>
+                <div class="pool-header" style="height: auto; min-height: 80px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="margin: 0; font-weight: 700; color: #374151;">Unscheduled</h4>
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #6b7280; background: #e5e7eb; padding: 2px 8px; border-radius: 12px;" id="task-count-badge">0</span>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="task-pool-search" class="form-control input-xs" placeholder="Search..." style="height: 28px; font-size: 0.8rem; flex: 1;">
+                        <select id="task-pool-sort" class="form-control input-xs" style="height: 28px; width: 85px; font-size: 0.8rem; padding: 0 4px;">
+                             <option value="manual">Manual</option>
+                             <option value="priority">Priority</option>
+                             <option value="date">Due Date</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="pool-body" id="planner-task-pool">
+                <div class="pool-body" id="planner-task-pool" style="top: 90px;">
                     <div style="text-align: center; color: #9ca3af; margin-top: 50px;">
                         <i class="fa fa-spinner fa-spin"></i> Loading...
                     </div>
@@ -149,7 +167,7 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
                         </select>
                     </div>
                     <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
-                        <input type="date" id="planner-date-picker" class="form-control input-sm" style="width: 140px; font-weight: 600; color: #374151;" value="${moment().format('YYYY-MM-DD')}">
+                        <input type="date" id="planner-date-picker" class="form-control input-sm" style="width: 140px; font-weight: 600; color: #374151;" value="${moment().format('YYYY-MM-DD')}" min="${moment().format('YYYY-MM-DD')}">
                         <span style="font-size: 0.9rem; font-weight: 600; min-width: 100px; text-align: right;" id="planner-date-display">Today</span>
                     </div>
                 </div>
@@ -188,20 +206,236 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
             frappe.pages["dak_day_planner"].config.current_date = dateVal;
 
             // Update Display Label
-            let display = moment(dateVal).format("ddd, MMM D");
-            if (moment(dateVal).isSame(moment(), 'day')) display = "Today";
-            $("#planner-date-display").text(display);
+            let display = "";
+            let alertLabel = moment(dateVal).format("MM-DD-YYYY");
+
+            if (moment(dateVal).isSame(moment(), 'day')) {
+                display = "Today";
+                alertLabel = "Today";
+            } else if (moment(dateVal).isSame(moment().add(1, 'day'), 'day')) {
+                display = "Tomorrow";
+                alertLabel = "Tomorrow";
+            }
+
+            if (display) {
+                $("#planner-date-display").text(display).show();
+            } else {
+                $("#planner-date-display").text("").hide();
+            }
 
             // Re-render grid and reload tasks for that day
             frappe.pages["dak_day_planner"].load_tasks();
             frappe.pages["dak_day_planner"].render_grid();
-            frappe.show_alert({ message: `Planning for ${display}`, indicator: "blue" });
+            frappe.show_alert({ message: `Planning for ${alertLabel}`, indicator: "blue" });
+        }
+    });
+
+    // Event Listeners for Pool (Unschedule Drop)
+    $(".task-pool-col").on("dragenter", function (e) {
+        e.preventDefault();
+        if (frappe.pages["dak_day_planner"].dragging_item) {
+            $(this).addClass("drag-over-delete");
+        }
+    });
+
+    $(".task-pool-col").on("dragover", function (e) {
+        e.preventDefault(); // Necessary to allow dropping
+        e.originalEvent.dataTransfer.dropEffect = "move";
+
+        if (frappe.pages["dak_day_planner"].dragging_item) {
+            let container = document.getElementById("planner-task-pool");
+            let ghost = $("#pool-ghost-card");
+
+            // 1. Create Ghost Object (if not exists)
+            if (ghost.length === 0) {
+                let task = frappe.pages["dak_day_planner"].dragging_item;
+                let html = frappe.pages["dak_day_planner"].get_task_card_html(task);
+                ghost = $(html).attr("id", "pool-ghost-card").css({
+                    "opacity": "0.5",
+                    "border": "2px dashed #9ca3af",
+                    "pointer-events": "none"
+                });
+            }
+
+            // 2. Determine Position to Insert
+            const draggableElements = [...container.querySelectorAll('.planner-task-card:not(#pool-ghost-card)')];
+            const y = e.originalEvent.clientY;
+
+            const afterElement = draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+
+            // 3. Insert Ghost
+            if (afterElement) {
+                $(afterElement).before(ghost);
+            } else {
+                $(container).append(ghost);
+            }
+        }
+    });
+
+    $(".task-pool-col").on("dragleave", function (e) {
+        // Only remove if leaving the main container, not entering a child
+        // Simple check: remove class. Ghost removal might be tricky with child elements firing dragleave.
+        // Better to remove ghost only on drop or dragend of source.
+        // But user wants "hover over there".
+        // Let's keep it simple: Remove class. Keep ghost until drop or dragend handles cleanup?
+        // Actually, standard behavior is remove on leave.
+        // checks if relatedTarget is inside
+        if (!this.contains(e.originalEvent.relatedTarget)) {
+            $(this).removeClass("drag-over-delete");
+            $("#pool-ghost-card").remove();
+        }
+    });
+
+    $(".task-pool-col").on("drop", function (e) {
+        e.preventDefault();
+        $(this).removeClass("drag-over-delete");
+
+        let ghost = $("#pool-ghost-card");
+        if (ghost.length === 0) return; // Should not happen if dragover worked
+
+        let rawData = e.originalEvent.dataTransfer.getData("text/plain");
+
+        if (rawData && rawData.startsWith("RESCHEDULE:")) {
+            // Case 1: Unscheduling (Grid -> Pool)
+            let scheduleId = rawData.replace("RESCHEDULE:", "");
+            let taskItem = frappe.pages["dak_day_planner"].dragging_item; // Saved during dragstart
+
+            frappe.call({
+                method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.unschedule_task_from_slot",
+                args: { schedule_id: scheduleId },
+                callback: function (r) {
+                    if (r.message) {
+                        // Create actual card and replace ghost
+                        let html = frappe.pages["dak_day_planner"].get_task_card_html(taskItem);
+                        let newCard = $(html);
+                        ghost.replaceWith(newCard);
+
+                        // Re-bind events to new card
+                        frappe.pages["dak_day_planner"].bind_task_card_events(newCard);
+
+                        // Save Order
+                        frappe.pages["dak_day_planner"].save_pool_order();
+
+                        // Refresh Grid (to remove slot)
+                        frappe.pages["dak_day_planner"].render_grid();
+                        frappe.show_alert({ message: "Task unscheduled", indicator: "orange" });
+                    }
+                }
+            });
+
+        } else if (rawData) {
+            // Case 2: Reordering (Pool -> Pool)
+            try {
+                let task = JSON.parse(decodeURIComponent(rawData));
+                let originalCard = $(`#pt-${task.name}`);
+
+                if (originalCard.length) {
+                    ghost.replaceWith(originalCard);
+                    frappe.pages["dak_day_planner"].save_pool_order();
+                } else {
+                    ghost.remove();
+                }
+            } catch (e) {
+                console.error("Drop error", e);
+                ghost.remove();
+            }
+        } else {
+            ghost.remove();
         }
     });
 
     // Initial Load
     frappe.pages["dak_day_planner"].load_tasks();
     frappe.pages["dak_day_planner"].render_grid();
+
+    // Bind Search & Sort Events
+    $("#task-pool-search").on("input", function () {
+        let val = $(this).val().toLowerCase();
+        $("#planner-task-pool .planner-task-card").each(function () {
+            let taskData = $(this).data("task"); // We can use data object or just text
+            // Text search covers subject and project displayed
+            let text = $(this).text().toLowerCase();
+            $(this).toggle(text.indexOf(val) > -1);
+        });
+    });
+
+    $("#task-pool-sort").on("change", function () {
+        let criteria = $(this).val();
+        frappe.pages["dak_day_planner"].sort_pool(criteria);
+    });
+
+    // Event Delegation for Grid Items (Rescheduling)
+    // We bind this once on the container, so we don't need to re-bind on render_grid
+    $("#planner-grid-area").on("dragstart", ".slot-task", function (e) {
+        let scheduleId = $(this).attr("data-schedule-id"); // Use .attr for safety
+
+        // Store dragging item for Ghost Logic
+        let taskObjRaw = $(this).attr("data-task-obj");
+        if (taskObjRaw) {
+            let item = JSON.parse(decodeURIComponent(taskObjRaw));
+            frappe.pages["dak_day_planner"].dragging_item = {
+                name: item.task, // The Task ID
+                subject: item.subject || item.title,
+                project: item.project,
+                priority: item.priority || "Low",
+                expected_time: item.expected_time,
+                exp_end_date: item.exp_end_date
+            };
+        }
+
+        // Use text/plain with prefix for robust cross-browser support
+        if (scheduleId) {
+            e.originalEvent.dataTransfer.setData("text/plain", "RESCHEDULE:" + scheduleId);
+            e.originalEvent.dataTransfer.effectAllowed = "move";
+            $(this).css('opacity', '0.5');
+        } else {
+            console.error("Missing schedule-id on drag start");
+        }
+    });
+
+    $("#planner-grid-area").on("dragend", ".slot-task", function (e) {
+        $(this).css('opacity', '1');
+        frappe.pages["dak_day_planner"].dragging_item = null;
+        $("#pool-ghost-card").remove();
+    });
+};
+
+frappe.pages["dak_day_planner"].sort_pool = function (criteria) {
+    let tasks = frappe.pages["dak_day_planner"].tasks || [];
+    let sorted = [...tasks];
+
+    if (criteria === 'priority') {
+        const pMap = { "Urgent": 4, "High": 3, "Medium": 2, "Low": 1 };
+        sorted.sort((a, b) => (pMap[b.priority] || 0) - (pMap[a.priority] || 0));
+    } else if (criteria === 'date') {
+        sorted.sort((a, b) => {
+            if (!a.exp_end_date) return 1;
+            if (!b.exp_end_date) return -1;
+            return new Date(a.exp_end_date) - new Date(b.exp_end_date);
+        });
+    } else {
+        // Manual: custom_planner_sort_index asc
+        sorted.sort((a, b) => (a.custom_planner_sort_index || 0) - (b.custom_planner_sort_index || 0));
+    }
+
+    let container = $("#planner-task-pool");
+    container.empty();
+    sorted.forEach(task => {
+        let html = frappe.pages["dak_day_planner"].get_task_card_html(task);
+        container.append(html);
+    });
+    frappe.pages["dak_day_planner"].bind_task_card_events($(".planner-task-card"));
+
+    // Re-apply search filter if any
+    $("#task-pool-search").trigger("input");
 };
 
 frappe.pages["dak_day_planner"].load_tasks = function () {
@@ -213,7 +447,8 @@ frappe.pages["dak_day_planner"].load_tasks = function () {
         },
         callback: function (r) {
             if (r.message) {
-                frappe.pages["dak_day_planner"].tasks = r.message;
+                frappe.pages["dak_day_planner"].tasks = r.message || [];
+                $("#task-count-badge").text(frappe.pages["dak_day_planner"].tasks.length);
                 frappe.pages["dak_day_planner"].render_pool();
             }
         },
@@ -221,62 +456,82 @@ frappe.pages["dak_day_planner"].load_tasks = function () {
 };
 
 frappe.pages["dak_day_planner"].render_pool = function () {
-    let container = $("#planner-task-pool");
-    container.empty();
+    // Determine current sort
+    let criteria = $("#task-pool-sort").val() || "manual";
+    frappe.pages["dak_day_planner"].sort_pool(criteria);
+};
 
-    if (
-        !frappe.pages["dak_day_planner"].tasks ||
-        frappe.pages["dak_day_planner"].tasks.length === 0
-    ) {
-        container.html(
-            '<div style="text-align: center; color: #9ca3af; margin-top: 30px;">No unscheduled tasks found.</div>'
-        );
+frappe.pages["dak_day_planner"].bind_task_card_events = function (elements) {
+    elements.on("dragstart", function (e) {
+        e.originalEvent.dataTransfer.setData("text/plain", $(this).attr("data-task"));
+        e.originalEvent.dataTransfer.effectAllowed = "copy"; // or move
+        $(this).addClass("is-dragging");
+        // Store for ghost logic
+        let taskData = $(this).attr("data-task");
+        if (taskData) {
+            frappe.pages["dak_day_planner"].dragging_item = JSON.parse(decodeURIComponent(taskData));
+        }
+    });
+
+    elements.on("dragend", function (e) {
+        $(this).removeClass("is-dragging");
+        frappe.pages["dak_day_planner"].dragging_item = null;
+        $("#pool-ghost-card").remove();
+    });
+};
+
+frappe.pages["dak_day_planner"].save_pool_order = function () {
+    // Only save order if we are in Manual mode
+    if ($("#task-pool-sort").val() !== "manual") {
+        frappe.msgprint("Switch to 'Manual' sort to save custom order.");
         return;
     }
 
-    frappe.pages["dak_day_planner"].tasks.forEach((task) => {
-        let priorityColor = "#10b981"; // Low
-        if (task.priority === "Medium") priorityColor = "#f59e0b";
-        if (task.priority === "High" || task.priority === "Urgent") priorityColor = "#dc2626";
+    let taskNames = [];
+    $("#planner-task-pool .planner-task-card").each(function () {
+        // ID is "pt-TASKNAME"
+        let idStr = $(this).attr("id");
+        if (idStr && idStr.startsWith("pt-")) {
+            taskNames.push(idStr.replace("pt-", ""));
+        }
+    });
 
-        let html = `
-            <div class="planner-task-card" draggable="true" onclick="frappe.pages['dak_day_planner'].show_task_details('${task.name}')" data-task="${encodeURIComponent(
-            JSON.stringify(task)
-        )}" id="pt-${task.name}">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
-                    <span style="
-                        font-size: 0.65rem;
-                        text-transform: uppercase;
-                        font-weight: 700;
-                        color: ${priorityColor};
-                        background: ${priorityColor}15;
-                        padding: 2px 6px;
-                        border-radius: 4px;
-                        border: 1px solid ${priorityColor}30;
-                    ">${task.priority}</span>
-                    <span style="font-size: 0.7rem; color: #6b7280;">${task.project || ""}</span>
-                </div>
-                <h5 style="margin: 0 0 5px 0; font-size: 0.95rem; line-height: 1.3;">${task.subject
-            }</h5>
-                <div style="font-size: 0.75rem; color: #6b7280; display: flex; align-items: center; gap: 10px;">
-                    <span><i class="fa fa-clock-o"></i> ${task.expected_time || "-"}h</span>
-                    <span><i class="fa fa-calendar"></i> ${task.exp_end_date}</span>
-                </div>
+    frappe.call({
+        method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.update_task_order",
+        args: { task_names: taskNames },
+        callback: function (r) {
+            // Silent success
+        }
+    });
+};
+
+frappe.pages["dak_day_planner"].get_task_card_html = function (task) {
+    let priorityColor = "#10b981"; // Low
+    if (task.priority === "Medium") priorityColor = "#f59e0b";
+    if (task.priority === "High" || task.priority === "Urgent") priorityColor = "#dc2626";
+
+    return `
+        <div class="planner-task-card" draggable="true" onclick="frappe.pages['dak_day_planner'].show_task_details('${task.name}')" data-task="${encodeURIComponent(JSON.stringify(task))}" id="pt-${task.name}">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
+                <span style="
+                    font-size: 0.65rem;
+                    text-transform: uppercase;
+                    font-weight: 700;
+                    color: ${priorityColor};
+                    background: ${priorityColor}15;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    border: 1px solid ${priorityColor}30;
+                ">${task.priority}</span>
+                <span style="font-size: 0.7rem; color: #6b7280;">${task.project || ""}</span>
             </div>
-        `;
-        container.append(html);
-    });
-
-    // Re-bind Drag Events
-    $(".planner-task-card").on("dragstart", function (e) {
-        e.originalEvent.dataTransfer.setData("text/plain", $(this).attr("data-task"));
-        e.originalEvent.dataTransfer.effectAllowed = "copy";
-        $(this).addClass("is-dragging");
-    });
-
-    $(".planner-task-card").on("dragend", function (e) {
-        $(this).removeClass("is-dragging");
-    });
+            <h5 style="margin: 0 0 5px 0; font-size: 0.95rem; line-height: 1.3;">${task.subject}</h5>
+            <div style="font-size: 0.75rem; color: #6b7280; display: flex; align-items: center; gap: 10px;">
+                <span><i class="fa fa-clock-o"></i> ${task.expected_time || "-"}h</span>
+                <span><i class="fa fa-calendar"></i> ${task.exp_end_date || "-"}</span>
+            </div>
+        </div>
+    `;
 };
 
 frappe.pages["dak_day_planner"].render_grid = function () {
@@ -298,13 +553,24 @@ frappe.pages["dak_day_planner"].render_grid = function () {
 
             if (config.end_hour <= config.start_hour) endMoment.add(1, "day");
 
+            let isToday = moment(config.current_date).isSame(moment(), 'day');
+            let isPastDate = moment(config.current_date).isBefore(moment(), 'day');
+            let now = moment();
+
             while (currentMoment.isBefore(endMoment)) {
+                // Rule 1: For TODAY, hide slots that have already passed (Focus Mode)
+                if (isToday && currentMoment.isBefore(now)) {
+                    currentMoment.add(config.interval, "minutes");
+                    continue;
+                }
+
                 let timeLabel = currentMoment.format("h:mm A");
                 let slotId = currentMoment.format("HH:mm");
 
+                // Rule 2: If viewing a PAST date, everything is Read-Only
+                let isReadOnly = isPastDate;
+
                 // Check if any task is scheduled in this slot
-                // Simple matching: start_time starts with slotId (matches HH:mm)
-                // In production, better time range overlap logic is needed.
                 let slotContent = "";
                 let occupied = false;
 
@@ -312,10 +578,14 @@ frappe.pages["dak_day_planner"].render_grid = function () {
                     // item.start_time is "HH:mm:ss"
                     if (item.start_time.startsWith(slotId)) {
                         occupied = true;
-                        slotContent += `
-                            <div class="slot-task" draggable="false" style="cursor: default;">
-                                <h5>${item.subject || item.task}</h5>
-                                <p><i class="fa fa-clock-o"></i> ${moment(item.start_time, "HH:mm:ss").format("h:mm A")} - ${moment(item.end_time, "HH:mm:ss").format("h:mm A")}</p>
+
+                        let deleteBtn = "";
+                        let dragAttr = 'draggable="true" style="cursor: grab;"';
+
+                        if (isReadOnly) {
+                            dragAttr = 'draggable="false" style="cursor: default; opacity: 0.85; filter: grayscale(0.5);"';
+                        } else {
+                            deleteBtn = `
                                 <span style="
                                     position: absolute; right: 5px; top: 5px;
                                     cursor: pointer; opacity: 0.7;"
@@ -323,14 +593,22 @@ frappe.pages["dak_day_planner"].render_grid = function () {
                                     onclick="frappe.pages['dak_day_planner'].unschedule('${item.name}')">
                                     <i class="fa fa-times-circle" style="color: #ef4444;"></i>
                                 </span>
+                            `;
+                        }
+
+                        slotContent += `
+                            <div class="slot-task" ${dragAttr} data-schedule-id="${item.name}" data-task-obj="${encodeURIComponent(JSON.stringify(item))}">
+                                <h5>${item.subject || item.task}</h5>
+                                <p><i class="fa fa-clock-o"></i> ${moment(item.start_time, "HH:mm:ss").format("h:mm A")} - ${moment(item.end_time, "HH:mm:ss").format("h:mm A")}</p>
+                                ${deleteBtn}
                             </div>
                         `;
                     }
                 });
 
                 let html = `
-                    <div class="time-slot-row">
-                        <div class="time-slot-label">${timeLabel}</div>
+                    <div class="time-slot-row ${isReadOnly ? 'time-slot-past' : ''}" style="${isReadOnly ? 'background-color: #f9fafb;' : ''}">
+                        <div class="time-slot-label" style="${isReadOnly ? 'opacity: 0.6;' : ''}">${timeLabel}</div>
                         <div class="time-slot-dropzone ${occupied ? 'has-task' : ''}" data-time="${slotId}">
                             ${slotContent}
                         </div>
@@ -341,7 +619,7 @@ frappe.pages["dak_day_planner"].render_grid = function () {
                 currentMoment.add(config.interval, "minutes");
             }
 
-            // Bind Drop Events (moved inside callback to bind to new elements)
+            // Bind Drop Events (Drop zones need re-binding as they are destroyed/recreated)
             bind_drop_events();
         }
     });
@@ -374,41 +652,88 @@ function bind_drop_events() {
     $(".time-slot-dropzone").on("drop", function (e) {
         e.preventDefault();
         $(this).removeClass("drag-over");
-        let taskData = e.originalEvent.dataTransfer.getData("text/plain");
-        if (!taskData) return;
 
+        let rawData = e.originalEvent.dataTransfer.getData("text/plain");
+        if (!rawData) return;
 
-        let task = JSON.parse(decodeURIComponent(taskData));
         let slotTimeStr = $(this).data("time"); // "HH:mm"
+
+        // Validation: Cannot schedule in the past
+        let selectedDate = frappe.pages["dak_day_planner"].config.current_date;
+        let now = moment();
+        let slotDateTime = moment(selectedDate + " " + slotTimeStr, "YYYY-MM-DD HH:mm");
 
         // Calculate End Time (Start + Interval)
         let interval = frappe.pages["dak_day_planner"].config.interval;
         let startMoment = moment(slotTimeStr, "HH:mm");
+
+        if (slotDateTime.clone().add(interval, 'minutes').isBefore(now)) {
+            frappe.show_alert({ message: "Cannot schedule tasks in the past.", indicator: "red" });
+            return;
+        }
+
         let endMoment = startMoment.clone().add(interval, 'minutes');
         let endTimeStr = endMoment.format("HH:mm:ss");
         let startTimeFull = startMoment.format("HH:mm:ss");
 
-        frappe.call({
-            method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.schedule_task",
-            args: {
-                task_name: task.name,
-                date: frappe.pages["dak_day_planner"].config.current_date,
-                start_time: startTimeFull,
-                end_time: endTimeStr
-            },
-            callback: function (r) {
-                if (r.message) {
-                    frappe.show_alert({ message: `Scheduled ${task.subject}`, indicator: "green" });
-                    // Access the correct 'this' from closure or re-select
-                    // Since 'this' changes in callback, we should reload grid/tasks
-                    frappe.pages["dak_day_planner"].load_tasks();
-                    frappe.pages["dak_day_planner"].render_grid(); // This will fetch and render the new slot
-                }
-            }
-        });
+        if (rawData.startsWith("RESCHEDULE:")) {
+            // RESCHEDULE EXISTING
+            let rescheduleId = rawData.replace("RESCHEDULE:", "");
 
+            if (!rescheduleId || rescheduleId === "undefined") {
+                frappe.msgprint("Error: Invalid Task ID for rescheduling.");
+                return;
+            }
+
+            frappe.call({
+                method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.reschedule_task",
+                args: {
+                    schedule_id: rescheduleId,
+                    date: selectedDate,
+                    start_time: startTimeFull,
+                    end_time: endTimeStr
+                },
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.show_alert({ message: `Task Rescheduled to ${startTimeFull}`, indicator: "green" });
+                        frappe.pages["dak_day_planner"].load_tasks();
+                        frappe.pages["dak_day_planner"].render_grid();
+                    } else {
+                        frappe.msgprint("Failed to reschedule task. Check console/logs.");
+                    }
+                },
+                error: function (r) {
+                    console.error(r);
+                    frappe.msgprint("Server Error during Reschedule.");
+                }
+            });
+        } else {
+            // SCHEDULE NEW
+            try {
+                let task = JSON.parse(decodeURIComponent(rawData));
+                frappe.call({
+                    method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.schedule_task",
+                    args: {
+                        task_name: task.name,
+                        date: selectedDate,
+                        start_time: startTimeFull,
+                        end_time: endTimeStr
+                    },
+                    callback: function (r) {
+                        if (r.message) {
+                            frappe.show_alert({ message: `Scheduled ${task.subject}`, indicator: "green" });
+                            frappe.pages["dak_day_planner"].load_tasks();
+                            frappe.pages["dak_day_planner"].render_grid();
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Invalid Drop Data", err);
+            }
+        }
     });
 }
+
 
 frappe.pages["dak_day_planner"].show_task_details = function (task_name) {
     if (!task_name) return;
@@ -483,7 +808,9 @@ frappe.pages["dak_day_planner"].render_task_modal_skeleton = function (task) {
                      <!-- Right Col: Meta Data -->
                      <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 15px;">
                         <div style="padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff;">
-                            <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Start Date</div>
+                            <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Start Date</div> 
+                            <div style="font-weight: 600; color: #374151;">${task.exp_start_date ? frappe.datetime.str_to_user(task.exp_start_date) : '-'}</div>
+                        </div>
                             <div style="font-weight: 600; color: #374151;">${task.exp_start_date ? frappe.datetime.str_to_user(task.exp_start_date) : '-'}</div>
                         </div>
                         <div style="padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff;">
@@ -501,8 +828,8 @@ frappe.pages["dak_day_planner"].render_task_modal_skeleton = function (task) {
                         </div>
                      </div>
                 </div>
-            </div>
-        `;
+            </div >
+                            `;
 
     d.$body.html(html);
     d.show();
@@ -602,4 +929,26 @@ frappe.pages["dak_day_planner"].apply_modal_theme = function (d) {
     d.$wrapper.find('.modal-header .btn-modal-close .icon').css("stroke", "white");
     d.$wrapper.find('.modal-header .btn-modal-close svg').css("stroke", "white");
     d.$wrapper.find('.modal-header .btn-modal-close use').css("stroke", "white");
+};
+
+frappe.pages["dak_day_planner"].reset_schedule = function () {
+    let date = frappe.pages["dak_day_planner"].config.current_date;
+    frappe.confirm(
+        `Are you sure you want to clear the entire schedule for <b>${date}</b> ? <br>This will move all tasks back to the unscheduled pool.`,
+        () => {
+            frappe.call({
+                method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.reset_day_schedule",
+                args: { date: date },
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.show_alert({ message: "Schedule cleared successfully", indicator: "green" });
+                        frappe.pages["dak_day_planner"].load_tasks();
+                        frappe.pages["dak_day_planner"].render_grid();
+                    } else {
+                        frappe.msgprint("Failed to clear schedule.");
+                    }
+                }
+            });
+        }
+    );
 };

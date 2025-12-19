@@ -306,12 +306,28 @@ class DakTimesheets {
                             dateRangeStr = "-";
                         }
 
+
+                        let noteDisplay = ts.note || "-";
+                        if (ts.note === "Timer started from Dashboard") {
+                            noteDisplay = `<i class="fa fa-clock-o" title="Timer started from Dashboard" style="color: #f59e0b; font-size: 1rem;"></i> <span style="font-size: 0.75rem; color: #9ca3af;">Timer Log</span>`;
+                        }
+
+                        let taskDisplay = "";
+                        if (ts.task_subject) {
+                            taskDisplay = `<div style="font-size: 0.9rem; font-weight: 600; color: #1f2937; margin-bottom: 2px;">${ts.task_subject}</div>`;
+                        } else {
+                            // Fallback if no task subject but has name (shouldn't happen often)
+                            taskDisplay = `<div style="font-weight: 600; color: #1f2937;">${ts.name}</div>`;
+                        }
+
                         html += `
-                            <tr class="frappe-list-row" style="cursor: default;">
+                            <tr class="frappe-list-row" style="cursor: pointer;" onclick="frappe.pages['dak_timesheet'].show_timesheet_details('${ts.name}')">
                                 <td style="padding: 12px 15px;">
-                                    <div style="font-weight: 600; color: #1f2937; cursor: pointer;" onclick="frappe.pages['dak_timesheet'].show_timesheet_details('${ts.name}')">${ts.name}</div>
-                                    <div style="font-size: 0.8rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ts.note || "-"
-                            }</div>
+                                    ${taskDisplay}
+                                    <div style="font-size: 0.8rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px;">
+                                        ${noteDisplay}
+                                    </div>
+                                    ${ts.task_subject ? `<div style="font-size: 0.7rem; color: #9ca3af;">${ts.name}</div>` : ''} 
                                 </td>
                                 <td style="padding: 12px 15px;">
                                     <div style="font-size: 0.9rem; color: #374151;">${ts.employee_name || '-'}</div>
@@ -326,8 +342,8 @@ class DakTimesheets {
                                 <td style="padding: 12px 15px; font-weight: 600;">
                                     ${parseFloat(ts.total_hours || 0).toFixed(2)} Hrs
                                 </td>
-                            </tr>
-                        `;
+                            </tr >
+                            `;
                     });
                     this.wrapper.find("#timesheet-table-body").html(html);
                 } else {
@@ -344,7 +360,7 @@ class DakTimesheets {
     set_filter(key, value) {
         this.filters[key] = value;
         this.render_timesheets();
-        frappe.show_alert({ message: `Filtering by ${value}`, indicator: "blue" });
+        frappe.show_alert({ message: `Filtering by ${value} `, indicator: "blue" });
     }
 
     clear_filters() {
@@ -395,7 +411,7 @@ frappe.pages["dak_timesheet"].show_timesheet_details = function (ts_name) {
 
         let logs_html = '';
         if (logs.length > 0) {
-            logs_html = `<table class="table table-bordered table-condensed" style="font-size: 0.9rem; margin-top: 10px;">
+            logs_html = `< table class="table table-bordered table-condensed" style = "font-size: 0.9rem; margin-top: 10px;" >
                 <thead><tr style="background: #f9fafb;">
                     <th>Project / Task</th>
                     <th>Activity</th>
@@ -415,14 +431,14 @@ frappe.pages["dak_timesheet"].show_timesheet_details = function (ts_name) {
                     <td style="font-size: 0.85rem; color: #6b7280;">${log.description || '-'}</td>
                 </tr>`;
             });
-            logs_html += `</tbody></table>`;
+            logs_html += `</tbody></table > `;
         } else {
-            logs_html = `<div style="padding: 15px; text-align: center; color: #9ca3af; font-style: italic; background: #f9fafb; border-radius: 8px;">No time logs found.</div>`;
+            logs_html = `< div style = "padding: 15px; text-align: center; color: #9ca3af; font-style: italic; background: #f9fafb; border-radius: 8px;" > No time logs found.</div > `;
         }
 
         let html = `
-            <div style="padding: 20px;">
-                <!-- Header Info -->
+                            < div style = "padding: 20px;" >
+                < !--Header Info-- >
                 <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                     <span class="indicator ${statusColor}" style="font-size: 14px; font-weight: 500;">${ts.status}</span>
                     <span style="font-size: 12px; color: #9ca3af; margin-left: auto;">${ts.name}</span>
@@ -466,7 +482,7 @@ frappe.pages["dak_timesheet"].show_timesheet_details = function (ts_name) {
                      </div>
                 </div>
             </div>
-        `;
+                        `;
 
         d.$body.html(html);
         d.show();
@@ -484,7 +500,7 @@ frappe.pages["dak_timesheet"].apply_modal_theme = function (d) {
         "overflow": "hidden"
     });
     d.$wrapper.find('.modal-header').css({
-        "background": "linear-gradient(135deg, #1f2937 0%, #111827 100%)",
+        "background": "linear-gradient(135deg, #2e605c 0%, #468e88 100%)",
         "color": "white",
         "border-bottom": "none",
         "padding": "20px 25px"
