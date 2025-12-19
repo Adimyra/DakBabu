@@ -411,7 +411,7 @@ frappe.pages["dak_timesheet"].show_timesheet_details = function (ts_name) {
 
         let logs_html = '';
         if (logs.length > 0) {
-            logs_html = `< table class="table table-bordered table-condensed" style = "font-size: 0.9rem; margin-top: 10px;" >
+            logs_html = `<table class="table table-bordered table-condensed" style="font-size: 0.9rem; margin-top: 10px;">
                 <thead><tr style="background: #f9fafb;">
                     <th>Project / Task</th>
                     <th>Activity</th>
@@ -431,14 +431,14 @@ frappe.pages["dak_timesheet"].show_timesheet_details = function (ts_name) {
                     <td style="font-size: 0.85rem; color: #6b7280;">${log.description || '-'}</td>
                 </tr>`;
             });
-            logs_html += `</tbody></table > `;
+            logs_html += `</tbody></table>`;
         } else {
-            logs_html = `< div style = "padding: 15px; text-align: center; color: #9ca3af; font-style: italic; background: #f9fafb; border-radius: 8px;" > No time logs found.</div > `;
+            logs_html = `<div style="padding: 15px; text-align: center; color: #9ca3af; font-style: italic; background: #f9fafb; border-radius: 8px;">No time logs found.</div>`;
         }
 
         let html = `
-                            < div style = "padding: 20px;" >
-                < !--Header Info-- >
+                            <div style="padding: 20px;">
+                <!--Header Info-->
                 <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                     <span class="indicator ${statusColor}" style="font-size: 14px; font-weight: 500;">${ts.status}</span>
                     <span style="font-size: 12px; color: #9ca3af; margin-left: auto;">${ts.name}</span>
