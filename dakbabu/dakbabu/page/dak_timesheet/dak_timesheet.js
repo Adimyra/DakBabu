@@ -21,33 +21,12 @@ class DakTimesheets {
 
     make() {
         this.wrapper.addClass("dak-timesheet-page");
-        this.apply_styles();
         this.render_layout();
         this.setup_filters();
         this.render_timesheets();
     }
 
-    apply_styles() {
-        $("<style>")
-            .prop("type", "text/css")
-            .html(`
-                .dak-timesheet-page .layout-main-section { max-width: 100% !important; }
-                [data-page-route="dak_timesheet"] .layout-main-section-wrapper { max-width: 100% !important; }
-                [data-page-route="dak_timesheet"] .page-head { display: none !important; }
-                .ts-filter-input {
-                    background: #f9fafb;
-                    border: 1px solid #d1d5db;
-                    border-radius: 6px;
-                    padding: 6px 10px;
-                    font-size: 0.85rem;
-                    color: #374151;
-                    outline: none;
-                    transition: border-color 0.2s;
-                }
-                .ts-filter-input:focus { border-color: #468e88; }
-            `)
-            .appendTo(this.wrapper);
-    }
+
 
     render_layout() {
         this.wrapper.css("padding", "0");
@@ -138,8 +117,8 @@ class DakTimesheets {
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="timesheetFilterDropdown" style="margin-top: 10px; border-radius: 8px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); min-width: 150px; overflow: hidden;">
                             <li style="border-bottom: 1px solid #f3f4f6;"><div style="padding: 8px 15px; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Filter Status</div></li>
-                            <li><a href="#" onclick="frappe.pages['dak_timesheet'].controller.set_filter('status', 'Draft'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Drafts</a></li>
-                            <li><a href="#" onclick="frappe.pages['dak_timesheet'].controller.set_filter('status', 'Submitted'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Submitted</a></li>
+                            <li><a href="#" onclick="frappe.pages['dak_timesheet'].controller.set_filter('status', 'Draft'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Submitted</a></li>
+                            <li><a href="#" onclick="frappe.pages['dak_timesheet'].controller.set_filter('status', 'Submitted'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Approved</a></li>
                              <li><a href="#" onclick="frappe.pages['dak_timesheet'].controller.set_filter('status', 'All'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;">Show All</a></li>
                         </ul>
                     </div>
@@ -189,6 +168,27 @@ class DakTimesheets {
                     " onmouseover="this.style.borderColor='#9ca3af'; this.style.color='#374151'" onmouseout="this.style.borderColor='#d1d5db'; this.style.color='#6b7280'">
                         <i class="fa fa-refresh"></i> Reset
                     </button>
+
+                    <!-- Status Counters & Total Hours -->
+                    <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+                        <!-- Draft Count -->
+                        <div style="display: flex; align-items: center; gap: 6px; background: #fffbeb; padding: 6px 12px; border-radius: 8px; border: 1px solid #fcd34d;">
+                            <span style="font-size: 0.75rem; color: #b45309; font-weight: 600; text-transform: uppercase;">Submitted</span>
+                            <span id="ts-count-draft" style="font-size: 0.95rem; color: #b45309; font-weight: 700;">0</span>
+                        </div>
+
+                        <!-- Submitted Count -->
+                        <div style="display: flex; align-items: center; gap: 6px; background: #ecfdf5; padding: 6px 12px; border-radius: 8px; border: 1px solid #6ee7b7;">
+                            <span style="font-size: 0.75rem; color: #047857; font-weight: 600; text-transform: uppercase;">Approved</span>
+                            <span id="ts-count-submitted" style="font-size: 0.95rem; color: #047857; font-weight: 700;">0</span>
+                        </div>
+
+                        <!-- Total Hours -->
+                        <div style="display: flex; align-items: center; gap: 8px; background: #ffffff; padding: 6px 14px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <span style="font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total</span>
+                            <span id="ts-total-hours" style="font-size: 1rem; color: #111827; font-weight: 700;">0.00 Hrs</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="table-responsive">
@@ -280,9 +280,23 @@ class DakTimesheets {
                 search_term: this.filters.search_term
             },
             callback: (r) => {
+                let total_hours = 0;
+                let count_draft = 0;
+                let count_submitted = 0;
+                let has_employee = false;
+                if (r.message && r.message.length > 0) {
+                    has_employee = r.message.some(ts => ts.employee_name);
+                }
+
+                // Toggle Header
+                this.wrapper.find('#timesheet-table th:nth-child(2)').toggle(has_employee);
+
                 if (r.message && r.message.length > 0) {
                     let html = "";
                     r.message.forEach((ts) => {
+                        total_hours += parseFloat(ts.total_hours || 0);
+                        if (ts.status === 'Draft') count_draft++;
+                        if (ts.status === 'Submitted') count_submitted++;
                         let statusColor =
                             ts.status === "Submitted"
                                 ? "#10b981"
@@ -295,6 +309,12 @@ class DakTimesheets {
                                 : ts.status === "Draft"
                                     ? "#fef3c7"
                                     : "#f3f4f6";
+
+                        // Map Status Labels
+                        let displayStatus = ts.status;
+                        if (ts.status === 'Draft') displayStatus = 'Submitted';
+                        if (ts.status === 'Submitted') displayStatus = 'Approved';
+
 
                         let dateRangeStr = "";
                         if (ts.start_date) {
@@ -320,6 +340,15 @@ class DakTimesheets {
                             taskDisplay = `<div style="font-weight: 600; color: #1f2937;">${ts.name}</div>`;
                         }
 
+                        let employeeCell = "";
+                        if (has_employee) {
+                            employeeCell = `
+                                <td style="padding: 12px 15px;">
+                                    <div style="font-size: 0.9rem; color: #374151;">${ts.employee_name || '-'}</div>
+                                </td>
+                            `;
+                        }
+
                         html += `
                             <tr class="frappe-list-row" style="cursor: pointer;" onclick="frappe.pages['dak_timesheet'].show_timesheet_details('${ts.name}')">
                                 <td style="padding: 12px 15px;">
@@ -329,12 +358,9 @@ class DakTimesheets {
                                     </div>
                                     ${ts.task_subject ? `<div style="font-size: 0.7rem; color: #9ca3af;">${ts.name}</div>` : ''} 
                                 </td>
+                                ${employeeCell}
                                 <td style="padding: 12px 15px;">
-                                    <div style="font-size: 0.9rem; color: #374151;">${ts.employee_name || '-'}</div>
-                                </td>
-                                <td style="padding: 12px 15px;">
-                                    <span class="badge" style="background: ${badgeBg}; color: ${statusColor}; font-weight: 500;">${ts.status
-                            }</span>
+                                    <span class="badge" style="background: ${badgeBg}; color: ${statusColor}; font-weight: 500;">${displayStatus}</span>
                                 </td>
                                 <td style="padding: 12px 15px; font-size: 0.85rem; color: #4b5563;">
                                     ${dateRangeStr}
@@ -352,6 +378,23 @@ class DakTimesheets {
                         .html(
                             '<tr><td colspan="6" style="text-align:center; padding:20px; font-style: italic; color: #6b7280;">No timesheets found matching criteria.</td></tr>'
                         );
+                }
+                // Update Stats Display
+                this.wrapper.find("#ts-total-hours").text(total_hours.toFixed(2) + " Hrs");
+                this.wrapper.find("#ts-count-draft").text(count_draft);
+                this.wrapper.find("#ts-count-submitted").text(count_submitted);
+
+                // Conditional Visibility
+                let filter_status = this.filters.status || 'All';
+                if (filter_status === 'Draft') {
+                    this.wrapper.find("#ts-count-draft").parent().show();
+                    this.wrapper.find("#ts-count-submitted").parent().hide();
+                } else if (filter_status === 'Submitted') {
+                    this.wrapper.find("#ts-count-draft").parent().hide();
+                    this.wrapper.find("#ts-count-submitted").parent().show();
+                } else {
+                    this.wrapper.find("#ts-count-draft").parent().show();
+                    this.wrapper.find("#ts-count-submitted").parent().show();
                 }
             },
         });

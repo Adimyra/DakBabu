@@ -22,11 +22,32 @@ def get_timesheets_summary(status=None, from_date=None, to_date=None, employee=N
 
     # Search Filter
     if search_term:
-        filters['name|note|employee_name'] = ['like', f'%{search_term}%']
-    
+        # 1. Find directly matching Timesheets
+        direct_matches = frappe.db.sql("""
+            SELECT name FROM `tabTimesheet`
+            WHERE name LIKE %s OR note LIKE %s OR employee_name LIKE %s
+        """, (f"%{search_term}%", f"%{search_term}%", f"%{search_term}%"), as_dict=True)
+        
+        match_ids = set([d.name for d in direct_matches])
+
+        # 2. Find Timesheets linked to matching Tasks
+        task_matches = frappe.db.sql("""
+            SELECT parent FROM `tabTimesheet Detail`
+            WHERE task IN (SELECT name FROM `tabTask` WHERE subject LIKE %s)
+        """, (f"%{search_term}%",), as_dict=True)
+        
+        for d in task_matches:
+            match_ids.add(d.parent)
+        
+        if not match_ids:
+            return []
+            
+        filters['name'] = ['in', list(match_ids)]
+
     timesheets = frappe.get_list('Timesheet', 
         fields=['name', 'status', 'start_date', 'end_date', 'total_hours', 'note', 'employee_name', 'owner', 'employee'], 
         filters=filters, 
+        limit_page_length=1000,
         order_by='modified desc'
     )
     

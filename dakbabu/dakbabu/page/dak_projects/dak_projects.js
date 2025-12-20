@@ -266,18 +266,18 @@ class DakProjects {
 
             <!-- Standard List View -->
             <div id="standard-project-list" style="width: 100%; margin-bottom: 50px; background: #ffffff; border-radius: 0; padding: 20px 40px; margin-top: 0px;">
-                <h3 style="margin-bottom: 20px; font-size: 1.5rem; color: #374151;">All Projects</h3>
+
                 
                 <div class="table-responsive">
                     <table class="frappe-list-table" id="project-table" style="width: 100%; table-layout: fixed;">
                         <thead>
                             <tr>
-                                <th style="width: 50px;"></th>
+                                <th style="width: 50px; text-align: center; vertical-align: middle; padding: 12px 0; color: #2e605c;"><i class="fa fa-dot-circle-o" title="Working Status" style="font-size: 1.2rem;"></i></th>
                                 <th style="width: 30%; padding: 12px 15px; border-bottom: 1px solid #d1d8dd; color: #8d99a6; font-size: 11px;">Project Name</th>
                                 <th style="width: 15%; padding: 12px 15px; border-bottom: 1px solid #d1d8dd; color: #8d99a6; font-size: 11px;">Status</th>
                                 <th style="width: 15%; padding: 12px 15px; border-bottom: 1px solid #d1d8dd; color: #8d99a6; font-size: 11px;">Priority</th>
                                 <th style="width: 35%; padding: 12px 15px; border-bottom: 1px solid #d1d8dd; color: #8d99a6; font-size: 11px;">Tasks (Total / Open / Overdue)</th>
-                                <th style="width: 50px;"></th>
+                                <th style="width: 50px; text-align: right; vertical-align: middle; padding: 12px 15px; color: #2e605c;"><i class="fa fa-check-circle" title="Completion Status" style="font-size: 1.2rem;"></i></th>
                             </tr>
                         </thead>
                         <tbody id="project-table-body">

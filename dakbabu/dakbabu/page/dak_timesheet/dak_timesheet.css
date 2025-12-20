@@ -1,0 +1,14 @@
+.dak-timesheet-page .layout-main-section { max-width: 100% !important; }
+[data-page-route="dak_timesheet"] .layout-main-section-wrapper { max-width: 100% !important; }
+[data-page-route="dak_timesheet"] .page-head { display: none !important; }
+.ts-filter-input {
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    color: #374151;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.ts-filter-input:focus { border-color: #468e88; }

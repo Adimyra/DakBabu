@@ -1,4 +1,14 @@
 frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
+    if (!frappe.provide("dakbabu.components") || !dakbabu.components.get_task_card) {
+        frappe.require("/assets/dakbabu/js/dak_components.js", () => {
+            frappe.pages["dak_task_list"].init_page(wrapper);
+        });
+    } else {
+        frappe.pages["dak_task_list"].init_page(wrapper);
+    }
+};
+
+frappe.pages["dak_task_list"].init_page = function (wrapper) {
     var page = frappe.ui.make_app_page({
         parent: wrapper,
         title: "",
@@ -60,7 +70,7 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
                         <i class="fa fa-home" style="margin-right: 8px; font-size: 1.1rem;"></i> Dashboard
                     </div>
                     <div style="display: flex; align-items: center; color: #ffffff; font-weight: 600; cursor: pointer; border-bottom: 2px solid #ffffff; padding-bottom: 5px;">
-                        <i class="fa fa-list" style="margin-right: 8px; font-size: 1rem;"></i> All Tasks
+                        <i class="fa fa-list" style="margin-right: 8px; font-size: 1rem;"></i> Tasks
                     </div>
                     <div style="display: flex; align-items: center; color: rgba(255,255,255,0.7); font-weight: 500; cursor: pointer; transition: color 0.2s;" onclick="frappe.set_route('dak_projects')" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
                         <i class="fa fa-briefcase" style="margin-right: 8px; font-size: 1rem;"></i> Projects
@@ -141,6 +151,12 @@ frappe.pages["dak_task_list"].on_page_load = function (wrapper) {
 
         <!-- Latest Task Featured Card -->
         <div id="latest-task-container" style="width: 100%; margin-bottom: 0px; display: none;"></div>
+
+        <!-- Task Tabs -->
+        <div style="width: 100%; padding: 0 40px; background: #ffffff; display: flex; gap: 20px; border-bottom: 2px solid #f3f4f6;">
+            <div class="task-tab active" onclick="frappe.pages['dak_task_list'].set_active_tab('Active')" style="padding: 15px 5px; font-weight: 600; color: #111827; border-bottom: 2px solid #2e605c; cursor: pointer; transition: all 0.2s; margin-bottom: -2px;">Active Tasks</div>
+            <div class="task-tab" onclick="frappe.pages['dak_task_list'].set_active_tab('Completed')" style="padding: 15px 5px; font-weight: 500; color: #6b7280; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; margin-bottom: -2px;">Completed Tasks</div>
+        </div>
 
         <!-- Shared Filter Bar (Premium Pill Design) -->
         <div id="task-filter-wrapper" style="width: 100%; padding: 12px 40px; background: #ffffff; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 10px;">
@@ -290,6 +306,8 @@ frappe.pages["dak_task_list"].render_task_list = function (wrapper) {
             if (r.message) {
                 frappe.pages["dak_task_list"].all_tasks = r.message;
 
+                if (!frappe.pages["dak_task_list"].current_tab) frappe.pages["dak_task_list"].current_tab = "Active";
+
                 if (!frappe.pages["dak_task_list"].current_view) frappe.pages["dak_task_list"].current_view = "list";
                 if (!frappe.pages["dak_task_list"].kanban_field) frappe.pages["dak_task_list"].kanban_field = "status";
                 if (frappe.pages["dak_task_list"].group_by_field === undefined) frappe.pages["dak_task_list"].group_by_field = null;
@@ -394,7 +412,9 @@ frappe.pages["dak_task_list"].reset_all_filters = function () {
     // Reset Pills Visuals
     $(".dak-filter-pill").removeClass("active");
 
-    frappe.pages["dak_task_list"].apply_task_filters();
+    // Reset Tab
+    frappe.pages["dak_task_list"].set_active_tab('Active');
+
     frappe.show_alert({ message: "Filters Reset", indicator: "blue" });
 };
 
@@ -435,7 +455,16 @@ frappe.pages["dak_task_list"].apply_task_filters = function (reset_pagination = 
             }
         }
 
-        return matchSubject && matchStatus && matchPriority && matchDate;
+        // Tab Filtering Logic
+        let currentTab = frappe.pages["dak_task_list"].current_tab || 'Active';
+        let matchTab = true;
+        if (currentTab === 'Active') {
+            if (task.status === 'Completed') matchTab = false;
+        } else if (currentTab === 'Completed') {
+            if (task.status !== 'Completed') matchTab = false;
+        }
+
+        return matchSubject && matchStatus && matchPriority && matchDate && matchTab;
     });
 
     frappe.pages["dak_task_list"].render_tasks_visuals(wrapper, filtered_tasks);
@@ -451,6 +480,28 @@ frappe.pages["dak_task_list"].set_group_by = function (field) {
     frappe.pages["dak_task_list"].apply_task_filters();
 };
 
+frappe.pages["dak_task_list"].set_active_tab = function (tab) {
+    frappe.pages["dak_task_list"].current_tab = tab;
+
+    // Update Tab UI
+    let $wrapper = $(frappe.pages["dak_task_list"].page_wrapper);
+    $wrapper.find('.task-tab').css({
+        'color': '#6b7280',
+        'border-bottom-color': 'transparent',
+        'font-weight': '500'
+    });
+
+    // Find the clicked tab (either by index or text content matching logic)
+    let index = tab === 'Active' ? 0 : 1;
+    $wrapper.find(`.task-tab:eq(${index})`).css({
+        'color': '#111827',
+        'border-bottom-color': '#2e605c',
+        'font-weight': '600'
+    });
+
+    frappe.pages["dak_task_list"].apply_task_filters();
+};
+
 frappe.pages["dak_task_list"].render_tasks_visuals = function (wrapper, tasks) {
     let container = $("#task-list-container");
     let table_header = $("#task-table-header");
@@ -459,14 +510,14 @@ frappe.pages["dak_task_list"].render_tasks_visuals = function (wrapper, tasks) {
     let groupBy = frappe.pages["dak_task_list"].group_by_field;
 
     // Render Headers
-    let header_html = `<th style="width: 50px;"></th>`;
+    let header_html = `<th style="width: 50px; text-align: center; vertical-align: middle; padding: 12px 0; color: #2e605c;"><i class="fa fa-dot-circle-o" title="Working Status" style="font-size: 1.2rem;"></i></th>`;
     frappe.pages["dak_task_list"].visible_columns.forEach((col, index) => {
         if (col.field === "custom_working_now") return;
         header_html += `<th class="dynamic-col-header" data-index="${index}" style="padding: 12px 15px; font-weight: normal; border-bottom: 1px solid #d1d8dd; text-align: left; cursor: pointer; color: #8d99a6; font-size: 11px; vertical-align: middle;">
 			${col.label} <i class="fa fa-caret-down" style="display: none; margin-left: 5px; color: #ced4da;"></i>
 		</th>`;
     });
-    header_html += `<th style="width: 50px;"></th>`;
+    header_html += `<th style="width: 50px; text-align: right; vertical-align: middle; padding: 12px 15px; color: #2e605c;"><i class="fa fa-check-circle" title="Completion Status" style="font-size: 1.2rem;"></i></th>`;
     table_header.html(header_html);
 
     $(".dynamic-col-header").off("click").on("click", function (e) {
@@ -580,86 +631,10 @@ frappe.pages["dak_task_list"].render_tasks_visuals = function (wrapper, tasks) {
 };
 
 frappe.pages["dak_task_list"].get_task_card_html = function (task) {
-    let statusColor = "#3b82f6";
-    if (task.status === "Open" || task.status === "Working") statusColor = "#10b981";
-    if (task.status === "Overdue") statusColor = "#ef4444";
-    if (task.status === "Completed") statusColor = "#6b7280";
-
-    let priorityColor = "#6b7280";
-    if (task.priority === "High" || task.priority === "Urgent") priorityColor = "#dc2626";
-    else if (task.priority === "Medium") priorityColor = "#f59e0b";
-
-    let isWorking = task.custom_working_now == 1;
-    let dueDate = task.exp_end_date ? frappe.datetime.str_to_user(task.exp_end_date) : "No Due Date";
-    let assigneeInitials = task.owner ? task.owner.split('@')[0].charAt(0).toUpperCase() : "?";
-
-    return `
-		<div class="task-grid-card" onclick="frappe.pages['dak_task_list'].show_task_details('${task.name}')" style="
-			width: calc(50% - 15px);
-			background: #ffffff;
-			border-radius: 12px;
-			padding: 24px;
-			box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-			cursor: pointer;
-			position: relative;
-			border: 1px solid #f3f4f6;
-			display: flex;
-			flex-direction: column;
-			justify-content: space-between;
-			min-height: 200px;
-		" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)';">
-			
-            <!-- Status Badges & Active Indicator -->
-			<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-				    <span style="font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; background: ${statusColor}15; color: ${statusColor}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${task.status}</span>
-				    <span style="font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; background: ${priorityColor}15; color: ${priorityColor}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${task.priority}</span>
-                </div>
-                <!-- Interactive Active Indicator -->
-                <div onclick="event.stopPropagation(); frappe.pages['dak_task_list'].set_working_task('${task.name}')" style="cursor: pointer; padding: 5px; color: ${isWorking ? '#2e605c' : '#d1d5db'}; font-size: 1.2rem; transition: all 0.2s;" title="${isWorking ? 'Currently Working' : 'Set as Working'}" onmouseover="if(!${isWorking}) this.style.color='#2e605c'" onmouseout="if(!${isWorking}) this.style.color='#d1d5db'">
-                    <i class="fa ${isWorking ? 'fa-dot-circle-o' : 'fa-circle-o'}"></i>
-                </div>
-			</div>
-
-            <!-- Content Area -->
-            <div style="margin-bottom: auto;">
-                <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 4px; font-weight: 600;">${task.name}</div>
-			    <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin: 0 0 8px 0; line-height: 1.3;">${task.subject}</h3>
-                ${task.project ? `<div style="font-size: 0.85rem; color: #4b5563; display: flex; align-items: center; gap: 6px; margin-bottom: 12px;">
-                    <i class="fa fa-briefcase" style="color: #6b7280;"></i> ${task.project}
-                </div>` : ''}
-            </div>
-
-            <!-- Progress Bar Section -->
-            <div style="margin-top: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 0.75rem; font-weight: 600; color: #6b7280;">Task Progress</span>
-                    <span style="font-size: 0.75rem; font-weight: 700; color: #111827;">${task.progress || 0}%</span>
-                </div>
-                <div style="width: 100%; height: 6px; background: #f3f4f6; border-radius: 3px; overflow: hidden;">
-                    <div style="width: ${task.progress || 0}%; height: 100%; background: ${statusColor}; transition: width 0.5s ease;"></div>
-                </div>
-            </div>
-
-            <!-- Footer Stats & Info -->
-			<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #f3f4f6;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 28px; height: 28px; background: #2e605c; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">${assigneeInitials}</div>
-                    <div style="font-size: 0.8rem; color: #6b7280; display: flex; align-items: center; gap: 5px;">
-                        <i class="fa fa-clock-o"></i> ${dueDate}
-                    </div>
-                </div>
-                <!-- Interactive Completion Button -->
-                <div onclick="event.stopPropagation(); frappe.pages['dak_task_list'].mark_task_complete(event, '${task.name}')" 
-                     style="cursor: ${task.status === 'Completed' ? 'default' : 'pointer'}; color: ${task.status === 'Completed' ? '#2e605c' : '#d1d5db'}; transition: all 0.2s; font-size: 1.3rem;" 
-                     title="${task.status === 'Completed' ? 'Task Completed' : 'Mark as Completed'}"
-                     onmouseover="if('${task.status}' !== 'Completed') this.style.color='#2e605c'" 
-                     onmouseout="if('${task.status}' !== 'Completed') this.style.color='#d1d5db'">
-                    <i class="fa ${task.status === 'Completed' ? 'fa-check-circle' : 'fa-check-circle-o'}"></i>
-                </div>
-			</div>
-		</div>`;
+    if (dakbabu.components && dakbabu.components.get_task_card) {
+        return dakbabu.components.get_task_card(task);
+    }
+    return "<div>Error loading task card component</div>";
 };
 
 frappe.pages["dak_task_list"].get_task_row_html = function (task) {

@@ -20,8 +20,15 @@ def schedule_task(task_name, date, start_time, end_time):
     Creates a new 'Dak Schedule' entry.
     """
     try:
-        # Check for overlaps (optional but recommended)
-        # For MVP, just create
+        # Check if already scheduled for this date
+        existing = frappe.db.exists("Dak Schedule", {
+            "task": task_name,
+            "schedule_date": date
+        })
+        
+        if existing:
+            return existing
+
         doc = frappe.get_doc({
             "doctype": "Dak Schedule",
             "task": task_name,
@@ -42,6 +49,7 @@ def reschedule_task(schedule_id, date, start_time, end_time):
     """
     try:
         doc = frappe.get_doc("Dak Schedule", schedule_id)
+        
         doc.schedule_date = date
         doc.start_time = start_time
         doc.end_time = end_time
@@ -145,3 +153,51 @@ def create_custom_sort_field():
             "hidden": 1
         })
 
+
+@frappe.whitelist()
+def reset_all_schedules():
+    """
+    Clears ALL 'Dak Schedule' entries regardless of date.
+    """
+    try:
+        frappe.db.delete("Dak Schedule")
+        return True
+    except Exception as e:
+        frappe.log_error(f"Error clearing all schedules: {str(e)}")
+        return False
+
+@frappe.whitelist()
+def remove_duplicate_tasks():
+    """
+    Finds tasks with duplicate subjects and deletes the newer ones, keeping the oldest unique one.
+    """
+    try:
+        # Get all duplicates
+        duplicates = frappe.db.sql("""
+            SELECT subject, COUNT(*) as count 
+            FROM `tabTask` 
+            GROUP BY subject 
+            HAVING count > 1
+        """, as_dict=True)
+        
+        removed_count = 0
+        
+        for d in duplicates:
+            # Get all tasks with this subject, ordered by creation (oldest first)
+            tasks = frappe.get_all("Task", 
+                filters={"subject": d.subject}, 
+                fields=["name"], 
+                order_by="creation asc"
+            )
+            
+            # Keep the first one (index 0), delete the rest
+            if len(tasks) > 1:
+                to_delete = tasks[1:]
+                for t in to_delete:
+                    frappe.delete_doc("Task", t.name)
+                    removed_count += 1
+                    
+        return f"Removed {removed_count} duplicate tasks."
+    except Exception as e:
+        frappe.log_error(f"Error removing duplicates: {str(e)}")
+        return f"Error: {str(e)}"

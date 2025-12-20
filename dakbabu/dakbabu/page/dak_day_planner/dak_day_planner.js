@@ -106,7 +106,13 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
                             <a href="#" onclick="$('#planner-date-picker').removeAttr('min'); frappe.show_alert('Past dates enabled in picker', 'green'); return false;" style="padding: 10px 15px; font-weight: 500; font-size: 0.9rem;"><i class="fa fa-history" style="margin-right:8px;"></i> Past Dates</a>
                         </li>
                         <li>
-                            <a href="#" onclick="frappe.pages['dak_day_planner'].reset_schedule(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #dc2626;"><i class="fa fa-trash" style="margin-right:8px;"></i> Clear Plan</a>
+                            <a href="#" onclick="frappe.pages['dak_day_planner'].reset_schedule(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #dc2626;"><i class="fa fa-trash" style="margin-right:8px;"></i> Clear Today</a>
+                        </li>
+                        <li>
+                            <a href="#" onclick="frappe.pages['dak_day_planner'].reset_all_schedules(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #b91c1c;"><i class="fa fa-bomb" style="margin-right:8px;"></i> Clear ALL Database</a>
+                        </li>
+                        <li style="border-top: 1px solid #f3f4f6; margin-top: 5px; padding-top: 5px;">
+                            <a href="#" onclick="frappe.pages['dak_day_planner'].remove_duplicate_tasks(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #d97706;"><i class="fa fa-clone" style="margin-right:8px;"></i> Remove Dupes</a>
                         </li>
                         <li>
                             <a href="#" onclick="frappe.pages['dak_day_planner'].load_tasks(); frappe.pages['dak_day_planner'].render_grid(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #4b5563;"><i class="fa fa-refresh" style="margin-right:8px;"></i> Refresh</a>
@@ -379,17 +385,23 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
 
         // Store dragging item for Ghost Logic
         let taskObjRaw = $(this).attr("data-task-obj");
-        if (taskObjRaw) {
-            let item = JSON.parse(decodeURIComponent(taskObjRaw));
-            frappe.pages["dak_day_planner"].dragging_item = {
-                name: item.task, // The Task ID
-                subject: item.subject || item.title,
-                project: item.project,
-                priority: item.priority || "Low",
-                expected_time: item.expected_time,
-                exp_end_date: item.exp_end_date
-            };
-        }
+        console.log("GRID DRAGSTART: Raw obj available?", !!taskObjRaw);
+        let item = JSON.parse(decodeURIComponent(taskObjRaw));
+
+        // Calculate Duration in Minutes
+        let start = moment(item.start_time, "HH:mm:ss");
+        let end = moment(item.end_time, "HH:mm:ss");
+        let durationMinutes = end.diff(start, 'minutes');
+
+        frappe.pages["dak_day_planner"].dragging_item = {
+            name: item.task, // The Task ID
+            subject: item.subject || item.title,
+            project: item.project,
+            priority: item.priority || "Low",
+            expected_time: item.expected_time,
+            exp_end_date: item.exp_end_date,
+            current_duration: durationMinutes // Store existing duration
+        };
 
         // Use text/plain with prefix for robust cross-browser support
         if (scheduleId) {
@@ -405,6 +417,127 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
         $(this).css('opacity', '1');
         frappe.pages["dak_day_planner"].dragging_item = null;
         $("#pool-ghost-card").remove();
+    });
+
+    // ------------------------------------------
+    // EVENT DELEGATION FOR DROPZONES (Refactored)
+    // ------------------------------------------
+    $("#planner-grid-area").on("dragover", ".time-slot-dropzone", function (e) {
+        e.preventDefault();
+        $(this).addClass("drag-over");
+        e.originalEvent.dataTransfer.dropEffect = "copy";
+    });
+
+    $("#planner-grid-area").on("dragleave", ".time-slot-dropzone", function (e) {
+        $(this).removeClass("drag-over");
+    });
+
+    $("#planner-grid-area").on("drop", ".time-slot-dropzone", function (e) {
+        e.preventDefault();
+        $(this).removeClass("drag-over");
+
+        let rawData = e.originalEvent.dataTransfer.getData("text/plain");
+        if (!rawData) return;
+
+        let slotTimeStr = $(this).data("time"); // "HH:mm"
+
+        // Validation: Cannot schedule in the past
+        let selectedDate = frappe.pages["dak_day_planner"].config.current_date;
+        let now = moment();
+        let slotDateTime = moment(selectedDate + " " + slotTimeStr, "YYYY-MM-DD HH:mm");
+
+        console.log("DROP EVENT (Delegated):", {
+            slotTime: slotTimeStr,
+            selectedDate: selectedDate,
+            rawData: rawData,
+            dragging_item: frappe.pages["dak_day_planner"].dragging_item
+        });
+
+        // Calculate End Time (Start + Interval)
+        let interval = frappe.pages["dak_day_planner"].config.interval;
+
+        // Determine Duration to use
+        let durationToUse = interval; // Default fallback
+
+        // If dragging an existing item (Rescheduling) or New Item
+        let draggedItem = frappe.pages["dak_day_planner"].dragging_item;
+
+        if (draggedItem) {
+            if (rawData.startsWith("RESCHEDULE:") && draggedItem.current_duration) {
+                // CASE 1: Keep existing duration
+                durationToUse = draggedItem.current_duration;
+            } else if (draggedItem.expected_time && parseFloat(draggedItem.expected_time) > 0) {
+                // CASE 2: New Schedule - Use Expected Time (Hrs -> Mins)
+                durationToUse = parseFloat(draggedItem.expected_time) * 60;
+            }
+        }
+
+        let startMoment = moment(slotTimeStr, "HH:mm");
+
+        if (slotDateTime.clone().add(durationToUse, 'minutes').isBefore(now)) {
+            frappe.show_alert({ message: "Cannot schedule tasks in the past.", indicator: "red" });
+            return;
+        }
+
+        let endMoment = startMoment.clone().add(durationToUse, 'minutes');
+        let endTimeStr = endMoment.format("HH:mm:ss");
+        let startTimeFull = startMoment.format("HH:mm:ss");
+
+        if (rawData.startsWith("RESCHEDULE:")) {
+            // RESCHEDULE EXISTING
+            let rescheduleId = rawData.replace("RESCHEDULE:", "");
+
+            if (!rescheduleId || rescheduleId === "undefined") {
+                frappe.msgprint("Error: Invalid Task ID for rescheduling.");
+                return;
+            }
+
+            frappe.call({
+                method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.reschedule_task",
+                args: {
+                    schedule_id: rescheduleId,
+                    date: selectedDate,
+                    start_time: startTimeFull,
+                    end_time: endTimeStr
+                },
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.show_alert({ message: `Task Rescheduled to ${startTimeFull}`, indicator: "green" });
+                        frappe.pages["dak_day_planner"].load_tasks();
+                        frappe.pages["dak_day_planner"].render_grid();
+                    } else {
+                        frappe.msgprint("Failed to reschedule task. Check console/logs.");
+                    }
+                },
+                error: function (r) {
+                    console.error(r);
+                    frappe.msgprint("Server Error during Reschedule.");
+                }
+            });
+        } else {
+            // SCHEDULE NEW
+            try {
+                let task = JSON.parse(decodeURIComponent(rawData));
+                frappe.call({
+                    method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.schedule_task",
+                    args: {
+                        task_name: task.name,
+                        date: selectedDate,
+                        start_time: startTimeFull,
+                        end_time: endTimeStr
+                    },
+                    callback: function (r) {
+                        if (r.message) {
+                            frappe.show_alert({ message: `Scheduled ${task.subject}`, indicator: "green" });
+                            frappe.pages["dak_day_planner"].load_tasks();
+                            frappe.pages["dak_day_planner"].render_grid();
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Invalid Drop Data", err);
+            }
+        }
     });
 };
 
@@ -630,9 +763,36 @@ frappe.pages["dak_day_planner"].render_grid = function () {
                 currentMoment.add(config.interval, "minutes");
             }
 
-            // Bind Drop Events (Drop zones need re-binding as they are destroyed/recreated)
-            bind_drop_events();
+
         }
+    });
+};
+
+frappe.pages["dak_day_planner"].reset_schedule = function () {
+    frappe.confirm("Are you sure you want to clear the schedule for THIS DATE?", () => {
+        let date = frappe.pages["dak_day_planner"].config.current_date;
+        frappe.call({
+            method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.reset_day_schedule",
+            args: { date: date },
+            callback: function (r) {
+                frappe.pages["dak_day_planner"].load_tasks();
+                frappe.pages["dak_day_planner"].render_grid();
+                frappe.show_alert({ message: "Day schedule cleared", indicator: "orange" });
+            }
+        });
+    });
+};
+
+frappe.pages["dak_day_planner"].reset_all_schedules = function () {
+    frappe.confirm("WARNING: This will delete ALL scheduled tasks from the database forever. Are you sure?", () => {
+        frappe.call({
+            method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.reset_all_schedules",
+            callback: function (r) {
+                frappe.pages["dak_day_planner"].load_tasks();
+                frappe.pages["dak_day_planner"].render_grid();
+                frappe.show_alert({ message: "ALL SCHEDULES DELETED", indicator: "red" });
+            }
+        });
     });
 };
 
@@ -662,101 +822,7 @@ frappe.pages["dak_day_planner"].set_active_task = function (task_name) {
     });
 };
 
-function bind_drop_events() {
-    $(".time-slot-dropzone").on("dragover", function (e) {
-        e.preventDefault();
-        $(this).addClass("drag-over");
-        e.originalEvent.dataTransfer.dropEffect = "copy";
-    });
 
-    $(".time-slot-dropzone").on("dragleave", function (e) {
-        $(this).removeClass("drag-over");
-    });
-
-    $(".time-slot-dropzone").on("drop", function (e) {
-        e.preventDefault();
-        $(this).removeClass("drag-over");
-
-        let rawData = e.originalEvent.dataTransfer.getData("text/plain");
-        if (!rawData) return;
-
-        let slotTimeStr = $(this).data("time"); // "HH:mm"
-
-        // Validation: Cannot schedule in the past
-        let selectedDate = frappe.pages["dak_day_planner"].config.current_date;
-        let now = moment();
-        let slotDateTime = moment(selectedDate + " " + slotTimeStr, "YYYY-MM-DD HH:mm");
-
-        // Calculate End Time (Start + Interval)
-        let interval = frappe.pages["dak_day_planner"].config.interval;
-        let startMoment = moment(slotTimeStr, "HH:mm");
-
-        if (slotDateTime.clone().add(interval, 'minutes').isBefore(now)) {
-            frappe.show_alert({ message: "Cannot schedule tasks in the past.", indicator: "red" });
-            return;
-        }
-
-        let endMoment = startMoment.clone().add(interval, 'minutes');
-        let endTimeStr = endMoment.format("HH:mm:ss");
-        let startTimeFull = startMoment.format("HH:mm:ss");
-
-        if (rawData.startsWith("RESCHEDULE:")) {
-            // RESCHEDULE EXISTING
-            let rescheduleId = rawData.replace("RESCHEDULE:", "");
-
-            if (!rescheduleId || rescheduleId === "undefined") {
-                frappe.msgprint("Error: Invalid Task ID for rescheduling.");
-                return;
-            }
-
-            frappe.call({
-                method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.reschedule_task",
-                args: {
-                    schedule_id: rescheduleId,
-                    date: selectedDate,
-                    start_time: startTimeFull,
-                    end_time: endTimeStr
-                },
-                callback: function (r) {
-                    if (r.message) {
-                        frappe.show_alert({ message: `Task Rescheduled to ${startTimeFull}`, indicator: "green" });
-                        frappe.pages["dak_day_planner"].load_tasks();
-                        frappe.pages["dak_day_planner"].render_grid();
-                    } else {
-                        frappe.msgprint("Failed to reschedule task. Check console/logs.");
-                    }
-                },
-                error: function (r) {
-                    console.error(r);
-                    frappe.msgprint("Server Error during Reschedule.");
-                }
-            });
-        } else {
-            // SCHEDULE NEW
-            try {
-                let task = JSON.parse(decodeURIComponent(rawData));
-                frappe.call({
-                    method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.schedule_task",
-                    args: {
-                        task_name: task.name,
-                        date: selectedDate,
-                        start_time: startTimeFull,
-                        end_time: endTimeStr
-                    },
-                    callback: function (r) {
-                        if (r.message) {
-                            frappe.show_alert({ message: `Scheduled ${task.subject}`, indicator: "green" });
-                            frappe.pages["dak_day_planner"].load_tasks();
-                            frappe.pages["dak_day_planner"].render_grid();
-                        }
-                    }
-                });
-            } catch (err) {
-                console.error("Invalid Drop Data", err);
-            }
-        }
-    });
-}
 
 
 frappe.pages["dak_day_planner"].show_task_details = function (task_name) {
@@ -975,4 +1041,18 @@ frappe.pages["dak_day_planner"].reset_schedule = function () {
             });
         }
     );
+};
+
+frappe.pages["dak_day_planner"].remove_duplicate_tasks = function () {
+    frappe.confirm("This will delete all duplicate tasks (same subject), keeping only the oldest one. Continue?", () => {
+        frappe.call({
+            method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.remove_duplicate_tasks",
+            callback: function (r) {
+                if (r.message) {
+                    frappe.msgprint(r.message);
+                    frappe.pages["dak_day_planner"].load_tasks();
+                }
+            }
+        });
+    });
 };

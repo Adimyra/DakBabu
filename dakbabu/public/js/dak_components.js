@@ -163,3 +163,89 @@ dakbabu.components.get_performance_card = function () {
             </div>
             `;
 };
+
+dakbabu.components.get_task_card = function (task) {
+    let statusColor = "#3b82f6";
+    if (task.status === "Open" || task.status === "Working") statusColor = "#10b981";
+    if (task.status === "Overdue") statusColor = "#ef4444";
+    if (task.status === "Completed") statusColor = "#6b7280";
+
+    let priorityColor = "#6b7280";
+    if (task.priority === "High" || task.priority === "Urgent") priorityColor = "#dc2626";
+    else if (task.priority === "Medium") priorityColor = "#f59e0b";
+
+    let isWorking = task.custom_working_now == 1;
+    let dueDate = task.exp_end_date ? frappe.datetime.str_to_user(task.exp_end_date) : "No Due Date";
+    let assigneeInitials = task.owner ? task.owner.split('@')[0].charAt(0).toUpperCase() : "?";
+
+    // Note: onclick handlers presume availability of frappe.pages['dak_task_list'] in the global scope
+    // or properly bound. If used outside dak_task_list, these might need refactoring to separate events from markup.
+    
+    return `
+		<div class="task-grid-card" onclick="frappe.pages['dak_task_list'].show_task_details('${task.name}')" style="
+			width: calc(50% - 15px);
+			background: #ffffff;
+			border-radius: 12px;
+			padding: 24px;
+			box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			cursor: pointer;
+			position: relative;
+			border: 1px solid #f3f4f6;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			min-height: 200px;
+		" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)';">
+			
+            <!-- Status Badges & Active Indicator -->
+			<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+				    <span style="font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; background: ${statusColor}15; color: ${statusColor}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${task.status}</span>
+				    <span style="font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; background: ${priorityColor}15; color: ${priorityColor}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${task.priority}</span>
+                </div>
+                <!-- Interactive Active Indicator -->
+                <div onclick="event.stopPropagation(); frappe.pages['dak_task_list'].set_working_task('${task.name}')" style="cursor: pointer; padding: 5px; color: ${isWorking ? '#2e605c' : '#d1d5db'}; font-size: 1.2rem; transition: all 0.2s;" title="${isWorking ? 'Currently Working' : 'Set as Working'}" onmouseover="if(!${isWorking}) this.style.color='#2e605c'" onmouseout="if(!${isWorking}) this.style.color='#d1d5db'">
+                    <i class="fa ${isWorking ? 'fa-dot-circle-o' : 'fa-circle-o'}"></i>
+                </div>
+			</div>
+
+            <!-- Content Area -->
+            <div style="margin-bottom: auto;">
+                <div style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 4px; font-weight: 600;">${task.name}</div>
+			    <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin: 0 0 8px 0; line-height: 1.3;">${task.subject}</h3>
+                ${task.project ? `<div style="font-size: 0.85rem; color: #4b5563; display: flex; align-items: center; gap: 6px; margin-bottom: 12px;">
+                    <i class="fa fa-briefcase" style="color: #6b7280;"></i> ${task.project}
+                </div>` : ''}
+            </div>
+
+            <!-- Progress Bar Section -->
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.75rem; font-weight: 600; color: #6b7280;">Task Progress</span>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #111827;">${task.progress || 0}%</span>
+                </div>
+                <div style="width: 100%; height: 6px; background: #f3f4f6; border-radius: 3px; overflow: hidden;">
+                    <div style="width: ${task.progress || 0}%; height: 100%; background: ${statusColor}; transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+
+            <!-- Footer Stats & Info -->
+			<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #f3f4f6;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 28px; height: 28px; background: #2e605c; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">${assigneeInitials}</div>
+                    <div style="font-size: 0.8rem; color: #6b7280; display: flex; align-items: center; gap: 5px;">
+                        <i class="fa fa-clock-o"></i> ${dueDate}
+                    </div>
+                </div>
+                <!-- Interactive Completion Button -->
+                <div onclick="event.stopPropagation(); frappe.pages['dak_task_list'].mark_task_complete(event, '${task.name}')" 
+                     style="cursor: ${task.status === 'Completed' ? 'default' : 'pointer'}; color: ${task.status === 'Completed' ? '#2e605c' : '#d1d5db'}; transition: all 0.2s; font-size: 1.3rem;" 
+                     title="${task.status === 'Completed' ? 'Task Completed' : 'Mark as Completed'}"
+                     onmouseover="if('${task.status}' !== 'Completed') this.style.color='#2e605c'" 
+                     onmouseout="if('${task.status}' !== 'Completed') this.style.color='#d1d5db'">
+                    <i class="fa ${task.status === 'Completed' ? 'fa-check-circle' : 'fa-check-circle-o'}"></i>
+                </div>
+			</div>
+		</div>`;
+};
