@@ -29,6 +29,17 @@ def schedule_task(task_name, date, start_time, end_time):
         if existing:
             return existing
 
+        # Check for Overlap
+        overlap = frappe.db.sql("""
+            SELECT name FROM `tabDak Schedule`
+            WHERE schedule_date = %s
+            AND start_time < %s
+            AND end_time > %s
+        """, (date, end_time, start_time))
+
+        if overlap:
+            frappe.throw("Time slot overlaps with an existing task.")
+
         doc = frappe.get_doc({
             "doctype": "Dak Schedule",
             "task": task_name,
@@ -40,6 +51,9 @@ def schedule_task(task_name, date, start_time, end_time):
         return doc.name
     except Exception as e:
         frappe.log_error(f"Error scheduling task: {str(e)}")
+        # If it's a validation error, we want to percolate it up so the frontend sees it
+        if hasattr(e, "args") and "Time slot overlaps" in str(e):
+             raise e
         return None
 
 @frappe.whitelist()
@@ -50,6 +64,18 @@ def reschedule_task(schedule_id, date, start_time, end_time):
     try:
         doc = frappe.get_doc("Dak Schedule", schedule_id)
         
+        # Check for Overlap (Excluding self)
+        overlap = frappe.db.sql("""
+            SELECT name FROM `tabDak Schedule`
+            WHERE schedule_date = %s
+            AND start_time < %s
+            AND end_time > %s
+            AND name != %s
+        """, (date, end_time, start_time, schedule_id))
+
+        if overlap:
+            frappe.throw("Time slot overlaps with an existing task.")
+
         doc.schedule_date = date
         doc.start_time = start_time
         doc.end_time = end_time
@@ -57,6 +83,8 @@ def reschedule_task(schedule_id, date, start_time, end_time):
         return True
     except Exception as e:
         frappe.log_error(f"Error rescheduling task: {str(e)}")
+        if hasattr(e, "args") and "Time slot overlaps" in str(e):
+             raise e
         return False
 
 @frappe.whitelist()

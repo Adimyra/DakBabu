@@ -8,10 +8,18 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
     frappe.pages["dak_day_planner"].wrapper = wrapper;
 
     // Initial Config
+    // Initial Config
+    // Load from localStorage if available
+    let savedStart = localStorage.getItem("dak_planner_start_hour");
+    let savedEnd = localStorage.getItem("dak_planner_end_hour");
+    let savedInterval = localStorage.getItem("dak_planner_interval");
+
+    console.log("DakPlanner: Loaded Config", { savedStart, savedEnd, savedInterval });
+
     frappe.pages["dak_day_planner"].config = {
-        start_hour: 9,
-        end_hour: 18,
-        interval: 30, // minutes
+        start_hour: (savedStart && !isNaN(parseInt(savedStart))) ? parseInt(savedStart) : 9,
+        end_hour: (savedEnd && !isNaN(parseInt(savedEnd))) ? parseInt(savedEnd) : 18,
+        interval: (savedInterval && !isNaN(parseInt(savedInterval))) ? parseInt(savedInterval) : 30, // minutes
         current_date: moment().format('YYYY-MM-DD'),
     };
 
@@ -108,12 +116,8 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
                         <li>
                             <a href="#" onclick="frappe.pages['dak_day_planner'].reset_schedule(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #dc2626;"><i class="fa fa-trash" style="margin-right:8px;"></i> Clear Today</a>
                         </li>
-                        <li>
-                            <a href="#" onclick="frappe.pages['dak_day_planner'].reset_all_schedules(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #b91c1c;"><i class="fa fa-bomb" style="margin-right:8px;"></i> Clear ALL Database</a>
-                        </li>
-                        <li style="border-top: 1px solid #f3f4f6; margin-top: 5px; padding-top: 5px;">
-                            <a href="#" onclick="frappe.pages['dak_day_planner'].remove_duplicate_tasks(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #d97706;"><i class="fa fa-clone" style="margin-right:8px;"></i> Remove Dupes</a>
-                        </li>
+
+
                         <li>
                             <a href="#" onclick="frappe.pages['dak_day_planner'].load_tasks(); frappe.pages['dak_day_planner'].render_grid(); return false;" style="padding: 10px 15px; font-weight: 600; font-size: 0.9rem; color: #4b5563;"><i class="fa fa-refresh" style="margin-right:8px;"></i> Refresh</a>
                         </li>
@@ -155,21 +159,21 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
                     <div class="form-group" style="margin: 0;">
                         <label style="font-size: 0.8rem; margin-bottom: 2px;">Start Time</label>
                         <select id="planner-start-time" class="form-control input-sm" style="width: 100px;">
-                            ${generate_hour_options(6, 12, 9)}
+                            ${generate_hour_options(0, 23, frappe.pages["dak_day_planner"].config.start_hour)}
                         </select>
                     </div>
                     <div class="form-group" style="margin: 0;">
                         <label style="font-size: 0.8rem; margin-bottom: 2px;">End Time</label>
                         <select id="planner-end-time" class="form-control input-sm" style="width: 100px;">
-                            ${generate_hour_options(13, 23, 18)}
+                            ${generate_hour_options(0, 23, frappe.pages["dak_day_planner"].config.end_hour)}
                         </select>
                     </div>
                     <div class="form-group" style="margin: 0;">
                         <label style="font-size: 0.8rem; margin-bottom: 2px;">Slot Duration</label>
                         <select id="planner-interval" class="form-control input-sm" style="width: 100px;">
-                            <option value="15">15 Min</option>
-                            <option value="30" selected>30 Min</option>
-                            <option value="60">60 Min</option>
+                            <option value="15" ${frappe.pages["dak_day_planner"].config.interval === 15 ? "selected" : ""}>15 Min</option>
+                            <option value="30" ${frappe.pages["dak_day_planner"].config.interval === 30 ? "selected" : ""}>30 Min</option>
+                            <option value="60" ${frappe.pages["dak_day_planner"].config.interval === 60 ? "selected" : ""}>60 Min</option>
                         </select>
                     </div>
                     <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
@@ -203,6 +207,14 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
         );
         frappe.pages["dak_day_planner"].config.end_hour = parseInt($("#planner-end-time").val());
         frappe.pages["dak_day_planner"].config.interval = parseInt($("#planner-interval").val());
+
+        // Save to localStorage
+        // Save to localStorage
+        console.log("DakPlanner: Saving Config", frappe.pages["dak_day_planner"].config);
+        localStorage.setItem("dak_planner_start_hour", frappe.pages["dak_day_planner"].config.start_hour);
+        localStorage.setItem("dak_planner_end_hour", frappe.pages["dak_day_planner"].config.end_hour);
+        localStorage.setItem("dak_planner_interval", frappe.pages["dak_day_planner"].config.interval);
+
         frappe.pages["dak_day_planner"].render_grid();
     });
 
@@ -510,8 +522,14 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
                     }
                 },
                 error: function (r) {
-                    console.error(r);
-                    frappe.msgprint("Server Error during Reschedule.");
+                    // If the server threw an error (like overlap), frappe usually handles showing the message.
+                    // But we can add a specific alert if needed or just log it.
+                    console.error("Reschedule Error", r);
+                    if (r && r._server_messages) {
+                        // Frappe will show the message automatically usually
+                    } else {
+                        frappe.msgprint("Failed to reschedule task. It may overlap with another task.");
+                    }
                 }
             });
         } else {
@@ -531,6 +549,13 @@ frappe.pages["dak_day_planner"].on_page_load = function (wrapper) {
                             frappe.show_alert({ message: `Scheduled ${task.subject}`, indicator: "green" });
                             frappe.pages["dak_day_planner"].load_tasks();
                             frappe.pages["dak_day_planner"].render_grid();
+                        }
+                    },
+                    error: function (r) {
+                        console.error("Schedule Error", r);
+                        // Fallback if no server message shown
+                        if (!r._server_messages) {
+                            frappe.msgprint("Failed to schedule task. It may overlap with another task.");
                         }
                     }
                 });
@@ -678,7 +703,9 @@ frappe.pages["dak_day_planner"].render_grid = function () {
         method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.get_day_plan",
         args: { date: config.current_date },
         callback: function (r) {
+
             let scheduledItems = r.message || [];
+            frappe.pages["dak_day_planner"].today_schedule = scheduledItems; // Cache for smart rescheduling
 
             // Render basic slots
             let currentMoment = moment().hour(config.start_hour).minute(0).second(0);
@@ -719,13 +746,18 @@ frappe.pages["dak_day_planner"].render_grid = function () {
                             dragAttr = 'draggable="false" style="cursor: default; opacity: 0.85; filter: grayscale(0.5);"';
                         } else {
                             deleteBtn = `
-                                <span style="
-                                    position: absolute; right: 5px; top: 5px;
-                                    cursor: pointer; opacity: 0.7;"
-                                    title="Unschedule"
-                                    onclick="frappe.pages['dak_day_planner'].unschedule('${item.name}')">
-                                    <i class="fa fa-times-circle" style="color: #ef4444;"></i>
-                                </span>
+                                <div style="position: absolute; right: 5px; top: 5px; display: flex; gap: 5px;">
+                                    <span style="cursor: pointer; opacity: 0.7;"
+                                        title="Reschedule"
+                                        onclick="frappe.pages['dak_day_planner'].open_reschedule_dialog('${item.name}', '${item.start_time}', '${item.end_time}')">
+                                        <i class="fa fa-calendar" style="color: #3b82f6;"></i>
+                                    </span>
+                                    <span style="cursor: pointer; opacity: 0.7;"
+                                        title="Unschedule"
+                                        onclick="frappe.pages['dak_day_planner'].unschedule('${item.name}')">
+                                        <i class="fa fa-times-circle" style="color: #ef4444;"></i>
+                                    </span>
+                                </div>
                             `;
                         }
 
@@ -794,6 +826,147 @@ frappe.pages["dak_day_planner"].reset_all_schedules = function () {
             }
         });
     });
+};
+
+frappe.pages["dak_day_planner"].open_reschedule_dialog = function (schedule_id, current_start, current_end) {
+    // Calculate Duration
+    let start = moment(current_start, "HH:mm:ss");
+    let end = moment(current_end, "HH:mm:ss");
+    let durationMinutes = end.diff(start, 'minutes');
+
+    // Get Filtered Options
+    let availableOptions = frappe.pages["dak_day_planner"].get_available_time_slots(durationMinutes, schedule_id);
+
+    if (availableOptions.length === 0) {
+        frappe.msgprint("No available time slots found for this duration today.");
+        return;
+    }
+
+    let d = new frappe.ui.Dialog({
+        title: 'Reschedule Task',
+        fields: [
+            {
+                label: 'New Start Time',
+                fieldname: 'new_start_time',
+                fieldtype: 'Select',
+                options: availableOptions,
+                reqd: 1,
+                default: start.format("HH:mm") // Pre-select current if available (it might be filtered out if we don't handle excluding self properly in logic, but self IS excluded in get_avail so it should appear)
+            }
+        ],
+        primary_action_label: 'Reschedule',
+        primary_action: function (values) {
+            let config = frappe.pages["dak_day_planner"].config;
+            let date = config.current_date;
+
+            // Calculate Duration logic
+            let start = moment(current_start, "HH:mm:ss");
+            let end = moment(current_end, "HH:mm:ss");
+            let durationMinutes = end.diff(start, 'minutes');
+
+            let newStartMoment = moment(values.new_start_time, "HH:mm");
+            let newEndMoment = newStartMoment.clone().add(durationMinutes, 'minutes');
+
+            // Format for backend
+            let newStartStr = newStartMoment.format("HH:mm:ss");
+            let newEndStr = newEndMoment.format("HH:mm:ss");
+
+            frappe.call({
+                method: "dakbabu.dakbabu.page.dak_day_planner.dak_day_planner.reschedule_task",
+                args: {
+                    schedule_id: schedule_id,
+                    date: date,
+                    start_time: newStartStr,
+                    end_time: newEndStr
+                },
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.show_alert({ message: `Task Rescheduled`, indicator: "green" });
+                        frappe.pages["dak_day_planner"].load_tasks();
+                        frappe.pages["dak_day_planner"].render_grid();
+                        d.hide();
+                    }
+                },
+                error: function (r) {
+                    console.error("Reschedule Dialog Error", r);
+                    if (!r._server_messages) {
+                        frappe.msgprint("Failed to reschedule. Time slot likely overlaps.");
+                    }
+                }
+            });
+        }
+    });
+
+    d.show();
+};
+
+frappe.pages["dak_day_planner"].get_available_time_slots = function (durationMinutes, ignore_schedule_id) {
+    let options = [];
+    let startHour = frappe.pages["dak_day_planner"].config.start_hour || 6;
+    let endHour = frappe.pages["dak_day_planner"].config.end_hour || 23;
+    let interval = frappe.pages["dak_day_planner"].config.interval || 30;
+
+    let current = moment().hour(startHour).minute(0).second(0);
+    // End limit: The task must finish by endHour.
+    // So latest start = endHour - duration
+    let endLimit = moment().hour(endHour).minute(0).second(0);
+
+    let existingTasks = frappe.pages["dak_day_planner"].today_schedule || [];
+
+    while (current.isBefore(endLimit)) {
+        let slotStart = current.clone();
+        let slotEnd = slotStart.clone().add(durationMinutes, 'minutes');
+
+        if (slotEnd.isAfter(endLimit)) {
+            // Task would overrun the day end
+            break;
+        }
+
+        // Check Overlap
+        let isOverlapping = false;
+        for (let task of existingTasks) {
+            if (task.name === ignore_schedule_id) continue;
+
+            let tStart = moment(task.start_time, "HH:mm:ss");
+            let tEnd = moment(task.end_time, "HH:mm:ss");
+
+            // Overlap Condition: (StartA < EndB) and (EndA > StartB)
+            if (slotStart.isBefore(tEnd) && slotEnd.isAfter(tStart)) {
+                isOverlapping = true;
+                break;
+            }
+        }
+
+        if (!isOverlapping) {
+            options.push({
+                label: slotStart.format("h:mm A"),
+                value: slotStart.format("HH:mm")
+            });
+        }
+
+        current.add(interval, 'minutes');
+    }
+    return options;
+};
+
+// Deprecated but keeping for generic use if needed (removed from dialog though)
+frappe.pages["dak_day_planner"].generate_time_options = function () {
+    let options = [];
+    let startHour = frappe.pages["dak_day_planner"].config.start_hour || 6;
+    let endHour = frappe.pages["dak_day_planner"].config.end_hour || 23;
+    let interval = frappe.pages["dak_day_planner"].config.interval || 30;
+
+    let current = moment().hour(startHour).minute(0).second(0);
+    let end = moment().hour(endHour).minute(0).second(0);
+
+    while (current.isBefore(end)) {
+        options.push({
+            label: current.format("h:mm A"),
+            value: current.format("HH:mm")
+        });
+        current.add(interval, 'minutes');
+    }
+    return options;
 };
 
 frappe.pages["dak_day_planner"].unschedule = function (schedule_name) {
